@@ -1,0 +1,118 @@
+.village {
+  padding: 48px 0 20px;
+}
+
+.village__heading {
+  text-align: center;
+  font-size: 1.7rem;
+}
+
+.village__hint {
+  text-align: center;
+  color: var(--ink-soft);
+  margin: 8px 0 28px;
+}
+
+.village__map {
+  position: relative;
+  border-radius: 40px;
+  border: 2px solid var(--line);
+  padding: 40px 24px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.village-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.village__grid {
+  position: relative;
+  z-index: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.village-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 26px 16px 20px;
+  background: radial-gradient(ellipse at center, var(--zone-bg) 0%, var(--zone-bg) 55%, transparent 88%);
+  border-radius: 58% 42% 52% 48% / 48% 52% 48% 52%;
+  text-align: center;
+  transition: transform 0.18s ease, border-radius 0.3s ease;
+}
+
+.village-zone:hover,
+.village-zone:focus-visible {
+  transform: translateY(-6px) scale(1.05);
+  border-radius: 48% 52% 42% 58% / 52% 48% 58% 42%;
+}
+
+.village-zone__badge {
+  position: absolute;
+  top: 10px;
+  left: 22px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--zone-color);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+}
+
+.village-zone__char {
+  margin-top: 4px;
+}
+
+.village-zone__name {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  color: var(--ink);
+  line-height: 1.35;
+  background: rgba(255, 253, 247, 0.75);
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+@media (max-width: 860px) {
+  .village__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .village__map {
+    padding: 32px 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .village__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .village-zone__char svg {
+    width: 84px;
+    height: 84px;
+  }
+
+  .village-zone__name {
+    font-size: 0.85rem;
+  }
+}

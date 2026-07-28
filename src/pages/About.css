@@ -1,0 +1,62 @@
+.about-page {
+  padding: 40px 20px 64px;
+}
+
+.about-page__card {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 40px;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 40px;
+  box-shadow: var(--shadow-soft);
+}
+
+.about-page__char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-page__char-caption {
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
+.about-page__intro {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+}
+
+.about-page__content h2 {
+  font-size: 1.2rem;
+  margin-bottom: 14px;
+}
+
+.about-page__career {
+  display: grid;
+  gap: 10px;
+  padding-left: 20px;
+  color: var(--ink);
+}
+
+.about-page__career li {
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .about-page__card {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 28px 20px;
+  }
+
+  .about-page__career {
+    padding-left: 0;
+    list-style-position: inside;
+  }
+}

@@ -1,0 +1,42 @@
+.cases-page {
+  padding: 32px 20px 64px;
+}
+
+.cases-page__banner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--cream-deep);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  margin-bottom: 32px;
+}
+
+.cases-page__banner p {
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+.cases-page__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 860px) {
+  .cases-page__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .cases-page__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cases-page__banner {
+    flex-direction: column;
+    text-align: center;
+  }
+}

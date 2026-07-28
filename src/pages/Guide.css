@@ -1,0 +1,23 @@
+.guide-page {
+  padding: 40px 20px 64px;
+}
+
+.guide-page__card {
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+
+.guide-page__credit {
+  font-weight: 700;
+  color: var(--ink);
+}
