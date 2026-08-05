@@ -482,8 +482,8 @@ function renderHub() {
         if(t.tier>userTier) {
           return `<div class="tool-card locked">
             <div class="tool-ico gray">🔒</div>
-            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${TIER_LABELS[t.tier]||'강의'} 코드로 열람 가능</div></div>
-            <span class="badge badge-locked">${TIER_LABELS[t.tier]||''} 필요</span>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">추후 강의 코드 발송 후 열람 가능</div></div>
+            <span class="badge badge-locked">강의 후 열람</span>
           </div>`;
         } else if(t.url) {
           return `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
@@ -521,7 +521,7 @@ function renderHub() {
 
   <footer class="footer">
     <div class="footer-brand">급식"소리"함 🌿</div>
-    <div class="footer-copy">© 2026 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
+    <div class="footer-copy">© 2025 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
   </footer>`;
 
   document.getElementById('logoutBtn').onclick = doSignOut;
