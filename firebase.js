@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, orderBy, query } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBEagv2iP4sSJuDsjBB24A3FHFfAiiS8wA",
@@ -16,19 +16,34 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-export function signIn() {
-  return signInWithPopup(auth, provider);
+export const ADMIN_EMAIL = 'thfl4811@gmail.com';
+
+export function signIn() { return signInWithPopup(auth, provider); }
+export function logOut() { return signOut(auth); }
+export function onAuth(cb) { return onAuthStateChanged(auth, cb); }
+
+// 유저 프로필 저장 (users + signups 두 곳에)
+export async function saveProfile(uid, data) {
+  const payload = { ...data, updatedAt: new Date().toISOString() };
+  await setDoc(doc(db, 'users', uid), payload, { merge: true });
+  await setDoc(doc(db, 'signups', uid), {
+    name: data.name,
+    school: data.school,
+    email: data.email,
+    joinedAt: data.joinedAt || new Date().toISOString(),
+    uid,
+  }, { merge: true });
 }
-export function logOut() {
-  return signOut(auth);
-}
-export function onAuth(callback) {
-  return onAuthStateChanged(auth, callback);
-}
-export async function saveUserData(uid, data) {
-  await setDoc(doc(db, 'users', uid), { ...data, updatedAt: new Date().toISOString() }, { merge: true });
-}
-export async function getUserData(uid) {
+
+// 프로필 불러오기
+export async function getProfile(uid) {
   const snap = await getDoc(doc(db, 'users', uid));
   return snap.exists() ? snap.data() : null;
+}
+
+// 관리자용: 전체 가입자 목록
+export async function getAllSignups() {
+  const q = query(collection(db, 'signups'), orderBy('joinedAt', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => d.data());
 }
