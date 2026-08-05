@@ -442,7 +442,7 @@ function renderHub() {
         <div><div class="stat-n">${CATS.length}</div><div class="stat-l">카테고리</div></div>
         <div><div class="stat-n">${totalTools}</div><div class="stat-l">전체 도구</div></div>
       </div>
-      <div class="notice">선생님들의 업무효율화와 개인 업무지원은 얼마든지 활용 가능하지만, 개인 연수·강의·공모전 등 이익 창출 목적 활용은 허용하지 않습니다.</div>
+      <div class="notice"> 본 사이트는 무료 사이트로 선생님들의 업무효율화와 개인 업무지원은 얼마든지 활용 가능하지만, 개인 연수·강의·공모전 등 이익 창출 목적 활용은 허용하지 않습니다.</div>
     </div>
   </section>
 
@@ -450,7 +450,7 @@ function renderHub() {
     <div class="tier-banner-inner">
       <span class="tier-badge tier-badge-${userTier}">${TIER_LABELS[userTier]||'기본'}</span>
       <span class="tier-text">
-        ${userTier===0?'<strong>강의 코드</strong>를 입력하면 더 많은 도구가 열려요.':
+        ${userTier===0?'웹앱이 개발되고 강의 코드를 입력하면 더 많은 도구가 열려요.':
           userTier===1?'1차 강의 코드가 적용됐어요. 개발이 되어 웹앱이 배포되면 2차 강의 코드로 웹앱을 더 열 수 있어요.':
           '<strong>2차 강의</strong>까지 적용됐어요. 모든 도구 열람 가능!'}
       </span>
