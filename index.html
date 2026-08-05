@@ -480,10 +480,10 @@ function renderHub() {
     <div class="tool-grid">
       ${c.tools.map(t=>{
         if(t.tier>userTier) {
-          return `<div class="tool-card locked">
-            <div class="tool-ico gray">🔒</div>
-            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">추후 강의 코드 발송 후 열람 가능</div></div>
-            <span class="badge badge-locked">강의 후 열람</span>
+          return `<div class="tool-card soon">
+            <div class="tool-ico gray">·</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
+            <span class="badge badge-soon">개발 후 배포</span>
           </div>`;
         } else if(t.url) {
           return `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
@@ -494,8 +494,8 @@ function renderHub() {
         } else {
           return `<div class="tool-card soon">
             <div class="tool-ico gray">·</div>
-            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${esc(t.desc)}</div></div>
-            <span class="badge badge-soon">배포 예정</span>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
+            <span class="badge badge-soon">개발 후 배포</span>
           </div>`;
         }
       }).join('')}
