@@ -451,7 +451,7 @@ function renderHub() {
       <span class="tier-badge tier-badge-${userTier}">${TIER_LABELS[userTier]||'기본'}</span>
       <span class="tier-text">
         ${userTier===0?'<strong>강의 코드</strong>를 입력하면 더 많은 도구가 열려요.':
-          userTier===1?'<strong>1차 강의</strong> 코드가 적용됐어요. 2차 강의 코드로 더 열 수 있어요.':
+          userTier===1?'1차 강의 코드가 적용됐어요. 개발이 되어 웹앱이 배포되면 2차 강의 코드로 웹앱을 더 열 수 있어요.':
           '<strong>2차 강의</strong>까지 적용됐어요. 모든 도구 열람 가능!'}
       </span>
       <button class="btn btn-code" onclick="document.getElementById('codeBtn').click()">🔑 코드 입력</button>
@@ -483,7 +483,7 @@ function renderHub() {
           return `<div class="tool-card soon">
             <div class="tool-ico gray">·</div>
             <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
-            <span class="badge badge-soon">개발 후 배포</span>
+            <span class="badge badge-soon">배포 예정</span>
           </div>`;
         } else if(t.url) {
           return `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
@@ -495,7 +495,7 @@ function renderHub() {
           return `<div class="tool-card soon">
             <div class="tool-ico gray">·</div>
             <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
-            <span class="badge badge-soon">개발 후 배포</span>
+            <span class="badge badge-soon">배포 예정</span>
           </div>`;
         }
       }).join('')}
@@ -521,7 +521,7 @@ function renderHub() {
 
   <footer class="footer">
     <div class="footer-brand">급식"소리"함 🌿</div>
-    <div class="footer-copy">© 2025 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
+    <div class="footer-copy">© 2026 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
   </footer>`;
 
   document.getElementById('logoutBtn').onclick = doSignOut;
