@@ -7,9 +7,457 @@
   <title>급식소리함</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --g: #2A8558; --gl: #E6F4EC; --gd: #1E6B44;
+      --am: #C47A2E; --al: #FDF0E3;
+      --bl: #2B68AC; --bll: #E6EEF8;
+      --co: #C04848; --cl: #FAEAEA;
+      --pu: #6B57B5; --pl: #F0EEFC;
+      --te: #1A8A80; --tl: #E3F4F3;
+      --bd: #E0E8E0; --tx: #1A2820; --mu: #6B7B72; --bg: #F4F7F4;
+    }
+    body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--tx); line-height: 1.6; }
+    .hide { display: none !important; }
+
+    /* NAV */
+    .nav { background: #fff; border-bottom: 1px solid var(--bd); position: sticky; top: 0; z-index: 200; }
+    .nav-in { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; display: flex; align-items: center; height: 56px; }
+    .nav-brand { font-size: 15px; font-weight: 700; color: var(--g); margin-right: 1.5rem; white-space: nowrap; cursor: pointer; }
+    .nav-tabs { display: flex; flex: 1; overflow-x: auto; scrollbar-width: none; }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-tab { padding: 0 12px; height: 56px; display: flex; align-items: center; font-size: 13px; color: var(--mu); white-space: nowrap; border-bottom: 2px solid transparent; cursor: pointer; transition: color .15s; }
+    .nav-tab:hover { color: var(--g); }
+    .nav-user { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+    .nav-uname { font-size: 12px; color: var(--mu); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn { padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 500; border: 1px solid var(--bd); background: #fff; color: var(--tx); cursor: pointer; white-space: nowrap; font-family: inherit; transition: background .12s; }
+    .btn:hover { background: var(--bg); }
+    .btn-g { background: var(--g); color: #fff; border-color: var(--g); }
+    .btn-g:hover { background: var(--gd); }
+    .btn-admin { color: var(--g); border-color: var(--g); }
+
+    /* LOGIN */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+    .login-card { background: #fff; border: 1px solid var(--bd); border-radius: 18px; padding: 2.25rem 1.75rem; width: 100%; max-width: 360px; text-align: center; }
+    .login-logo { width: 54px; height: 54px; border-radius: 14px; background: var(--gl); display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; font-size: 26px; }
+    .login-title { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+    .login-sub { font-size: 13px; color: var(--mu); margin-bottom: 1.5rem; }
+    .g-btn { width: 100%; padding: 11px; border-radius: 9px; border: 1px solid var(--bd); background: #fff; font-size: 13.5px; font-weight: 500; font-family: inherit; display: flex; align-items: center; justify-content: center; gap: 9px; cursor: pointer; transition: background .12s; }
+    .g-btn:hover { background: var(--bg); }
+    .g-btn:disabled { opacity: .5; cursor: default; }
+    .login-note { font-size: 11px; color: var(--mu); margin-top: 14px; line-height: 1.7; }
+
+    /* PROFILE SETUP */
+    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--mu); margin-bottom: 5px; text-align: left; }
+    .form-input { width: 100%; padding: 10px 12px; border: 1px solid var(--bd); border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; transition: border-color .15s; }
+    .form-input:focus { border-color: var(--g); }
+    .form-group { margin-bottom: 13px; }
+
+    /* HERO */
+    .hero { background: #fff; padding: 3rem 1.5rem 2.5rem; text-align: center; border-bottom: 1px solid var(--bd); }
+    .hero-in { max-width: 680px; margin: 0 auto; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--g); background: var(--gl); padding: 4px 14px; border-radius: 99px; margin-bottom: 1.25rem; }
+    .hero-title { font-size: clamp(28px, 6vw, 40px); font-weight: 700; letter-spacing: -.03em; margin-bottom: 8px; }
+    .hero-title em { color: var(--g); font-style: normal; }
+    .hero-sub { font-size: 15px; color: var(--mu); margin-bottom: 4px; }
+    .hero-by { font-size: 13px; color: var(--mu); margin-bottom: 1.75rem; }
+    .stats { display: flex; justify-content: center; gap: 2.5rem; margin-bottom: 1.75rem; }
+    .stat-n { font-size: 24px; font-weight: 700; color: var(--g); line-height: 1; margin-bottom: 4px; }
+    .stat-l { font-size: 11px; color: var(--mu); }
+    .notice { max-width: 540px; margin: 0 auto; background: #FAFDF9; border: 1px solid var(--bd); border-radius: 10px; padding: 12px 16px; font-size: 11.5px; color: var(--mu); line-height: 1.7; text-align: left; }
+
+    /* SECTIONS */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+    .ey { font-size: 11px; font-weight: 600; color: var(--mu); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1rem; }
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; margin-bottom: 2.5rem; }
+    .cat-card { background: #fff; border: 1px solid var(--bd); border-radius: 12px; padding: 1.1rem 1rem; cursor: pointer; display: block; transition: border-color .12s, transform .12s; }
+    .cat-card:hover { border-color: #AACCB4; transform: translateY(-2px); }
+    .cat-ico { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 9px; font-size: 19px; }
+    .cat-name { font-size: 13.5px; font-weight: 600; color: var(--tx); margin-bottom: 3px; }
+    .cat-meta { font-size: 11.5px; color: var(--mu); }
+
+    .tool-sec { padding: 0 1.5rem; margin-bottom: 2.75rem; }
+    .sec-head { display: flex; align-items: center; gap: 10px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 2px solid; }
+    .sec-ico { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .sec-title { font-size: 16px; font-weight: 700; color: var(--tx); flex: 1; }
+    .sec-meta { font-size: 12px; color: var(--mu); }
+    .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 9px; }
+    .tool-card { background: #fff; border: 1px solid var(--bd); border-radius: 12px; padding: 13px 15px; display: flex; align-items: center; gap: 11px; text-decoration: none; color: inherit; transition: border-color .12s, background .12s; }
+    .tool-card.link:hover { border-color: #AACCB4; background: #FAFDF9; }
+    .tool-card.soon { opacity: .62; }
+    .tool-ico { width: 37px; height: 37px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    .tool-ico.gray { background: #F1F4F1; color: #9DAAA2; }
+    .tool-text { flex: 1; min-width: 0; }
+    .tool-name { font-size: 13.5px; font-weight: 500; color: var(--tx); line-height: 1.35; margin-bottom: 2px; }
+    .tool-desc { font-size: 11.5px; color: #9DAAA2; }
+    .badge { font-size: 10.5px; padding: 3px 9px; border-radius: 99px; font-weight: 500; flex-shrink: 0; white-space: nowrap; }
+    .badge-on { background: var(--gl); color: var(--g); }
+    .badge-soon { background: #F1F3F1; color: #8A9890; }
+    .ext { font-size: 14px; color: #C0CEC2; flex-shrink: 0; }
+
+    /* ABOUT */
+    .about-card { background: #fff; border: 1px solid var(--bd); border-radius: 16px; padding: 2rem; display: flex; gap: 1.75rem; align-items: flex-start; }
+    .about-av { width: 64px; height: 64px; border-radius: 50%; background: var(--gl); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+    .about-name { font-size: 17px; font-weight: 700; margin-bottom: 2px; }
+    .about-role { font-size: 13px; color: var(--mu); margin-bottom: 1rem; }
+    .about-list { list-style: none; }
+    .about-list li { font-size: 13px; color: var(--mu); padding: 3px 0; display: flex; gap: 7px; }
+    .about-list li::before { content: "·"; color: var(--g); font-weight: 700; flex-shrink: 0; }
+
+    /* ADMIN */
+    .admin-table { background: #fff; border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; }
+    .admin-head { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr 1fr; padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--bd); font-size: 12px; font-weight: 600; color: var(--mu); }
+    .admin-row { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr 1fr; padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: 13px; gap: 8px; align-items: center; }
+    .admin-row:last-child { border-bottom: none; }
+
+    /* FOOTER */
+    .footer { background: #fff; border-top: 1px solid var(--bd); padding: 2rem 1.5rem; text-align: center; margin-top: .5rem; }
+    .footer-brand { font-size: 14px; font-weight: 700; color: var(--g); margin-bottom: 6px; }
+    .footer-copy { font-size: 11.5px; color: var(--mu); }
+
+    @media (max-width: 640px) {
+      .stats { gap: 1.5rem; }
+      .about-card { flex-direction: column; gap: 1rem; }
+      .cat-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .nav-uname { display: none; }
+      .admin-head, .admin-row { grid-template-columns: 1fr 1fr; }
+      .admin-head span:nth-child(n+3), .admin-row span:nth-child(n+3) { display: none; }
+    }
+    @media (max-width: 420px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+
+<div id="app">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;color:var(--mu);font-size:14px;">불러오는 중...</div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── Firebase 설정 ──
+const firebaseConfig = {
+  apiKey: "AIzaSyBEagv2iP4sSJuDsjBB24A3FHFfAiiS8wA",
+  authDomain: "aisori.firebaseapp.com",
+  projectId: "aisori",
+  storageBucket: "aisori.firebasestorage.app",
+  messagingSenderId: "829702954282",
+  appId: "1:829702954282:web:7f38d1ca0e591d238d9253"
+};
+const fbApp  = initializeApp(firebaseConfig);
+const auth   = getAuth(fbApp);
+const db     = getFirestore(fbApp);
+const gprov  = new GoogleAuthProvider();
+const ADMIN  = 'thfl4811@gmail.com';
+
+// ── 도구 데이터 ──
+const CATS = [
+  { id:'meal', name:'식단·영양', icon:'🥗', c:'var(--g)', cl:'var(--gl)',
+    tools:[
+      { name:'식단 게시자료 프롬프트 생성기', desc:'AI 프롬프트로 게시자료 자동 작성', url:'https://thfl4811-maker.github.io/meal-poster-prompt-builder/' },
+      { name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/' },
+      { name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/' },
+      { name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/' },
+      { name:'젬스(GEMS) 식단 활용', desc:'GEMS 연동 식단 분석·활용 도구', url:null },
+      { name:'추천 식단', desc:'균형 잡힌 학교급식 식단 추천', url:null },
+    ]
+  },
+  { id:'order', name:'발주·재고', icon:'📦', c:'var(--am)', cl:'var(--al)',
+    tools:[
+      { name:'만년형 쌀 발주 계산기', desc:'주간 쌀 소요량 계산·발주표 작성', url:'https://thfl4811-maker.github.io/rice-order-planner/' },
+      { name:'1인 분량 환산', desc:'식재료별 1인 분량 기준 환산', url:null },
+      { name:'식수별 발주량 계산', desc:'식수 인원별 식재료 발주량 산출', url:null },
+      { name:'재고조사표', desc:'식재료 재고 현황 조사·기록', url:null },
+    ]
+  },
+  { id:'inspect', name:'검수·엑셀', icon:'📊', c:'var(--bl)', cl:'var(--bll)',
+    tools:[
+      { name:'시장조사 자료 변환', desc:'시장조사 결과 자동 정리·변환', url:null },
+      { name:'계약단가·검수단가 자동 매칭', desc:'단가 비교·불일치 자동 감지', url:null },
+      { name:'나이스 자료 표준 변환', desc:'NEIS 데이터 표준 형식 자동 변환', url:null },
+    ]
+  },
+  { id:'document', name:'문서·소통', icon:'📄', c:'var(--co)', cl:'var(--cl)',
+    tools:[
+      { name:'안내장', desc:'학생·학부모 대상 급식 안내장 작성', url:null },
+      { name:'기안문', desc:'급식 관련 기안문 자동 작성', url:null },
+      { name:'품의서 작성기', desc:'지출품의서 자동 완성', url:'https://edu-finance-drafter-3.vercel.app/' },
+      { name:'가정통신문', desc:'가정통신문 자동 생성 도구', url:null },
+      { name:'학생·교직원·조리종사원 공지', desc:'대상별 맞춤 공지 문구 생성', url:null },
+      { name:'선호도 조사', desc:'자율선택급식 학생 선호도 수집·분석', url:'https://school-meal-survey-v2.vercel.app/' },
+    ]
+  },
+  { id:'hygiene', name:'위생·조리', icon:'🛡️', c:'var(--pu)', cl:'var(--pl)',
+    tools:[
+      { name:'HACCP 교육', desc:'HACCP 기준·관리 포인트 교육 자료', url:null },
+      { name:'위생·안전교육', desc:'조리종사원 위생·안전 교육 도구', url:null },
+      { name:'조리종사원용 레시피', desc:'표준 레시피 검색·조회·인쇄', url:null },
+      { name:'일일 점검자료', desc:'급식실 일일 위생 점검 체크리스트', url:null },
+    ]
+  },
+  { id:'ai', name:'AI·수업', icon:'🤖', c:'var(--te)', cl:'var(--tl)',
+    tools:[
+      { name:'프롬프트 구성 앱', desc:'급식 업무용 AI 프롬프트 설계 도구', url:null },
+      { name:'웹앱 활용 수업', desc:'영양 수업에서 활용한 웹앱 사례', url:null },
+      { name:'노션 운영사례', desc:'급식실 노션 운영 템플릿·사례', url:null },
+      { name:'AI 활용 학교급식 운영사례', desc:'AI 도구 적용 급식 운영 사례 모음', url:null },
+    ]
+  }
+];
+
+const totalTools = CATS.reduce((s,c)=>s+c.tools.length,0);
+const available  = CATS.reduce((s,c)=>s+c.tools.filter(t=>t.url).length,0);
+
+// ── 상태 ──
+let currentUser = null;
+let userProfile = null;
+let view = 'hub'; // 'hub' | 'admin'
+
+const app = document.getElementById('app');
+const esc = v => String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+// ── Firebase 함수 ──
+async function doSignIn() {
+  await signInWithPopup(auth, gprov);
+}
+async function doSignOut() {
+  await signOut(auth);
+}
+async function saveProfile(uid, data) {
+  await setDoc(doc(db,'users',uid), data, {merge:true});
+  await setDoc(doc(db,'signups',uid), {
+    name: data.name, school: data.school,
+    email: data.email, joinedAt: data.joinedAt||new Date().toISOString(), uid
+  }, {merge:true});
+}
+async function loadProfile(uid) {
+  const snap = await getDoc(doc(db,'users',uid));
+  return snap.exists() ? snap.data() : null;
+}
+async function loadSignups() {
+  try {
+    const q = query(collection(db,'signups'), orderBy('joinedAt','desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d=>d.data());
+  } catch(e) { return []; }
+}
+
+// ── 렌더 ──
+function render() {
+  if (!currentUser) { renderLogin(); return; }
+  if (!userProfile || !userProfile.name) { renderProfile(); return; }
+  if (view === 'admin' && currentUser.email === ADMIN) { renderAdmin(); return; }
+  renderHub();
+}
+
+function renderLogin() {
+  app.innerHTML = `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">🌿</div>
+      <h1 class="login-title">급식소리함</h1>
+      <p class="login-sub">AI를 활용한 학교급식 업무 효율화 도구 모음</p>
+      <button class="g-btn" id="loginBtn">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Google 계정으로 시작하기
+      </button>
+      <p class="login-note">무료사이트이며, 급식 행정기관 또는 교육청 사이트가 아닙니다.<br>개인 연수·강의 등 이익창출 목적 활용은 허용하지 않습니다.</p>
+    </div>
+  </div>`;
+  document.getElementById('loginBtn').onclick = async function() {
+    this.disabled = true; this.textContent = '로그인 중...';
+    try { await doSignIn(); } catch(e) { this.disabled=false; this.textContent='Google 계정으로 시작하기'; }
+  };
+}
+
+function renderProfile() {
+  app.innerHTML = `
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">👋</div>
+      <h1 class="login-title">처음 오셨군요!</h1>
+      <p class="login-sub" style="margin-bottom:1.5rem">학교명과 이름을 입력하면 시작할 수 있어요.</p>
+      <div class="form-group">
+        <label class="form-label">학교명</label>
+        <input class="form-input" id="school" placeholder="예: 동탄중앙고등학교">
+      </div>
+      <div class="form-group">
+        <label class="form-label">이름</label>
+        <input class="form-input" id="uname" placeholder="예: 홍길동">
+      </div>
+      <button class="btn btn-g" id="saveBtn" style="width:100%;padding:12px;font-size:14px;border-radius:9px;margin-top:4px;">시작하기</button>
+      <p class="login-note" style="margin-top:12px;">입력 정보는 클라우드에 저장되며 외부에 공개되지 않아요.</p>
+    </div>
+  </div>`;
+  const schoolInput = document.getElementById('school');
+  const unameInput  = document.getElementById('uname');
+  const saveBtn     = document.getElementById('saveBtn');
+  schoolInput.onkeydown = e => { if(e.key==='Enter') unameInput.focus(); };
+  unameInput.onkeydown  = e => { if(e.key==='Enter') saveBtn.click(); };
+  saveBtn.onclick = async () => {
+    const school = schoolInput.value.trim();
+    const name   = unameInput.value.trim();
+    if (!school || !name) return;
+    saveBtn.disabled = true; saveBtn.textContent = '저장 중...';
+    const data = { name, school, email: currentUser.email, photoURL: currentUser.photoURL||'', joinedAt: new Date().toISOString() };
+    await saveProfile(currentUser.uid, data);
+    userProfile = data;
+    render();
+  };
+}
+
+async function renderAdmin() {
+  app.innerHTML = `
+  <nav class="nav">
+    <div class="nav-in">
+      <span class="nav-brand" id="backBtn">급식소리함 🌿</span>
+      <div class="nav-tabs"><span class="nav-tab" id="backBtn2">← 허브로 돌아가기</span></div>
+      <div class="nav-user"><button class="btn" id="logoutBtn">로그아웃</button></div>
+    </div>
+  </nav>
+  <div class="wrap" style="padding:2rem 1.5rem">
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;">가입자 관리</h2>
+    <p style="font-size:13px;color:var(--mu);margin-bottom:1.5rem;">급식소리함에 가입한 선생님 목록이에요.</p>
+    <div id="adminContent" style="color:var(--mu);font-size:13px;">불러오는 중...</div>
+  </div>`;
+  document.getElementById('backBtn').onclick  = () => { view='hub'; render(); };
+  document.getElementById('backBtn2').onclick = () => { view='hub'; render(); };
+  document.getElementById('logoutBtn').onclick = doSignOut;
+  const signups = await loadSignups();
+  const el = document.getElementById('adminContent');
+  if (!el) return;
+  if (signups.length === 0) { el.innerHTML = '<p>아직 가입자가 없어요.</p>'; return; }
+  el.innerHTML = `
+  <div style="background:var(--gl);border-radius:10px;padding:16px 20px;display:inline-block;margin-bottom:1.5rem;">
+    <div style="font-size:28px;font-weight:700;color:var(--g);line-height:1">${signups.length}</div>
+    <div style="font-size:12px;color:var(--mu);margin-top:4px;">전체 가입자</div>
+  </div>
+  <div class="admin-table">
+    <div class="admin-head"><span>이름</span><span>학교</span><span>이메일</span><span>가입일</span></div>
+    ${signups.map(s=>`
+    <div class="admin-row">
+      <span style="font-weight:500">${esc(s.name)}</span>
+      <span style="color:var(--mu)">${esc(s.school)}</span>
+      <span style="color:var(--mu);font-size:12px">${esc(s.email)}</span>
+      <span style="color:var(--mu);font-size:11px">${s.joinedAt?new Date(s.joinedAt).toLocaleDateString('ko-KR'):'-'}</span>
+    </div>`).join('')}
+  </div>`;
+}
+
+function renderHub() {
+  const isAdmin = currentUser.email === ADMIN;
+  app.innerHTML = `
+  <nav class="nav">
+    <div class="nav-in">
+      <span class="nav-brand" onclick="scrollTo_(0)">급식소리함 🌿</span>
+      <div class="nav-tabs">
+        ${CATS.map(c=>`<span class="nav-tab" onclick="scrollTo_('${c.id}')">${c.name}</span>`).join('')}
+      </div>
+      <div class="nav-user">
+        <span class="nav-uname">${esc(userProfile.school)} · ${esc(userProfile.name)}</span>
+        ${isAdmin?`<button class="btn btn-admin" id="adminBtn">관리자</button>`:''}
+        <button class="btn" id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero" id="home">
+    <div class="hero-in">
+      <div class="pill">✨ 영양교사 김소리 직접 제작</div>
+      <h1 class="hero-title"><em>급식소리함</em></h1>
+      <p class="hero-sub">AI를 활용한 학교급식 업무 효율화 도구 모음</p>
+      <p class="hero-by">영양교사 김소리가 직접 만든 AI 업무도구와 운영자료를 담았습니다.</p>
+      <div class="stats">
+        <div><div class="stat-n">${available}</div><div class="stat-l">이용 가능</div></div>
+        <div><div class="stat-n">${totalTools-available}</div><div class="stat-l">배포 예정</div></div>
+        <div><div class="stat-n">${CATS.length}</div><div class="stat-l">카테고리</div></div>
+        <div><div class="stat-n">${totalTools}</div><div class="stat-l">전체 도구</div></div>
+      </div>
+      <div class="notice">무료사이트이며, 급식 행정기관 또는 교육청 사이트가 아닙니다. 선생님들의 개인적인 업무지원을 위해서는 얼마든지 활용 가능하지만, 개인 연수나 강의 등 이익창출을 위한 자료 및 저작권은 허용하지 않습니다.</div>
+    </div>
+  </section>
+
+  <div class="wrap" style="padding:2.5rem 1.5rem 0">
+    <p class="ey">카테고리 바로가기</p>
+    <div class="cat-grid">
+      ${CATS.map(c=>`
+      <div class="cat-card" onclick="scrollTo_('${c.id}')">
+        <div class="cat-ico" style="background:${c.cl}">${c.icon}</div>
+        <div class="cat-name">${esc(c.name)}</div>
+        <div class="cat-meta">${c.tools.length}개 · ${c.tools.filter(t=>t.url).length}개 이용</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  ${CATS.map(c=>`
+  <div class="wrap tool-sec" id="${c.id}">
+    <div class="sec-head" style="border-color:${c.c}">
+      <div class="sec-ico" style="background:${c.cl}">${c.icon}</div>
+      <span class="sec-title">${esc(c.name)}</span>
+      <span class="sec-meta">${c.tools.length}개 · ${c.tools.filter(t=>t.url).length}개 이용 가능</span>
+    </div>
+    <div class="tool-grid">
+      ${c.tools.map(t => t.url
+        ? `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
+            <div class="tool-ico" style="background:${c.cl}">${c.icon}</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${esc(t.desc)}</div></div>
+            <span class="ext">↗</span>
+           </a>`
+        : `<div class="tool-card soon">
+            <div class="tool-ico gray">·</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${esc(t.desc)}</div></div>
+            <span class="badge badge-soon">배포 예정</span>
+           </div>`
+      ).join('')}
+    </div>
+  </div>`).join('')}
+
+  <div class="wrap" style="padding:0 1.5rem;margin-bottom:2.75rem">
+    <p class="ey" style="margin-bottom:1rem">영양교사 소개</p>
+    <div class="about-card">
+      <div class="about-av">👩‍🍳</div>
+      <div>
+        <div class="about-name">김소리</div>
+        <div class="about-role">영양교사</div>
+        <ul class="about-list">
+          <li>동탄중앙고등학교 영양교사</li>
+          <li>2026 미래학교급식플랫폼 TF 팀장</li>
+          <li>2025 경기도교육청 영양·식생활 교육 연구단 팀장</li>
+          <li>업무효율화 및 우수사례 강의 다수 진행</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-brand">급식소리함 🌿</div>
+    <div class="footer-copy">© 2025 급식소리함 · 영양교사 김소리 · All rights reserved.</div>
+  </footer>`;
+
+  document.getElementById('logoutBtn').onclick = doSignOut;
+  if (isAdmin) document.getElementById('adminBtn').onclick = () => { view='admin'; render(); };
+}
+
+window.scrollTo_ = function(id) {
+  if (id === 0) { window.scrollTo({top:0, behavior:'smooth'}); return; }
+  const el = document.getElementById(id);
+  if (el) window.scrollTo({top: el.offsetTop - 64, behavior:'smooth'});
+};
+
+// ── 인증 상태 감지 ──
+onAuthStateChanged(auth, async user => {
+  currentUser = user;
+  if (user) {
+    userProfile = await loadProfile(user.uid);
+  } else {
+    userProfile = null;
+    view = 'hub';
+  }
+  render();
+});
+</script>
 </body>
 </html>
