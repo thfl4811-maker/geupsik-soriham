@@ -135,10 +135,42 @@
     .admin-row { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr auto auto; padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: 13px; gap: 8px; align-items: center; }
     .admin-row:last-child { border-bottom: none; }
 
+    /* 자주 쓰는 도구 바로가기 */
+    .feat-sec { max-width: 1100px; margin: 0 auto; padding: 2.25rem 1.5rem 0; }
+    .feat-title { text-align: center; font-size: 19px; font-weight: 700; margin-bottom: 1.25rem; }
+    .feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .feat-card { position: relative; background: #fff; border: 1px solid var(--bd); border-radius: 14px; padding: 1.15rem 1.15rem 1rem; display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: transform .14s, box-shadow .14s, border-color .14s; }
+    .feat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(42,133,88,.13); border-color: #AACCB4; }
+    .feat-badge { position: absolute; top: -9px; left: 14px; background: var(--g); color: #fff; font-size: 10.5px; font-weight: 600; padding: 3px 11px; border-radius: 99px; }
+    .feat-cat { font-size: 11px; font-weight: 600; color: var(--am); margin: 6px 0 4px; }
+    .feat-name { font-size: 15.5px; font-weight: 700; color: var(--tx); margin-bottom: 5px; }
+    .feat-desc { font-size: 12.5px; color: var(--mu); line-height: 1.6; flex: 1; margin-bottom: 12px; }
+    .feat-btn { display: block; text-align: center; background: var(--g); color: #fff; font-size: 13px; font-weight: 600; padding: 10px; border-radius: 9px; transition: background .12s; }
+    .feat-card:hover .feat-btn { background: var(--gd); }
+    .feat-more { text-align: center; margin-top: 1.25rem; }
+    .feat-more-btn { display: inline-block; border: 1px solid var(--g); color: var(--g); background: #fff; font-size: 13px; font-weight: 600; padding: 10px 22px; border-radius: 99px; cursor: pointer; font-family: inherit; transition: background .12s; }
+    .feat-more-btn:hover { background: var(--gl); }
+    @media (max-width: 900px) { .feat-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .feat-grid { grid-template-columns: 1fr; } .feat-btn { padding: 12px; font-size: 14px; } }
+
+    /* 이용 안내 페이지 */
+    .guide-hero { background: #fff; border-bottom: 1px solid var(--bd); padding: 2.75rem 1.5rem 2.25rem; text-align: center; }
+    .guide-title { font-size: clamp(24px, 5vw, 32px); font-weight: 700; letter-spacing: -.02em; }
+    .guide-body { max-width: 720px; margin: 2.25rem auto 3rem; padding: 0 1.5rem; }
+    .guide-card { background: #fff; border: 1px solid var(--bd); border-radius: 16px; padding: 2rem 1.9rem; box-shadow: 0 6px 20px rgba(26,40,32,.05); }
+    .guide-card p { font-size: 14px; color: var(--tx); line-height: 1.9; margin-bottom: 1.15rem; }
+    .guide-card p:last-child { margin-bottom: 0; font-weight: 700; }
+    @media (max-width: 600px) { .guide-card { padding: 1.5rem 1.25rem; } }
+
     /* FOOTER */
     .footer { background: #fff; border-top: 1px solid var(--bd); padding: 2rem 1.5rem; text-align: center; margin-top: .5rem; }
     .footer-brand { font-size: 14px; font-weight: 700; color: var(--g); margin-bottom: 6px; }
     .footer-copy { font-size: 11.5px; color: var(--mu); }
+    .footer-links { display: flex; justify-content: center; gap: 4px; margin-bottom: 8px; font-size: 12px; }
+    .footer-links span { color: var(--mu); cursor: pointer; padding: 0 8px; }
+    .footer-links span:hover { color: var(--g); }
+    .footer-links a { color: var(--mu); text-decoration: none; padding: 0 8px; }
+    .footer-links a:hover { color: var(--g); }
 
     @media (max-width: 640px) {
       .stats { gap: 1.5rem; }
@@ -188,17 +220,17 @@ const TIER_LABELS = { 0: '기본', 1: '1차 강의', 2: '2차 강의' };
 const CATS = [
   { id:'meal', name:'식단·영양', icon:'🥗', c:'var(--g)', cl:'var(--gl)',
     tools:[
-      { name:'식단 게시자료 프롬프트 생성기', desc:'AI 프롬프트로 게시자료 자동 작성', url:'https://thfl4811-maker.github.io/meal-poster-prompt-builder/', tier:0 },
-      { name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
-      { name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
-      { name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
+      { featured:true, name:'식단 게시자료 프롬프트 생성기', desc:'AI 프롬프트로 게시자료 자동 작성', url:'https://thfl4811-maker.github.io/meal-poster-prompt-builder/', tier:0 },
+      { featured:true, name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
+      { featured:true, name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
+      { featured:true, name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
       { name:'젬스(GEMS) 식단 활용', desc:'GEMS 연동 식단 분석·활용 도구', url:null, tier:1 },
       { name:'추천 식단', desc:'균형 잡힌 학교급식 식단 추천', url:null, tier:1 },
     ]
   },
   { id:'order', name:'발주·재고', icon:'📦', c:'var(--am)', cl:'var(--al)',
     tools:[
-      { name:'만년형 쌀 발주 계산기', desc:'주간 쌀 소요량 계산·발주표 작성', url:'https://thfl4811-maker.github.io/rice-order-planner/', tier:0 },
+      { featured:true, name:'만년형 쌀 발주 계산기', desc:'주간 쌀 소요량 계산·발주표 작성', url:'https://thfl4811-maker.github.io/rice-order-planner/', tier:0 },
       { name:'1인 분량 환산', desc:'식재료별 1인 분량 기준 환산', url:null, tier:1 },
       { name:'식수별 발주량 계산', desc:'식수 인원별 식재료 발주량 산출', url:null, tier:1 },
       { name:'재고조사표', desc:'식재료 재고 현황 조사·기록', url:null, tier:1 },
@@ -215,10 +247,10 @@ const CATS = [
     tools:[
       { name:'안내장', desc:'학생·학부모 대상 급식 안내장 작성', url:null, tier:1 },
       { name:'기안문', desc:'급식 관련 기안문 자동 작성', url:null, tier:1 },
-      { name:'품의서 작성기', desc:'지출품의서 자동 완성', url:'https://edu-finance-drafter-3.vercel.app/', tier:0 },
+      { featured:true, name:'품의서 작성기', desc:'지출품의서 자동 완성', url:'https://edu-finance-drafter-3.vercel.app/', tier:0 },
       { name:'가정통신문', desc:'가정통신문 자동 생성 도구', url:null, tier:1 },
       { name:'학생·교직원·조리종사원 공지', desc:'대상별 맞춤 공지 문구 생성', url:null, tier:1 },
-      { name:'선호도 조사', desc:'자율선택급식 학생 선호도 수집·분석', url:'https://school-meal-survey-v2.vercel.app/', tier:0 },
+      { featured:true, name:'선호도 조사', desc:'자율선택급식 학생 선호도 수집·분석', url:'https://school-meal-survey-v2.vercel.app/', tier:0 },
     ]
   },
   { id:'hygiene', name:'위생·조리', icon:'🛡️', c:'var(--pu)', cl:'var(--pl)',
@@ -274,6 +306,7 @@ function render() {
   if (!currentUser) { renderLogin(); return; }
   if (!userProfile || !userProfile.name) { renderProfile(); return; }
   if (view === 'admin' && currentUser.email === ADMIN) { renderAdmin(); return; }
+  if (view === 'guide') { renderGuide(); return; }
   renderHub();
 }
 
@@ -411,6 +444,44 @@ async function renderAdmin() {
   </div>`;
 }
 
+function renderGuide() {
+  app.innerHTML=`
+  <nav class="nav"><div class="nav-in">
+    <span class="nav-brand" id="backBrand">급식"소리"함 🌿</span>
+    <div class="nav-tabs">
+      <span class="nav-tab" id="backHub">← 허브로 돌아가기</span>
+      <span class="nav-tab" style="color:var(--g);border-bottom-color:var(--g);font-weight:600">이용 안내</span>
+    </div>
+    <div class="nav-user"><button class="btn" id="logoutBtn">로그아웃</button></div>
+  </div></nav>
+  <section class="guide-hero">
+    <div class="pill">이용 안내</div>
+    <h1 class="guide-title">이용 안내 및 저작권</h1>
+  </section>
+  <div class="guide-body">
+    <div class="guide-card">
+      <p>급식 "소리"함은 무료로 운영되는 김소리 영양교사의 개인 사이트이며, 공식 행정기관 또는 교육청이 운영하는 사이트가 아닙니다.</p>
+      <p>본 사이트의 웹앱과 자료는 선생님들의 개인적인 학교급식 업무 지원과 교육 활동을 위해 활용할 수 있습니다.</p>
+      <p>개인 연수·강의·컨설팅 등 수익을 목적으로 하는 이용, 공모전·연구대회 등에 본인의 창작물처럼 제출하는 행위, 무단 복제·수정·재배포 및 유료 서비스 활용은 허용하지 않습니다.</p>
+      <p>출처 표기: 급식 "소리"함 · 김소리 영양교사</p>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="footer-brand">급식"소리"함 🌿</div>
+    <div class="footer-links">
+      <span onclick="goGuide()">이용 안내</span>·
+      <span onclick="goGuide()">저작권</span>·
+      <a href="mailto:thfl4811@gmail.com">문의·지원</a>
+    </div>
+    <div class="footer-copy">© 2026 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
+  </footer>`;
+  document.getElementById('backBrand').onclick=()=>{view='hub';render();window.scrollTo(0,0)};
+  document.getElementById('backHub').onclick=()=>{view='hub';render();window.scrollTo(0,0)};
+  document.getElementById('logoutBtn').onclick=doSignOut;
+  window.scrollTo(0,0);
+}
+window.goGuide=function(){ view='guide'; render(); };
+
 function renderHub() {
   const userTier = userProfile.tier || 0;
   const isAdmin  = currentUser.email === ADMIN;
@@ -422,6 +493,7 @@ function renderHub() {
     <span class="nav-brand" onclick="scrollTo_(0)">급식"소리"함 🌿</span>
     <div class="nav-tabs">
       ${CATS.map(c=>`<span class="nav-tab" onclick="scrollTo_('${c.id}')">${c.name}</span>`).join('')}
+      <span class="nav-tab" onclick="goGuide()">이용 안내</span>
     </div>
     <div class="nav-user">
       <span class="nav-uname">${esc(userProfile.school)} · ${esc(userProfile.name)}</span>
@@ -446,6 +518,21 @@ function renderHub() {
     </div>
   </section>
 
+  <section class="feat-sec">
+    <h2 class="feat-title">🌱 자주 쓰는 도구 바로가기</h2>
+    <div class="feat-grid">
+      ${CATS.flatMap(c=>c.tools.filter(t=>t.featured&&t.url).map(t=>({...t,catName:c.name}))).slice(0,7).map(t=>`
+      <a class="feat-card" href="${t.url}" target="_blank" rel="noopener noreferrer">
+        <span class="feat-badge">추천</span>
+        <div class="feat-cat">${esc(t.catName)}</div>
+        <div class="feat-name">${esc(t.name)}</div>
+        <div class="feat-desc">${esc(t.desc)}</div>
+        <span class="feat-btn">바로 사용 ↗</span>
+      </a>`).join('')}
+    </div>
+    <div class="feat-more"><button class="feat-more-btn" onclick="scrollTo_('tools-all')">도구 모음 더보기 →</button></div>
+  </section>
+
   <div class="tier-banner">
     <div class="tier-banner-inner">
       <span class="tier-badge tier-badge-${userTier}">${TIER_LABELS[userTier]||'기본'}</span>
@@ -458,7 +545,7 @@ function renderHub() {
     </div>
   </div>
 
-  <div class="wrap" style="padding:2.5rem 1.5rem 0">
+  <div class="wrap" id="tools-all" style="padding:2.5rem 1.5rem 0">
     <p class="ey">카테고리 바로가기</p>
     <div class="cat-grid">
       ${CATS.map(c=>`
@@ -521,6 +608,11 @@ function renderHub() {
 
   <footer class="footer">
     <div class="footer-brand">급식"소리"함 🌿</div>
+    <div class="footer-links">
+      <span onclick="goGuide()">이용 안내</span>·
+      <span onclick="goGuide()">저작권</span>·
+      <a href="mailto:thfl4811@gmail.com">문의·지원</a>
+    </div>
     <div class="footer-copy">© 2026 급식"소리"함 · 영양교사 김소리 · All rights reserved.</div>
   </footer>`;
 
