@@ -1,72 +1,277 @@
-import { useState, useEffect } from 'react';
-import { signIn, logOut, onAuth, saveProfile, getProfile, getAllSignups, ADMIN_EMAIL } from './firebase';
-import { categories } from './data/tools';
-import './index.css';
-
-const GoogleLogo = () => (
-  <svg width="18" height="18" viewBox="0 0 18 18">
-    <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
-    <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
-    <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
-    <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
-  </svg>
-);
-
-const colorMap = { green:'t-green', amber:'t-amber', blue:'t-blue', coral:'t-coral', purple:'t-purple', teal:'t-teal' };
+// ============================================================
+// 급식소리함 로그인 흐름 수정본
+// src/App.jsx에서
+//   export default function App() {
+// 부터
+//   // ── 관리자 페이지 ──
+// 바로 직전까지 이 코드로 교체하세요.
+// ============================================================
 
 export default function App() {
-  const [user, setUser]       = useState(undefined);
+  const [user, setUser] = useState(undefined);
+  // undefined = 로그인은 됐지만 프로필 조회 중
+  // null      = 프로필 없음(최초 사용자)
+  // object    = 기존 프로필 있음
   const [profile, setProfile] = useState(undefined);
-  const [view, setView]       = useState('hub'); // 'hub' | 'admin'
+  const [profileError, setProfileError] = useState('');
+  const [view, setView] = useState('hub');
 
   useEffect(() => {
-    const unsub = onAuth(async u => {
+    const unsub = onAuth(async (u) => {
       setUser(u);
-      if (u) {
+      setProfileError('');
+
+      // 로그아웃 상태:
+      // profile을 null로 바꿔 Loading에 걸리지 않도록 한다.
+      if (!u) {
+        setProfile(null);
+        setView('hub');
+        return;
+      }
+
+      // 로그인 성공 → Firebase 프로필 조회 시작
+      setProfile(undefined);
+
+      try {
         const p = await getProfile(u.uid);
-        setProfile(p);
-      } else {
-        setProfile(undefined);
+        setProfile(p || null);
+      } catch (e) {
+        console.error('프로필 조회 오류:', e);
+        setProfileError(
+          `로그인은 성공했지만 사용자 정보를 불러오지 못했습니다.\n` +
+          `오류코드: ${e?.code || 'unknown'}\n` +
+          `${e?.message || ''}`
+        );
+        setProfile(null);
       }
     });
+
     return unsub;
   }, []);
 
-  if (user === undefined || profile === undefined)
-    return <Loading />;
-  if (!user)
-    return <LoginScreen />;
-  if (!profile || !profile.name)
-    return <ProfileSetup user={user} onSaved={setProfile} />;
+  // 1. Firebase가 로그인 상태를 아직 확인 중
+  if (user === undefined) {
+    return <Loading text="로그인 상태를 확인하는 중..." />;
+  }
 
+  // 2. 로그아웃 상태 → 무조건 Google 로그인 화면
+  // profile 값과 관계없이 로그인 화면을 먼저 보여준다.
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  // 3. Google 로그인은 성공했고 기존 프로필을 찾는 중
+  if (profile === undefined) {
+    return <Loading text="사용자 정보를 불러오는 중..." />;
+  }
+
+  // 4. 로그인은 됐지만 Firestore 프로필 조회 자체가 실패
+  if (profileError) {
+    return (
+      <div className="login-screen">
+        <div className="login-card">
+          <div className="login-logo">⚠️</div>
+          <h1 className="login-title">사용자 정보 불러오기 오류</h1>
+
+          <div style={{
+            marginTop:'16px',
+            padding:'12px 14px',
+            borderRadius:'9px',
+            background:'#fff1f2',
+            border:'1px solid #fecdd3',
+            color:'#9f1239',
+            fontSize:'12px',
+            lineHeight:'1.65',
+            textAlign:'left',
+            whiteSpace:'pre-wrap',
+            wordBreak:'break-word'
+          }}>
+            {profileError}
+          </div>
+
+          <button
+            className="login-google"
+            style={{marginTop:'16px', justifyContent:'center'}}
+            onClick={() => logOut()}
+          >
+            다시 로그인하기
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 5. 최초 로그인 사용자
+  // Firebase에 학교명/이름 프로필이 없을 때 딱 한 번만 표시
+  if (!profile || !profile.name || !profile.school) {
+    return <ProfileSetup user={user} onSaved={setProfile} />;
+  }
+
+  // 6. 기존 사용자
+  // Google 로그인 → 저장된 프로필 발견 → 바로 급식소리함 허브
   return view === 'admin' && user.email === ADMIN_EMAIL
-    ? <AdminPage user={user} profile={profile} onBack={() => setView('hub')} />
-    : <MainApp user={user} profile={profile} onAdmin={() => setView('admin')} />;
+    ? (
+      <AdminPage
+        user={user}
+        profile={profile}
+        onBack={() => setView('hub')}
+      />
+    )
+    : (
+      <MainApp
+        user={user}
+        profile={profile}
+        onAdmin={() => setView('admin')}
+      />
+    );
 }
+
 
 // ── 로딩 ──
-function Loading() {
-  return <div style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh',color:'var(--muted)',fontSize:'14px'}}>불러오는 중...</div>;
+function Loading({ text = '불러오는 중...' }) {
+  return (
+    <div style={{
+      display:'flex',
+      alignItems:'center',
+      justifyContent:'center',
+      minHeight:'100vh',
+      color:'var(--muted)',
+      fontSize:'14px'
+    }}>
+      {text}
+    </div>
+  );
 }
+
+
+// Firebase Auth 오류를 사람이 읽기 쉽게 변환
+function getLoginErrorMessage(error) {
+  const code = error?.code || 'unknown';
+
+  const messages = {
+    'auth/popup-closed-by-user':
+      'Google 로그인 창이 닫혔습니다. 다시 시도해 주세요.',
+
+    'auth/cancelled-popup-request':
+      '로그인 요청이 취소되었습니다. 잠시 후 다시 시도해 주세요.',
+
+    'auth/popup-blocked':
+      '브라우저가 Google 로그인 팝업을 차단했습니다. 이 사이트의 팝업을 허용한 뒤 다시 시도해 주세요.',
+
+    'auth/unauthorized-domain':
+      `현재 접속 주소가 Firebase 승인 도메인에 등록되어 있지 않습니다.
+Firebase Console → Authentication → Settings → Authorized domains에
+geupsik-soriham.vercel.app 을 추가해 주세요.`,
+
+    'auth/operation-not-allowed':
+      'Firebase Authentication에서 Google 로그인 제공업체가 활성화되어 있지 않습니다.',
+
+    'auth/network-request-failed':
+      '네트워크 연결 문제로 Google 로그인에 실패했습니다.',
+
+    'auth/internal-error':
+      'Firebase 로그인 처리 중 내부 오류가 발생했습니다.',
+
+    'auth/account-exists-with-different-credential':
+      '같은 이메일이 다른 로그인 방식으로 이미 등록되어 있습니다.',
+
+    'auth/user-disabled':
+      '현재 사용이 중지된 계정입니다.'
+  };
+
+  return {
+    code,
+    friendly: messages[code] || 'Google 로그인 중 오류가 발생했습니다.',
+    detail: error?.message || ''
+  };
+}
+
 
 // ── 로그인 ──
 function LoginScreen() {
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
+
   const handleLogin = async () => {
+    if (loading) return;
+
     setLoading(true);
-    try { await signIn(); }
-    catch(e) { console.error(e); setLoading(false); }
+    setLoginError(null);
+
+    try {
+      await signIn();
+
+      // 성공한 경우 화면 이동을 직접 하지 않는다.
+      // Firebase onAuthStateChanged가 사용자 변화를 감지하고
+      // App에서 프로필 존재 여부를 판별해서 자동 이동한다.
+    } catch (e) {
+      console.error('Google 로그인 오류:', e);
+      setLoginError(getLoginErrorMessage(e));
+      setLoading(false);
+    }
   };
+
   return (
     <div className="login-screen">
       <div className="login-card">
         <div className="login-logo">🌿</div>
         <h1 className="login-title">급식소리함</h1>
-        <p className="login-sub">AI를 활용한 학교급식 업무 효율화 도구 모음</p>
-        <button className="login-google" onClick={handleLogin} disabled={loading}>
+
+        <p className="login-sub">
+          AI를 활용한 학교급식 업무 효율화 도구 모음
+        </p>
+
+        <button
+          className="login-google"
+          onClick={handleLogin}
+          disabled={loading}
+        >
           <GoogleLogo />
-          {loading ? '로그인 중...' : 'Google 계정으로 시작하기'}
+          {loading ? 'Google 로그인 중...' : 'Google 계정으로 시작하기'}
         </button>
+
+        {/* 로그인 실패 시 화면에 실제 오류 표시 */}
+        {loginError && (
+          <div style={{
+            marginTop:'14px',
+            padding:'12px 14px',
+            borderRadius:'9px',
+            background:'#fff1f2',
+            border:'1px solid #fecdd3',
+            color:'#9f1239',
+            fontSize:'12px',
+            lineHeight:'1.65',
+            textAlign:'left',
+            wordBreak:'break-word'
+          }}>
+            <div style={{fontWeight:'700', marginBottom:'4px'}}>
+              로그인을 완료하지 못했습니다.
+            </div>
+
+            <div>{loginError.friendly}</div>
+
+            <div style={{marginTop:'7px'}}>
+              <strong>오류코드:</strong> {loginError.code}
+            </div>
+
+            {loginError.detail && (
+              <details style={{marginTop:'7px'}}>
+                <summary style={{cursor:'pointer'}}>
+                  개발자용 상세 오류 보기
+                </summary>
+                <div style={{
+                  marginTop:'5px',
+                  whiteSpace:'pre-wrap',
+                  wordBreak:'break-word',
+                  opacity:.85
+                }}>
+                  {loginError.detail}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
+
         <p className="login-note">
           무료사이트이며, 급식 행정기관 또는 교육청 사이트가 아닙니다.<br/>
           개인 연수·강의 등 이익창출 목적 활용은 허용하지 않습니다.
@@ -76,27 +281,45 @@ function LoginScreen() {
   );
 }
 
-// ── 프로필 설정 (첫 로그인 시) ──
+
+// ── 프로필 설정: 최초 로그인 시 딱 1회 ──
 function ProfileSetup({ user, onSaved }) {
-  const [name, setName]     = useState('');
+  const [name, setName] = useState('');
   const [school, setSchool] = useState('');
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const handleSave = async () => {
-    if (!name.trim() || !school.trim()) return;
+    if (!name.trim() || !school.trim() || saving) return;
+
     setSaving(true);
+    setSaveError('');
+
     try {
       const data = {
         name: name.trim(),
         school: school.trim(),
-        email: user.email,
+        email: user.email || '',
         photoURL: user.photoURL || '',
         joinedAt: new Date().toISOString(),
       };
+
+      // Firestore users/{uid} + signups/{uid} 저장
       await saveProfile(user.uid, data);
+
+      // 저장 성공 즉시 App의 profile을 갱신
+      // → 다시 입력화면을 거치지 않고 허브로 이동
       onSaved(data);
-    } catch(e) {
-      console.error(e);
+
+    } catch (e) {
+      console.error('프로필 저장 오류:', e);
+
+      setSaveError(
+        `학교명과 이름을 저장하지 못했습니다.\n` +
+        `오류코드: ${e?.code || 'unknown'}\n` +
+        `${e?.message || ''}`
+      );
+
       setSaving(false);
     }
   };
@@ -105,217 +328,121 @@ function ProfileSetup({ user, onSaved }) {
     <div className="login-screen">
       <div className="login-card">
         <div className="login-logo">👋</div>
+
         <h1 className="login-title">처음 오셨군요!</h1>
-        <p className="login-sub" style={{marginBottom:'1.5rem'}}>학교명과 이름을 입력하면 바로 시작할 수 있어요.</p>
-        <div style={{marginBottom:'12px',textAlign:'left'}}>
-          <label style={{display:'block',fontSize:'12px',fontWeight:'500',color:'var(--muted)',marginBottom:'5px'}}>학교명</label>
+
+        <p
+          className="login-sub"
+          style={{marginBottom:'1.5rem'}}
+        >
+          최초 1회만 학교명과 이름을 입력해 주세요.
+          다음 로그인부터는 Google 로그인 후 바로 급식소리함으로 이동합니다.
+        </p>
+
+        <div style={{marginBottom:'12px', textAlign:'left'}}>
+          <label style={{
+            display:'block',
+            fontSize:'12px',
+            fontWeight:'500',
+            color:'var(--muted)',
+            marginBottom:'5px'
+          }}>
+            학교명
+          </label>
+
           <input
-            style={{width:'100%',padding:'10px 12px',border:'1px solid var(--border)',borderRadius:'8px',fontSize:'14px',fontFamily:'inherit',outline:'none'}}
+            autoFocus
+            style={{
+              width:'100%',
+              padding:'10px 12px',
+              border:'1px solid var(--border)',
+              borderRadius:'8px',
+              fontSize:'14px',
+              fontFamily:'inherit',
+              outline:'none'
+            }}
             placeholder="예: 동탄중앙고등학교"
             value={school}
             onChange={e => setSchool(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && document.getElementById('name-input').focus()}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                document.getElementById('name-input')?.focus();
+              }
+            }}
           />
         </div>
-        <div style={{marginBottom:'16px',textAlign:'left'}}>
-          <label style={{display:'block',fontSize:'12px',fontWeight:'500',color:'var(--muted)',marginBottom:'5px'}}>이름</label>
+
+        <div style={{marginBottom:'16px', textAlign:'left'}}>
+          <label style={{
+            display:'block',
+            fontSize:'12px',
+            fontWeight:'500',
+            color:'var(--muted)',
+            marginBottom:'5px'
+          }}>
+            이름
+          </label>
+
           <input
             id="name-input"
-            style={{width:'100%',padding:'10px 12px',border:'1px solid var(--border)',borderRadius:'8px',fontSize:'14px',fontFamily:'inherit',outline:'none'}}
+            style={{
+              width:'100%',
+              padding:'10px 12px',
+              border:'1px solid var(--border)',
+              borderRadius:'8px',
+              fontSize:'14px',
+              fontFamily:'inherit',
+              outline:'none'
+            }}
             placeholder="예: 홍길동"
             value={name}
             onChange={e => setName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSave()}
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleSave();
+            }}
           />
         </div>
+
+        {saveError && (
+          <div style={{
+            marginBottom:'12px',
+            padding:'10px 12px',
+            borderRadius:'8px',
+            background:'#fff1f2',
+            border:'1px solid #fecdd3',
+            color:'#9f1239',
+            fontSize:'12px',
+            lineHeight:'1.6',
+            textAlign:'left',
+            whiteSpace:'pre-wrap',
+            wordBreak:'break-word'
+          }}>
+            {saveError}
+          </div>
+        )}
+
         <button
           className="btn-primary"
-          style={{width:'100%',padding:'12px',border:'none',borderRadius:'9px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}
+          style={{
+            width:'100%',
+            padding:'12px',
+            border:'none',
+            borderRadius:'9px',
+            fontSize:'14px',
+            fontWeight:'600',
+            cursor:'pointer'
+          }}
           onClick={handleSave}
           disabled={saving || !name.trim() || !school.trim()}
         >
-          {saving ? '저장 중...' : '시작하기'}
+          {saving ? '저장 중...' : '저장하고 급식소리함 시작하기'}
         </button>
-        <p className="login-note" style={{marginTop:'12px'}}>입력 정보는 이 기기에만 저장되며 외부로 공개되지 않아요.</p>
+
+        <p className="login-note" style={{marginTop:'12px'}}>
+          학교명과 이름은 로그인 계정과 연결해 저장되며,
+          다음 로그인 때 자동으로 불러옵니다.
+        </p>
       </div>
     </div>
-  );
-}
-
-// ── 관리자 페이지 ──
-function AdminPage({ user, profile, onBack }) {
-  const [signups, setSignups] = useState(null);
-
-  useEffect(() => {
-    getAllSignups().then(setSignups).catch(console.error);
-  }, []);
-
-  return (
-    <>
-      <nav className="nav">
-        <div className="nav-inner">
-          <span className="nav-brand">급식소리함 🌿</span>
-          <div className="nav-links">
-            <span className="nav-link" style={{cursor:'pointer',color:'var(--muted)'}} onClick={onBack}>← 허브로 돌아가기</span>
-          </div>
-          <div className="nav-user">
-            <span className="nav-user-name">관리자</span>
-            <button className="btn btn-sm" onClick={logOut}>로그아웃</button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="wrap" style={{padding:'2rem 1.5rem'}}>
-        <h2 style={{fontSize:'20px',fontWeight:'700',marginBottom:'6px'}}>가입자 관리</h2>
-        <p style={{fontSize:'13px',color:'var(--muted)',marginBottom:'1.5rem'}}>급식소리함에 가입한 선생님 목록이에요.</p>
-
-        {signups === null ? (
-          <p style={{color:'var(--muted)',fontSize:'13px'}}>불러오는 중...</p>
-        ) : (
-          <>
-            <div style={{display:'flex',gap:'12px',marginBottom:'1.5rem'}}>
-              <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:'10px',padding:'16px 20px',textAlign:'center'}}>
-                <div style={{fontSize:'28px',fontWeight:'700',color:'var(--green)',lineHeight:1}}>{signups.length}</div>
-                <div style={{fontSize:'12px',color:'var(--muted)',marginTop:'4px'}}>전체 가입자</div>
-              </div>
-            </div>
-
-            <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:'12px',overflow:'hidden'}}>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1.5fr auto',padding:'10px 16px',background:'var(--bg)',borderBottom:'1px solid var(--border)',fontSize:'12px',fontWeight:'600',color:'var(--muted)'}}>
-                <span>이름</span><span>학교</span><span>이메일</span><span>가입일</span>
-              </div>
-              {signups.length === 0 ? (
-                <div style={{padding:'2rem',textAlign:'center',color:'var(--muted)',fontSize:'13px'}}>아직 가입자가 없어요.</div>
-              ) : signups.map((s, i) => (
-                <div key={s.uid || i} style={{display:'grid',gridTemplateColumns:'1fr 1fr 1.5fr auto',padding:'12px 16px',borderBottom:'1px solid var(--border)',fontSize:'13px',alignItems:'center',gap:'8px'}}>
-                  <span style={{fontWeight:'500'}}>{s.name}</span>
-                  <span style={{color:'var(--muted)'}}>{s.school}</span>
-                  <span style={{color:'var(--muted)',fontSize:'12px',wordBreak:'break-all'}}>{s.email}</span>
-                  <span style={{color:'var(--muted)',fontSize:'11px',whiteSpace:'nowrap'}}>{s.joinedAt ? new Date(s.joinedAt).toLocaleDateString('ko-KR') : '-'}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-    </>
-  );
-}
-
-// ── 메인 허브 ──
-function MainApp({ user, profile, onAdmin }) {
-  const totalTools = categories.reduce((s,c) => s + c.tools.length, 0);
-  const available  = categories.reduce((s,c) => s + c.tools.filter(t=>t.available).length, 0);
-  const isAdmin    = user.email === ADMIN_EMAIL;
-
-  const scrollTo = (id) => {
-    const el = document.getElementById(id);
-    if (el) window.scrollTo({ top: el.offsetTop - 64, behavior: 'smooth' });
-  };
-
-  return (
-    <>
-      <nav className="nav">
-        <div className="nav-inner">
-          <a className="nav-brand" href="#home" onClick={e=>{e.preventDefault();scrollTo('home')}}>급식소리함 🌿</a>
-          <div className="nav-links">
-            {categories.map(c => (
-              <a key={c.id} className="nav-link" href={`#${c.id}`} onClick={e=>{e.preventDefault();scrollTo(c.id)}}>{c.name}</a>
-            ))}
-          </div>
-          <div className="nav-user">
-            <span className="nav-user-name">{profile.school} · {profile.name}</span>
-            {isAdmin && <button className="btn btn-sm" onClick={onAdmin} style={{color:'var(--green)',borderColor:'var(--green)'}}>관리자</button>}
-            <button className="btn btn-sm" onClick={logOut}>로그아웃</button>
-          </div>
-        </div>
-      </nav>
-
-      <section className="hero" id="home">
-        <div className="hero-inner">
-          <div className="hero-pill">✨ 영양교사 김소리 직접 제작</div>
-          <h1 className="hero-title"><em>급식소리함</em></h1>
-          <p className="hero-sub">AI를 활용한 학교급식 업무 효율화 도구 모음</p>
-          <p className="hero-by">영양교사 김소리가 직접 만든 AI 업무도구와 운영자료를 담았습니다.</p>
-          <div className="hero-stats">
-            <div><div className="stat-num">{available}</div><div className="stat-label">이용 가능</div></div>
-            <div><div className="stat-num">{totalTools - available}</div><div className="stat-label">배포 예정</div></div>
-            <div><div className="stat-num">{categories.length}</div><div className="stat-label">카테고리</div></div>
-            <div><div className="stat-num">{totalTools}</div><div className="stat-label">전체 도구</div></div>
-          </div>
-          <div className="hero-notice">
-            무료사이트이며, 급식 행정기관 또는 교육청 사이트가 아닙니다.
-            선생님들의 개인적인 업무지원을 위해서는 얼마든지 활용 가능하지만,
-            개인 연수나 강의 등 이익창출을 위한 자료 및 저작권은 허용하지 않습니다.
-          </div>
-        </div>
-      </section>
-
-      <div className="wrap overview">
-        <p className="eyebrow">카테고리 바로가기</p>
-        <div className="cat-grid">
-          {categories.map(c => (
-            <a key={c.id} className={`cat-card ${colorMap[c.color]}`} href={`#${c.id}`} onClick={e=>{e.preventDefault();scrollTo(c.id)}}>
-              <div className="cat-ico">{c.icon}</div>
-              <div className="cat-name">{c.name}</div>
-              <div className="cat-meta">{c.tools.length}개 · {c.tools.filter(t=>t.available).length}개 이용</div>
-            </a>
-          ))}
-        </div>
-      </div>
-
-      {categories.map(c => (
-        <div key={c.id} className={`wrap tool-section ${colorMap[c.color]}`} id={c.id}>
-          <div className="sec-head">
-            <div className="sec-ico">{c.icon}</div>
-            <span className="sec-title">{c.name}</span>
-            <span className="sec-meta">{c.tools.length}개 · {c.tools.filter(t=>t.available).length}개 이용 가능</span>
-          </div>
-          <div className="tool-grid">
-            {c.tools.map(t => (
-              t.available
-                ? <a key={t.id} className={`tool-card link ${colorMap[c.color]}`} href={t.url} target="_blank" rel="noopener noreferrer">
-                    <div className="tool-ico">{c.icon}</div>
-                    <div className="tool-text">
-                      <div className="tool-name">{t.name}</div>
-                      <div className="tool-desc">{t.desc}</div>
-                    </div>
-                    <span className="ext">↗</span>
-                  </a>
-                : <div key={t.id} className="tool-card soon">
-                    <div className="tool-ico gray">·</div>
-                    <div className="tool-text">
-                      <div className="tool-name">{t.name}</div>
-                      <div className="tool-desc">{t.desc}</div>
-                    </div>
-                    <span className="badge badge-soon">배포 예정</span>
-                  </div>
-            ))}
-          </div>
-        </div>
-      ))}
-
-      <div className="wrap about-wrap">
-        <p className="eyebrow" style={{marginBottom:'1rem'}}>영양교사 소개</p>
-        <div className="about-card">
-          <div className="about-avatar">👩‍🍳</div>
-          <div>
-            <div className="about-name">김소리</div>
-            <div className="about-role">영양교사</div>
-            <ul className="about-list">
-              <li>동탄중앙고등학교 영양교사</li>
-              <li>2026 미래학교급식플랫폼 TF 팀장</li>
-              <li>2025 경기도교육청 영양·식생활 교육 연구단 팀장</li>
-              <li>업무효율화 및 우수사례 강의 다수 진행</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <footer className="footer">
-        <div className="footer-brand">급식소리함 🌿</div>
-        <div className="footer-copy">© 2025 급식소리함 · 영양교사 김소리 · All rights reserved.</div>
-      </footer>
-    </>
   );
 }
