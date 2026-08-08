@@ -19,7 +19,7 @@ export const categories = [
     icon: '📦',
     color: 'amber',
     tools: [
-      { id: 'rice-order', name: '만년형 쌀 발주 계산기', desc: '주간 쌀 소요량 계산·발주표 작성', url: 'https://thfl4811-maker.github.io/rice-order-planner/', available: true },
+      { id: 'rice-order', name: '만년형 쌀 발주 계산기', desc: '주간 쌀 소요량 계산·발주표 작성', url: 'https://rice-order-planner.vercel.app/', available: true },      
       { id: 'portion', name: '1인 분량 환산', desc: '식재료별 1인 분량 기준 환산', url: null, available: false },
       { id: 'serving-calc', name: '식수별 발주량 계산', desc: '식수 인원별 식재료 발주량 산출', url: null, available: false },
       { id: 'inventory', name: '재고조사표', desc: '식재료 재고 현황 조사·기록', url: null, available: false },
