@@ -302,6 +302,128 @@ async function loadSignups() {
   } catch(e) { return []; }
 }
 
+// ── 나이스 학교 검색 (전국) ──
+const SCHOOL_API='https://smart-meal-archive.vercel.app/api/schools';
+async function schoolSearch(q){
+  const r=await fetch(SCHOOL_API+'?q='+encodeURIComponent(q)+'&all=1');
+  if(!r.ok)throw new Error('검색 실패');
+  const j=await r.json();
+  return Array.isArray(j)?j:[];
+}
+
+// 기존 가입자(학교명만 저장)의 학교 코드 1회 자동 매칭
+async function autoResolveSchool(){
+  try{
+    if(!userProfile||!userProfile.school||userProfile.schoolCode)return;
+    const name=String(userProfile.school).trim();
+    if(/유치원/.test(name))return; // 유치원은 나이스 미제공 → 이름만 유지
+    const list=await schoolSearch(name);
+    const exact=list.filter(x=>x.schoolName===name);
+    const pick=exact.length===1?exact[0]:(list.length===1?list[0]:null);
+    if(!pick)return;
+    const patch={school:pick.schoolName,officeCode:pick.officeCode,officeName:pick.officeName,
+      schoolCode:pick.schoolCode,schoolLevel:pick.level||'',schoolAddress:pick.address||''};
+    await setDoc(doc(db,'users',currentUser.uid),patch,{merge:true});
+    Object.assign(userProfile,patch);
+    render();
+  }catch(e){/* 자동 매칭 실패는 조용히 무시 */}
+}
+
+// ── 학교 선택 모달 (검색 → 교육청·주소와 함께 선택) ──
+function openSchoolPicker(onPick,{title='학교 검색',allowManual=true}={}){
+  const old=document.getElementById('schoolPickModal'); if(old)old.remove();
+  const div=document.createElement('div');
+  div.id='schoolPickModal'; div.className='modal-bg';
+  div.innerHTML=`
+  <div class="modal-card" style="max-width:440px;text-align:left">
+    <div class="modal-title" style="text-align:center">🏫 ${esc(title)}</div>
+    <div style="display:flex;gap:8px;margin:14px 0 10px">
+      <input class="form-input" id="spQ" placeholder="학교명 입력 (예: 동탄중앙고)" style="flex:1">
+      <button class="btn btn-g" id="spGo" style="padding:0 18px;white-space:nowrap">학교 검색</button>
+    </div>
+    <div id="spStatus" style="font-size:12px;color:var(--mu);margin-bottom:6px"></div>
+    <div id="spList" style="max-height:260px;overflow:auto;display:flex;flex-direction:column;gap:8px"></div>
+    ${allowManual?`<div style="margin-top:12px;border-top:1px solid var(--border,#e2e8f0);padding-top:10px">
+      <div style="font-size:12px;color:var(--mu);margin-bottom:6px">유치원 등 검색이 안 되는 기관은 이름을 직접 입력하세요.</div>
+      <div style="display:flex;gap:8px">
+        <input class="form-input" id="spManual" placeholder="예: 무지개유치원" style="flex:1">
+        <button class="btn" id="spManualGo" style="white-space:nowrap">직접 등록</button>
+      </div>
+    </div>`:''}
+    <button class="btn" id="spClose" style="width:100%;margin-top:12px">닫기</button>
+  </div>`;
+  document.body.appendChild(div);
+  const q=document.getElementById('spQ'),list=document.getElementById('spList'),st=document.getElementById('spStatus');
+  q.focus();
+  const go=async()=>{
+    const v=q.value.trim();
+    if(v.length<2){st.textContent='두 글자 이상 입력해주세요.';return;}
+    st.textContent='검색 중…'; list.innerHTML='';
+    try{
+      const rows=await schoolSearch(v);
+      if(!rows.length){st.textContent='검색 결과가 없어요. 유치원 등은 아래 직접 등록을 이용하세요.';return;}
+      st.textContent=rows.length+'개 학교를 찾았어요. 본인 학교를 선택하세요.';
+      list.innerHTML=rows.slice(0,30).map((r,i)=>`
+        <button class="sp-item" data-i="${i}" style="text-align:left;border:1px solid var(--border,#e2e8f0);background:#fff;border-radius:12px;padding:12px 14px;cursor:pointer">
+          <div style="font-weight:800;font-size:14px">${esc(r.schoolName)}</div>
+          <div style="font-size:12px;color:var(--mu);margin-top:3px">${esc(r.officeName||'')} · ${esc(r.address||'')}</div>
+        </button>`).join('');
+      [...list.querySelectorAll('.sp-item')].forEach(b=>b.onclick=()=>{div.remove();onPick(rows[+b.dataset.i]);});
+    }catch(e){st.textContent='검색에 실패했어요. 잠시 후 다시 시도해주세요.';}
+  };
+  document.getElementById('spGo').onclick=go;
+  q.onkeydown=e=>{if(e.key==='Enter')go()};
+  if(allowManual){
+    const m=document.getElementById('spManual');
+    document.getElementById('spManualGo').onclick=()=>{
+      const v=m.value.trim(); if(!v)return;
+      div.remove(); onPick({schoolName:v,officeCode:'',schoolCode:'',officeName:'',level:/유치원/.test(v)?'유치원':'',address:''});
+    };
+    m.onkeydown=e=>{if(e.key==='Enter')document.getElementById('spManualGo').click()};
+  }
+  document.getElementById('spClose').onclick=()=>div.remove();
+  div.onclick=e=>{if(e.target===div)div.remove()};
+}
+
+// ── 학교변경 (전근 시 연 1회) ──
+async function applySchoolChange(pick){
+  const now=new Date().toISOString();
+  const patch={school:pick.schoolName,officeCode:pick.officeCode||'',officeName:pick.officeName||'',
+    schoolCode:pick.schoolCode||'',schoolLevel:pick.level||'',schoolAddress:pick.address||'',
+    prevSchool:userProfile.school||'',prevSchoolCode:userProfile.schoolCode||'',
+    schoolChangedAt:now};
+  await saveProfile(currentUser.uid,{...userProfile,...patch});
+  Object.assign(userProfile,patch);
+  alert('✅ 학교가 "'+pick.schoolName+'"(으)로 변경됐어요.\n급식소리함의 모든 도구에 함께 적용됩니다.');
+  render();
+}
+function changeSchoolFlow(){
+  const YEAR=365*24*60*60*1000, DAY=24*60*60*1000;
+  const changedAt=userProfile.schoolChangedAt?new Date(userProfile.schoolChangedAt).getTime():0;
+  const since=Date.now()-changedAt;
+  openSchoolPicker(async pick=>{
+    const key=(pick.officeCode||'')+':'+(pick.schoolCode||pick.schoolName);
+    const curKey=(userProfile.officeCode||'')+':'+(userProfile.schoolCode||userProfile.school);
+    if(key===curKey){alert('이미 등록된 학교예요.');return;}
+    const prevKey=(userProfile.prevSchoolCode?'':'')+(userProfile.prevSchoolCode||userProfile.prevSchool||'');
+    const isReturn=prevKey&&(pick.schoolCode===userProfile.prevSchoolCode||pick.schoolName===userProfile.prevSchool);
+    const firstTime=!changedAt;
+    const within24h=changedAt&&since<DAY;
+    const overYear=changedAt&&since>=YEAR;
+    if(firstTime||within24h||overYear||isReturn){
+      const why=within24h?'(24시간 이내 정정)':isReturn?'(이전 학교 복귀)':'';
+      if(!confirm('학교를 "'+pick.schoolName+'"(으)로 변경할까요? '+why+'\n\n학교 변경은 전근 시 연 1회만 가능합니다.'))return;
+      await applySchoolChange(pick);
+      return;
+    }
+    alert('학교 변경은 전근 시 연 1회만 가능합니다.\n추가 변경이 필요하면 개발자 김소리 선생님께 따로 문의해주세요.');
+    const code=prompt('개발자에게 받은 해제 코드가 있다면 입력하세요.');
+    if(code===null)return;
+    if(code.trim().toUpperCase()!=='SORI-OK'){alert('해제 코드가 올바르지 않습니다.');return;}
+    await applySchoolChange(pick);
+  },{title:'학교변경 (전근 시 연 1회)'});
+}
+
 function render() {
   if (!currentUser) { renderLogin(); return; }
   if (!userProfile || !userProfile.name) { renderProfile(); return; }
@@ -343,20 +465,38 @@ function renderProfile() {
       <div class="login-logo">👋</div>
       <h1 class="login-title">처음 오셨군요!</h1>
       <p class="login-sub" style="margin-bottom:1.5rem">학교명과 이름을 입력하면 시작할 수 있어요.</p>
-      <div class="form-group"><label class="form-label">학교명</label><input class="form-input" id="school" placeholder="예: 동탄중앙고등학교"></div>
+      <div class="form-group"><label class="form-label">학교명</label>
+        <div id="pickedSchool" style="display:none;border:1px solid var(--border,#dbe4f0);border-radius:9px;padding:10px 12px;text-align:left;margin-bottom:6px">
+          <div id="pickedName" style="font-weight:800;font-size:14px"></div>
+          <div id="pickedAddr" style="font-size:12px;color:var(--mu);margin-top:2px"></div>
+        </div>
+        <button class="btn" id="pickSchoolBtn" style="width:100%;padding:11px">🏫 학교 검색해서 선택하기</button>
+      </div>
       <div class="form-group"><label class="form-label">이름</label><input class="form-input" id="uname" placeholder="예: 홍길동"></div>
       <button class="btn btn-g" id="saveBtn" style="width:100%;padding:12px;font-size:14px;border-radius:9px;margin-top:4px;">시작하기</button>
-      <p class="login-note" style="margin-top:12px;">입력 정보는 클라우드에 저장되며 외부에 공개되지 않아요.</p>
+      <p class="login-note" style="margin-top:12px;">본인 학교는 정확하게 선택해주세요. 등록한 학교가 급식소리함의 모든 도구에 자동 연동되며, 이후 변경은 전근 시 연 1회만 가능해요.</p>
     </div>
   </div>`;
-  const schoolInput=document.getElementById('school'), unameInput=document.getElementById('uname'), saveBtn=document.getElementById('saveBtn');
-  schoolInput.onkeydown=e=>{if(e.key==='Enter')unameInput.focus()};
+  const unameInput=document.getElementById('uname'), saveBtn=document.getElementById('saveBtn');
+  let picked=null;
+  const showPicked=()=>{
+    const box=document.getElementById('pickedSchool');
+    if(!picked){box.style.display='none';return;}
+    box.style.display='block';
+    document.getElementById('pickedName').textContent=picked.schoolName;
+    document.getElementById('pickedAddr').textContent=[picked.officeName,picked.address].filter(Boolean).join(' · ')||'직접 입력한 기관';
+    document.getElementById('pickSchoolBtn').textContent='🏫 다른 학교로 다시 선택';
+  };
+  document.getElementById('pickSchoolBtn').onclick=()=>openSchoolPicker(p=>{picked=p;showPicked();unameInput.focus();});
   unameInput.onkeydown=e=>{if(e.key==='Enter')saveBtn.click()};
   saveBtn.onclick=async()=>{
-    const school=schoolInput.value.trim(), name=unameInput.value.trim();
-    if(!school||!name)return;
+    const name=unameInput.value.trim();
+    if(!picked){alert('학교 검색 버튼으로 본인 학교를 먼저 선택해주세요.');return;}
+    if(!name)return;
     saveBtn.disabled=true; saveBtn.textContent='저장 중...';
-    const data={name,school,email:currentUser.email,photoURL:currentUser.photoURL||'',joinedAt:new Date().toISOString(),tier:0};
+    const data={name,school:picked.schoolName,officeCode:picked.officeCode||'',officeName:picked.officeName||'',
+      schoolCode:picked.schoolCode||'',schoolLevel:picked.level||'',schoolAddress:picked.address||'',
+      email:currentUser.email,photoURL:currentUser.photoURL||'',joinedAt:new Date().toISOString(),tier:0};
     await saveProfile(currentUser.uid,data);
     userProfile=data; render();
   };
@@ -509,6 +649,7 @@ function renderHub() {
     </div>
     <div class="nav-user">
       <span class="nav-uname">${esc(userProfile.school)} · ${esc(userProfile.name)}</span>
+      <button class="btn" id="schoolChangeBtn" title="등록 학교는 모든 도구에 자동 연동돼요">🏫 학교변경</button>
       <button class="btn btn-code" id="codeBtn">🔑 코드 입력</button>
       ${isAdmin?`<button class="btn btn-admin" id="adminBtn">관리자</button>`:''}
       <button class="btn" id="logoutBtn">로그아웃</button>
@@ -629,6 +770,7 @@ function renderHub() {
   </footer>`;
 
   document.getElementById('logoutBtn').onclick = doSignOut;
+  document.getElementById('schoolChangeBtn').onclick = changeSchoolFlow;
   document.getElementById('codeBtn').onclick = renderCodeModal;
   if(isAdmin) document.getElementById('adminBtn').onclick=()=>{view='admin';render()};
 }
@@ -644,6 +786,7 @@ onAuthStateChanged(auth, async user=>{
   if(user){ userProfile=await loadProfile(user.uid); }
   else { userProfile=null; view='hub'; }
   render();
+  if(user&&userProfile) autoResolveSchool(); // 기존 가입자 학교코드 자동 매칭(1회)
 });
 </script>
 </body>
