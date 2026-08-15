@@ -686,6 +686,29 @@ function renderHub() {
     <div class="feat-more"><button class="feat-more-btn" onclick="scrollTo_('tools-all')">도구 모음 더보기 →</button></div>
   </section>
 
+  <div class="wrap" style="padding:0 1.5rem;margin-top:1.2rem">
+    <details style="background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:0;overflow:hidden;box-shadow:0 6px 18px rgba(15,23,42,.04)">
+      <summary style="cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 20px;font-weight:800;font-size:15px">
+        <span>📢 업데이트 소식</span>
+        <span style="font-size:12px;font-weight:600;color:var(--mu)">최근 업데이트: 2026년 8월 15일 · 눌러서 펼치기</span>
+      </summary>
+      <div style="padding:4px 20px 18px;border-top:1px solid #eef2f7;font-size:13.5px;line-height:1.75;color:#334155">
+
+        <p style="margin:14px 0 6px;font-weight:800;color:#0f172a">🗓 2026년 8월 15일 (금)</p>
+        <p style="margin:6px 0"><b>🔐 급식소리함 회원 전용 전환</b> — 7가지 도구 모두 가입 선생님만 이용 가능. 각 도구에서 최초 1회만 구글 로그인하면 돼요. (학생 투표 링크·급식실 TV 사이니지는 로그인 없이 그대로)</p>
+        <p style="margin:6px 0"><b>🏫 내 학교 자동 연동 + 학교변경 중앙화</b> — 가입 때 등록한 학교가 모든 도구에 자동 연결돼요. 기존 가입 선생님도 다음 로그인 때 자동 연결. 전근 시엔 급식소리함 상단 [🏫 학교변경]에서 바꾸면 전 도구에 적용돼요(연 1회).</p>
+        <p style="margin:6px 0"><b>🍽️ 조식·석식 지원</b> — 식단 아카이브·프롬프트 생성기·월간식단 뷰어에 "식사 구분(중식/조식/석식)" 선택 추가. 석식 사이니지 공유 가능. ※ 학교가 나이스에 등록한 식사만 조회돼요.</p>
+        <p style="margin:6px 0"><b>📊 식단 아카이브 편의 기능</b> — 엑셀 업로드 시 분석 기간 자동 설정, 한 번 올린 기관은 💾 저장돼 클릭 한 번으로 재사용, 검색 정확도 개선(과일 표기가 엉뚱한 검색에 걸리던 문제 수정).</p>
+
+        <p style="margin:16px 0 6px;font-weight:800;color:#0f172a">🗓 2026년 8월 14일 (목)</p>
+        <p style="margin:6px 0"><b>📺 월간식단 뷰어 대수리</b> — 휴대폰(아이폰·갤럭시)에서 검색칸 키보드가 안 뜨던 문제, 🎨 범례 기능이 사라졌던 문제, 무한 로딩 문제를 모두 해결했어요.</p>
+        <p style="margin:6px 0"><b>🎨 프롬프트 생성기 새 단장</b> — 식판 사진이 온전히 나오도록 프롬프트 규칙 강화, 5일 식단표에서 미급식일 자동 표시(문구 직접 설정 가능), 디오라마는 풍경과 어우러지게·화이트미니멀/프리미엄/재료광고는 고급 식기로 프리셋별 규칙 분리.</p>
+        <p style="margin:6px 0"><b>🧒 유치원 선생님 지원 확대</b> — 나이스에 유치원 데이터가 없어 검색이 안 되는 대신, 엑셀(월간식단표·조리방법조회) 업로드로 뷰어·프롬프트 생성기·식단 아카이브 이용 가능. 선호도 조사기는 연령반(3세·4세·5세·혼합연령)·반 이름 직접 입력 지원 + 구글 로그인으로 우리 기관 정보 저장/불러오기.</p>
+
+      </div>
+    </details>
+  </div>
+
   <div class="tier-banner">
     <div class="tier-banner-inner">
       <span class="tier-badge tier-badge-${userTier}">${TIER_LABELS[userTier]||'기본'}</span>
