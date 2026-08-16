@@ -709,7 +709,7 @@ function renderHub() {
     <div class="nav-tabs">
       ${CATS.map(c=>`<span class="nav-tab" onclick="scrollTo_('${c.id}')">${c.name}</span>`).join('')}
       <span class="nav-tab" onclick="goGuide()">이용 안내</span>
-      <span class="nav-tab" id="ideaTab" style="color:var(--am);font-weight:600">💡 어플 요청</span>
+      <span class="nav-tab" id="ideaTab" style="color:var(--am);font-weight:600">💡 어플 아이디어</span>
     </div>
     <div class="nav-user">
       <span class="nav-uname">${esc(userProfile.school)} · ${esc(userProfile.name)}</span>
@@ -735,20 +735,20 @@ function renderHub() {
       <div class="l2-item"><span class="li">🧼</span><span><b>무.물.위</b><small>무엇이든 물어보세요, 위생지침서편!</small></span></div>
       <div class="l2-item"><span class="li">💎</span><span><b>젬스 활용 '식단+교육' 자료 만들기</b><small>식단표 하나로 퀴즈·게임·인포그래픽까지</small></span></div>
       <div class="l2-item"><span class="li">🍽️</span><span><b>추천 식단</b><small>아카이브 데이터 기반 식단 추천</small></span></div>
-      <div class="l2-notice">⚠️ 개인적으로 강의를 사고파는 행위는 할 수 없으며, 제게 요청하셔도 드릴 수 없습니다. 본 강의는 영양선생님들의 연수 강화 목적으로만 개발된 강의입니다. <b>지역교육청·도교육청 또는 연구회 등에서 강의 요청이 오면</b> 2차 강의 자료를 열람하실 수 있습니다.</div>
-      <div class="l2-idea-cta">💡 강의를 들을 기회가 닿지 않는 선생님을 위해 — 앱 아이디어를 보내주세요! 채택되면 <b>"○○○ 선생님 아이디어로 만들었습니다"</b>로 소개하고, 그 선생님께는 기본 개발 자료와 아이디어 자료를 열람해 드려요.
-        <button class="btn btn-g" id="l2IdeaBtn">💡 어플 요청드리기</button>
+      <div class="l2-notice">⚠️ 본 강의는 영양선생님들의 연수와 업무 지원을 위해 개발한 자료로, <b>개인적인 유료 강의 요청은 받지 않으며, 강의자료 역시 개인에게 별도로 판매하거나 제공하지 않습니다.</b> 지역교육청·도교육청·연구회 등 기관에서 진행하는 공식 연수에 참여하신 선생님께는 해당 연수 과정에 따라 2차 강의자료를 열람하실 수 있도록 제공하고 있습니다.</div>
+      <div class="l2-idea-cta">💡 <b>강의에 참여할 기회가 없었던 선생님도 함께하실 수 있어요!</b> 학교급식 업무에 필요한 앱 아이디어를 보내주세요. 보내주신 아이디어가 채택되면 실제 앱으로 개발하고, <b>"○○○ 선생님의 아이디어로 만들었습니다!"</b>라고 소개합니다. 아이디어를 제안해 주신 선생님께는 <b>1차 강의자료와 해당 앱의 개발·활용 자료</b>도 열람하실 수 있도록 제공해 드립니다.
+        <button class="btn btn-g" id="l2IdeaBtn">💡 어플 아이디어 제안하기</button>
       </div>
     </div>
   </aside>
 
   <div class="idea-overlay" id="ideaOverlay">
     <div class="idea-modal">
-      <h3>💡 어플 요청드리기</h3>
+      <h3>💡 어플 아이디어 제안하기</h3>
       <p class="im-sub">"이런 앱이 있으면 좋겠어요!" 아이디어를 보내주시면 김소리 선생님에게 관리자 쪽지로 전달돼요.</p>
       <div class="form-group"><label class="form-label">앱 이름(가제)</label><input class="form-input" id="ideaTitle" placeholder="예: 우유 급식 관리기" maxlength="60"></div>
       <div class="form-group"><label class="form-label">어떤 앱인가요?</label><textarea id="ideaBody" rows="6" placeholder="어떤 업무가 힘든지, 앱이 무엇을 해주면 좋을지 자유롭게 적어주세요. 자세할수록 채택 확률이 올라가요!" maxlength="2000"></textarea></div>
-      <div class="idea-credit">🏅 채택되면 도구 소개에 <b>"○○○ 선생님 아이디어로 만들었습니다"</b>로 이름을 올려드리고, 해당 선생님께는 기본 개발 자료와 아이디어 자료를 열람해 드려요. (개별 판매·전달은 하지 않아요)</div>
+      <div class="idea-credit">🏅 아이디어가 채택되면 실제 앱으로 개발하고 <b>"○○○ 선생님의 아이디어로 만들었습니다!"</b>라고 소개해요. 제안해 주신 선생님께는 <b>1차 강의자료와 해당 앱의 개발·활용 자료</b>를 열람하실 수 있도록 제공해 드려요. (자료의 개인 판매·전달은 하지 않습니다)</div>
       <div id="ideaStatus" style="font-size:12.5px;margin-bottom:8px;"></div>
       <div style="display:flex;gap:8px;">
         <button class="btn" id="ideaCancel" style="flex:1;">취소</button>
