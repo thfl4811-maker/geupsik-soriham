@@ -254,8 +254,8 @@ const CATS = [
       { featured:true, featOrder:2, featName:'스마트 월간식단 뷰어', featCat:'식단 기획·급식 운영', name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
       { featured:true, featOrder:3, featCat:'식단 기획·급식 운영', name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
       { featured:true, featOrder:4, featCat:'식단 기획·급식 운영', name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
-      { name:'젬스(GEMS) 식단 활용', desc:'GEMS 연동 식단 분석·활용 도구', url:null, tier:1 },
-      { name:'추천 식단', desc:'균형 잡힌 학교급식 식단 추천', url:null, tier:1 },
+      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:null, tier:2 },
+      { name:'추천 식단', desc:'아카이브 데이터 기반 식단 추천', url:null, tier:2 },
     ]
   },
   { id:'order', name:'발주·재고', icon:'📦', c:'var(--am)', cl:'var(--al)',
@@ -268,9 +268,9 @@ const CATS = [
   },
   { id:'inspect', name:'검수·엑셀', icon:'📊', c:'var(--bl)', cl:'var(--bll)',
     tools:[
-      { name:'시장조사 자료 변환', desc:'시장조사 결과 자동 정리·변환', url:null, tier:1 },
-      { name:'계약단가·검수단가 자동 매칭', desc:'단가 비교·불일치 자동 감지', url:null, tier:1 },
-      { name:'나이스 자료 표준 변환', desc:'NEIS 데이터 표준 형식 자동 변환', url:null, tier:2 },
+      { name:'시장조사 자료 변환기', desc:'업체별 시장조사서를 한 번에 비교표로', url:null, tier:2 },
+      { name:'계약단가·검수단가 자동 매칭', desc:'단가표 대조 작업을 자동으로', url:null, tier:2 },
+      { name:'나이스 자료 표준 변환기', desc:'나이스 엑셀을 바로 쓰는 표준 양식으로', url:null, tier:2 },
     ]
   },
   { id:'document', name:'문서·소통', icon:'📄', c:'var(--co)', cl:'var(--cl)',
@@ -287,6 +287,7 @@ const CATS = [
     tools:[
       { name:'HACCP 교육', desc:'HACCP 기준·관리 포인트 교육 자료', url:null, tier:1 },
       { name:'위생·안전교육', desc:'조리종사원 위생·안전 교육 도구', url:null, tier:1 },
+      { name:'무.물.위', desc:'무엇이든 물어보세요, 위생지침서편!', url:null, tier:2 },
       { name:'조리종사원용 레시피', desc:'표준 레시피 검색·조회·인쇄', url:null, tier:2 },
       { name:'일일 점검자료', desc:'급식실 일일 위생 점검 체크리스트', url:null, tier:2 },
     ]
@@ -844,9 +845,9 @@ function renderHub() {
       ${c.tools.map(t=>{
         if(t.tier>userTier) {
           return `<div class="tool-card soon">
-            <div class="tool-ico gray">·</div>
-            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
-            <span class="badge badge-soon">배포 예정</span>
+            <div class="tool-ico gray">🔑</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${t.tier>=2?'2차':'1차'} 직무연수에서 공개되는 도구예요 · 연수 후 강의 코드를 입력하면 열려요</div></div>
+            <span class="badge badge-locked">🔑 ${t.tier>=2?'2차':'1차'} 강의 · 배포 예정</span>
           </div>`;
         } else if(t.url) {
           return `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
@@ -856,9 +857,9 @@ function renderHub() {
           </a>`;
         } else {
           return `<div class="tool-card soon">
-            <div class="tool-ico gray">·</div>
-            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">새로운 강의 시 코드가 발급되면 열려요!</div></div>
-            <span class="badge badge-soon">배포 예정</span>
+            <div class="tool-ico gray">🌱</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">한창 만드는 중이에요 · 개발이 끝나는 대로 여기서 바로 열려요</div></div>
+            <span class="badge badge-soon">개발 중 · 배포 예정</span>
           </div>`;
         }
       }).join('')}
