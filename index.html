@@ -129,6 +129,36 @@
     .about-list li { font-size: 13px; color: var(--mu); padding: 3px 0; display: flex; gap: 7px; }
     .about-list li::before { content: "·"; color: var(--g); font-weight: 700; flex-shrink: 0; }
 
+    /* 2차 강의 예고 + 어플 요청 */
+    @keyframes blinkGlow { 0%,100%{opacity:1;box-shadow:0 4px 16px rgba(192,72,72,.45);} 50%{opacity:.75;box-shadow:0 4px 6px rgba(192,72,72,.15);} }
+    .l2-tab { position: fixed; right: 0; top: 42%; z-index: 300; background: var(--co); color: #fff; font-weight: 700; font-size: 13px;
+      writing-mode: vertical-rl; padding: 16px 10px; border-radius: 12px 0 0 12px; cursor: pointer; letter-spacing: .08em;
+      animation: blinkGlow 1.4s ease-in-out infinite; user-select: none; }
+    .l2-tab:hover { animation-play-state: paused; opacity: 1; }
+    .l2-overlay { position: fixed; inset: 0; background: rgba(15,30,20,.45); z-index: 400; display: none; }
+    .l2-overlay.show { display: block; }
+    .l2-panel { position: fixed; top: 0; right: -420px; width: min(400px, 92vw); height: 100%; background: #fff; z-index: 401;
+      box-shadow: -12px 0 34px rgba(0,0,0,.18); transition: right .3s ease; display: flex; flex-direction: column; }
+    .l2-panel.show { right: 0; }
+    .l2-head { padding: 18px 20px 14px; border-bottom: 1px solid var(--bd); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .l2-head h3 { font-size: 16px; font-weight: 700; }
+    .l2-blink { display: inline-block; background: var(--cl); color: var(--co); font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 99px; animation: blinkGlow 1.4s ease-in-out infinite; box-shadow: none; }
+    .l2-body { flex: 1; overflow-y: auto; padding: 16px 20px 24px; }
+    .l2-item { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--bd); border-radius: 12px; padding: 12px 13px; margin-bottom: 9px; }
+    .l2-item .li { font-size: 20px; flex: none; }
+    .l2-item b { display: block; font-size: 13.5px; }
+    .l2-item small { font-size: 12px; color: var(--mu); word-break: keep-all; }
+    .l2-notice { margin-top: 14px; background: var(--cl); border: 1px solid #eccaca; border-radius: 12px; padding: 13px 15px; font-size: 12.5px; color: #8a3a3a; line-height: 1.75; word-break: keep-all; }
+    .l2-idea-cta { margin-top: 12px; background: var(--gl); border: 1px solid #cfe8da; border-radius: 12px; padding: 13px 15px; font-size: 12.5px; color: var(--gd); line-height: 1.7; word-break: keep-all; }
+    .l2-idea-cta button { margin-top: 8px; width: 100%; }
+    .idea-overlay { position: fixed; inset: 0; background: rgba(15,30,20,.5); z-index: 500; display: none; align-items: center; justify-content: center; padding: 16px; }
+    .idea-overlay.show { display: flex; }
+    .idea-modal { background: #fff; border-radius: 16px; width: min(480px, 100%); max-height: 90vh; overflow-y: auto; padding: 24px 22px; }
+    .idea-modal h3 { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .idea-modal .im-sub { font-size: 12.5px; color: var(--mu); margin-bottom: 14px; word-break: keep-all; }
+    .idea-modal textarea { width: 100%; border: 1px solid var(--bd); border-radius: 10px; padding: 11px 13px; font-size: 13.5px; font-family: inherit; resize: vertical; }
+    .idea-credit { background: var(--al); border: 1px dashed #e3c79a; border-radius: 10px; padding: 11px 13px; font-size: 12px; color: #8a5a1e; margin: 12px 0; line-height: 1.7; word-break: keep-all; }
+
     /* ADMIN */
     .admin-table { background: #fff; border: 1px solid var(--bd); border-radius: 12px; overflow: hidden; }
     .admin-head { display: grid; grid-template-columns: 1fr 1.2fr 1.5fr auto auto; padding: 10px 16px; background: var(--bg); border-bottom: 1px solid var(--bd); font-size: 12px; font-weight: 600; color: var(--mu); gap: 8px; }
@@ -192,7 +222,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, query, orderBy, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBEagv2iP4sSJuDsjBB24A3FHFfAiiS8wA",
@@ -300,6 +330,16 @@ async function loadSignups() {
     const snap = await getDocs(q);
     return snap.docs.map(d=>d.data());
   } catch(e) { return []; }
+}
+async function saveIdea(data) {
+  await addDoc(collection(db,'appRequests'), data);
+}
+async function loadIdeas() {
+  try {
+    const q = query(collection(db,'appRequests'), orderBy('createdAt','desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d=>({id:d.id, ...d.data()}));
+  } catch(e) { return null; }
 }
 
 // ── 나이스 학교 검색 (전국) ──
@@ -552,11 +592,33 @@ async function renderAdmin() {
   <div class="wrap" style="padding:2rem 1.5rem">
     <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;">가입자 관리</h2>
     <p style="font-size:13px;color:var(--mu);margin-bottom:1.5rem;">급식소리함에 가입한 선생님 목록이에요.</p>
+    <h2 style="font-size:20px;font-weight:700;margin:1.5rem 0 6px;">💡 어플 요청 쪽지함</h2>
+    <p style="font-size:13px;color:var(--mu);margin-bottom:1rem;">선생님들이 보낸 앱 아이디어예요.</p>
+    <div id="ideaInbox" style="color:var(--mu);font-size:13px;margin-bottom:2rem;">불러오는 중...</div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:6px;">가입자 목록</h2>
     <div id="adminContent" style="color:var(--mu);font-size:13px;">불러오는 중...</div>
   </div>`;
   document.getElementById('backBtn').onclick=()=>{view='hub';render()};
   document.getElementById('backBtn2').onclick=()=>{view='hub';render()};
   document.getElementById('logoutBtn').onclick=doSignOut;
+  // 아이디어 쪽지함
+  const ideas=await loadIdeas();
+  const inbox=document.getElementById('ideaInbox');
+  if(inbox){
+    if(ideas===null){inbox.innerHTML='<p style="color:var(--co)">⚠️ 읽기 권한이 없어요 — Firestore 규칙에 appRequests 관리자 읽기 규칙을 추가해 주세요.</p>';}
+    else if(!ideas.length){inbox.innerHTML='<p>아직 도착한 아이디어가 없어요.</p>';}
+    else{
+      inbox.innerHTML=ideas.map(i=>`
+      <div style="background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:9px;">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:5px;">
+          <span style="font-weight:700;font-size:14px;color:var(--tx)">💡 ${esc(i.title||'(제목 없음)')}</span>
+          <span style="font-size:11px;color:var(--mu);white-space:nowrap">${i.createdAt?new Date(i.createdAt).toLocaleString('ko-KR'):'-'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:7px;">${esc(i.name||'이름 미상')} · ${esc(i.school||'학교 미상')} · ${esc(i.email||'')}</div>
+        <div style="font-size:13px;color:var(--tx);white-space:pre-wrap;word-break:keep-all;">${esc(i.idea||'')}</div>
+      </div>`).join('');
+    }
+  }
   const signups=await loadSignups();
   const el=document.getElementById('adminContent');
   if(!el)return;
@@ -646,6 +708,7 @@ function renderHub() {
     <div class="nav-tabs">
       ${CATS.map(c=>`<span class="nav-tab" onclick="scrollTo_('${c.id}')">${c.name}</span>`).join('')}
       <span class="nav-tab" onclick="goGuide()">이용 안내</span>
+      <span class="nav-tab" id="ideaTab" style="color:var(--am);font-weight:600">💡 어플 요청</span>
     </div>
     <div class="nav-user">
       <span class="nav-uname">${esc(userProfile.school)} · ${esc(userProfile.name)}</span>
@@ -655,6 +718,43 @@ function renderHub() {
       <button class="btn" id="logoutBtn">로그아웃</button>
     </div>
   </div></nav>
+
+  <div class="l2-tab" id="l2Tab">📣 2차 강의 [배포예정]</div>
+  <div class="l2-overlay" id="l2Overlay"></div>
+  <aside class="l2-panel" id="l2Panel">
+    <div class="l2-head">
+      <h3>📣 2차 강의 예고 <span class="l2-blink">배포예정</span></h3>
+      <button class="btn" id="l2Close">✕</button>
+    </div>
+    <div class="l2-body">
+      <p style="font-size:13px;color:var(--mu);margin-bottom:12px;word-break:keep-all">2차 직무연수에서 공개될 새 도구 6가지를 미리 소개해요. 연수 후 강의 코드로 열립니다.</p>
+      <div class="l2-item"><span class="li">🛒</span><span><b>시장조사 자료 변환기</b><small>업체별 시장조사서를 한 번에 비교표로</small></span></div>
+      <div class="l2-item"><span class="li">📑</span><span><b>나이스 자료 표준 변환기</b><small>나이스 엑셀을 바로 쓰는 표준 양식으로</small></span></div>
+      <div class="l2-item"><span class="li">🔗</span><span><b>계약단가·검수단가 자동 매칭</b><small>단가표 대조 작업을 자동으로</small></span></div>
+      <div class="l2-item"><span class="li">🧼</span><span><b>무.물.위</b><small>무엇이든 물어보세요, 위생지침서편!</small></span></div>
+      <div class="l2-item"><span class="li">💎</span><span><b>젬스 활용 '식단+교육' 자료 만들기</b><small>식단표 하나로 퀴즈·게임·인포그래픽까지</small></span></div>
+      <div class="l2-item"><span class="li">🍽️</span><span><b>추천 식단</b><small>아카이브 데이터 기반 식단 추천</small></span></div>
+      <div class="l2-notice">⚠️ 개인적으로 강의를 사고파는 행위는 할 수 없으며, 제게 요청하셔도 드릴 수 없습니다. 본 강의는 영양선생님들의 연수 강화 목적으로만 개발된 강의입니다. <b>지역교육청·도교육청 또는 연구회 등에서 강의 요청이 오면</b> 2차 강의 자료를 열람하실 수 있습니다.</div>
+      <div class="l2-idea-cta">💡 강의를 들을 기회가 닿지 않는 선생님을 위해 — 앱 아이디어를 보내주세요! 채택되면 <b>"○○○ 선생님 아이디어로 만들었습니다"</b>로 소개하고, 그 선생님께는 기본 개발 자료와 아이디어 자료를 열람해 드려요.
+        <button class="btn btn-g" id="l2IdeaBtn">💡 어플 요청드리기</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="idea-overlay" id="ideaOverlay">
+    <div class="idea-modal">
+      <h3>💡 어플 요청드리기</h3>
+      <p class="im-sub">"이런 앱이 있으면 좋겠어요!" 아이디어를 보내주시면 김소리 선생님에게 관리자 쪽지로 전달돼요.</p>
+      <div class="form-group"><label class="form-label">앱 이름(가제)</label><input class="form-input" id="ideaTitle" placeholder="예: 우유 급식 관리기" maxlength="60"></div>
+      <div class="form-group"><label class="form-label">어떤 앱인가요?</label><textarea id="ideaBody" rows="6" placeholder="어떤 업무가 힘든지, 앱이 무엇을 해주면 좋을지 자유롭게 적어주세요. 자세할수록 채택 확률이 올라가요!" maxlength="2000"></textarea></div>
+      <div class="idea-credit">🏅 채택되면 도구 소개에 <b>"○○○ 선생님 아이디어로 만들었습니다"</b>로 이름을 올려드리고, 해당 선생님께는 기본 개발 자료와 아이디어 자료를 열람해 드려요. (개별 판매·전달은 하지 않아요)</div>
+      <div id="ideaStatus" style="font-size:12.5px;margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" id="ideaCancel" style="flex:1;">취소</button>
+        <button class="btn btn-g" id="ideaSend" style="flex:2;">보내기</button>
+      </div>
+    </div>
+  </div>
 
   <section class="hero" id="home">
     <div class="hero-in">
@@ -796,6 +896,42 @@ function renderHub() {
   document.getElementById('schoolChangeBtn').onclick = changeSchoolFlow;
   document.getElementById('codeBtn').onclick = renderCodeModal;
   if(isAdmin) document.getElementById('adminBtn').onclick=()=>{view='admin';render()};
+
+  // ── 2차 강의 예고 패널 ──
+  const l2Panel=document.getElementById('l2Panel'), l2Overlay=document.getElementById('l2Overlay');
+  const l2Open=()=>{l2Panel.classList.add('show');l2Overlay.classList.add('show');};
+  const l2CloseFn=()=>{l2Panel.classList.remove('show');l2Overlay.classList.remove('show');};
+  document.getElementById('l2Tab').onclick=l2Open;
+  document.getElementById('l2Close').onclick=l2CloseFn;
+  l2Overlay.onclick=l2CloseFn;
+
+  // ── 어플 요청드리기 ──
+  const ideaOverlay=document.getElementById('ideaOverlay');
+  const ideaOpen=()=>{ideaOverlay.classList.add('show');document.getElementById('ideaStatus').textContent='';};
+  const ideaClose=()=>{ideaOverlay.classList.remove('show');};
+  document.getElementById('ideaTab').onclick=ideaOpen;
+  document.getElementById('l2IdeaBtn').onclick=()=>{l2CloseFn();ideaOpen();};
+  document.getElementById('ideaCancel').onclick=ideaClose;
+  ideaOverlay.onclick=e=>{if(e.target===ideaOverlay)ideaClose();};
+  document.getElementById('ideaSend').onclick=async()=>{
+    const title=document.getElementById('ideaTitle').value.trim();
+    const body=document.getElementById('ideaBody').value.trim();
+    const st=document.getElementById('ideaStatus');
+    if(!title||!body){st.style.color='var(--co)';st.textContent='앱 이름과 내용을 모두 적어주세요.';return;}
+    st.style.color='var(--mu)';st.textContent='보내는 중...';
+    try{
+      await saveIdea({
+        uid:currentUser.uid, email:currentUser.email,
+        name:(userProfile&&userProfile.name)||'', school:(userProfile&&userProfile.school)||'',
+        title, idea:body, status:'new', createdAt:new Date().toISOString()
+      });
+      st.style.color='var(--g)';st.textContent='✅ 전달 완료! 소중한 아이디어 감사합니다.';
+      document.getElementById('ideaTitle').value='';document.getElementById('ideaBody').value='';
+      setTimeout(ideaClose,1600);
+    }catch(e){
+      st.style.color='var(--co)';st.textContent='전송에 실패했어요. 잠시 후 다시 시도해 주세요.';
+    }
+  };
 }
 
 window.scrollTo_=function(id){
