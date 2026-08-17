@@ -154,18 +154,30 @@ bindDrop($('#dropN'), $('#fileN'), async file=>{
 function parseVendor(wb){
   const sh=wb.Sheets[wb.SheetNames[0]];
   const rows=XLSX.utils.sheet_to_json(sh,{header:1});
-  let hIdx=-1,cName=-1,cPrice=-1,cAttr=-1;
-  for(let i=0;i<Math.min(20,rows.length);i++){
-    const cells=(rows[i]||[]).map(v=>norm(v));
-    const ni=cells.indexOf('식품명'), pi=cells.indexOf('단가');
-    if(ni>=0&&pi>=0){hIdx=i;cName=ni;cPrice=pi;cAttr=cells.indexOf('속성설명');break;}
+  let hIdx=-1,cName=-1,cPrice=-1,cAttr=-1,priceIsSpec=false;
+  for(let i=0;i<Math.min(25,rows.length);i++){
+    const cells=Array.from(rows[i]||[], v=>norm(v));
+    const ni=cells.findIndex(v=>v==='식품명'||v==='품명');
+    if(ni<0)continue;
+    /* 1순위: '단가' 포함 열(예정단가(원) 등, 총금액은 제외) */
+    let pi=cells.findIndex(v=>v.indexOf('단가')>=0&&v.indexOf('총')<0);
+    let spec=false;
+    /* 2순위: 규격 칸에 단가를 적는 양식 */
+    if(pi<0){pi=cells.indexOf('규격');spec=pi>=0;}
+    if(pi<0)continue;
+    hIdx=i;cName=ni;cPrice=pi;priceIsSpec=spec;
+    cAttr=cells.indexOf('속성설명');
+    break;
   }
-  if(hIdx<0)throw new Error('식품명·단가 열을 찾지 못했어요. 현품설명서 파일이 맞는지 확인해주세요.');
+  if(hIdx<0)throw new Error('식품명(품명)·단가 열을 찾지 못했어요. 현품설명서/견적서 파일이 맞는지 확인해주세요.');
   const items=[];
   for(let i=hIdx+1;i<rows.length;i++){
     const r=rows[i]||[];
-    const name=r[cName];if(!name||norm(name)==='식품명')continue;
-    const p=parseFloat(String(r[cPrice]).replace(/,/g,''));
+    const name=r[cName];if(!name||norm(name)==='식품명'||norm(name)==='품명')continue;
+    const raw=String(r[cPrice]==null?'':r[cPrice]).trim();
+    /* 규격 칸을 단가로 쓰는 경우엔 순수 숫자만 인정 (1kg 같은 규격 텍스트 오인 방지) */
+    if(priceIsSpec&&!/^[\d,\.]+$/.test(raw))continue;
+    const p=parseFloat(raw.replace(/,/g,''));
     if(!isFinite(p)||p<=0)continue;
     items.push({name:String(name).trim(),price:p,attr:String(cAttr>=0?(r[cAttr]||''):'')});
   }
