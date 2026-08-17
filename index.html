@@ -259,7 +259,7 @@ const CATS = [
       { featured:true, featOrder:3, featCat:'식단 기획·급식 운영', name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
       { featured:true, featOrder:4, featCat:'식단 기획·급식 운영', name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
       { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2 },
-      { name:'추천 식단', desc:'아카이브 데이터 기반 식단 추천', url:null, tier:2 },
+      { name:'⭐ 추천식단 캘린더 · 초안 식단 보드', desc:'특일·학사일정 캘린더에 스크랩 식단을 배치해 월간 식단 초안 작성', url:'https://smart-meal-archive.vercel.app/?view=recommend&beta=SORI-2ND', tier:2 },
     ]
   },
   { id:'order', name:'발주·재고', icon:'📦', c:'var(--am)', cl:'var(--al)',
@@ -702,8 +702,8 @@ function renderGuide() {
 window.goGuide=function(){ view='guide'; render(); };
 
 function renderHub() {
-  const userTier = userProfile.tier || 0;
   const isAdmin  = currentUser.email === ADMIN;
+  const userTier = isAdmin ? 2 : (userProfile.tier || 0);
   const totalTools = CATS.reduce((s,c)=>s+c.tools.length,0);
   const visibleTools = CATS.reduce((s,c)=>s+c.tools.filter(t=>t.tier<=userTier&&t.url).length,0);
 
