@@ -240,10 +240,14 @@ const gprov = new GoogleAuthProvider();
 const ADMIN = 'thfl4811@gmail.com';
 
 // ── 강의 코드 설정 (여기서 코드 관리) ──
-const CODES = {
-  'SORI202608': { tier:1, label:'1차 강의', expiresAt:'2026-08-18' },
-  'SORI2026': { tier:2, label:'2차 강의', expiresAt:'2099-12-31' },
-};
+const CODES = [
+  { h:'7042e89645a07deabb1650dfb0684c2ab0a3bcb4b2370683556062adac36b424', tier:1, label:'1차 강의', expiresAt:'2099-12-31' },
+  { h:'67c2d3ad3eda08f6522014b6e7009b1a6a55a3535b41cb464758332a167bb84f', tier:2, label:'2차 강의', expiresAt:'2099-12-31' }
+];
+async function sha256Hex(s){
+  const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
+  return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
 const TIER_LABELS = { 0: '기본', 1: '1차 강의', 2: '2차 강의' };
 
 // ── 도구 데이터 (tier: 접근에 필요한 강의 티어) ──
@@ -569,7 +573,8 @@ function renderCodeModal() {
   const submit=async()=>{
     const code=input.value.trim().toUpperCase();
     if(!code){errEl.textContent='코드를 입력해주세요.';return;}
-    const matched=CODES[code];
+    const hash=await sha256Hex(code);
+    const matched=CODES.find(c=>c.h===hash);
     if(!matched){errEl.textContent='올바르지 않은 코드예요.';input.value='';return;}
     if(matched.expiresAt && new Date() > new Date(matched.expiresAt)){errEl.textContent='만료된 코드예요. 강의 담당자에게 문의해주세요.';return;}
     if(matched.tier<=( userProfile.tier||0)){errEl.textContent='이미 적용된 코드예요.';return;}
