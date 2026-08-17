@@ -912,7 +912,7 @@ function renderHub() {
   document.getElementById('l2Close').onclick=l2CloseFn;
   l2Overlay.onclick=l2CloseFn;
   const ud=document.getElementById('updDate');
-  if(ud){const m=(document.querySelector('details')?.innerText||'').match(/🗓\s*(\d{4}년\s*\d{1,2}월\s*\d{1,2}일)/);if(m)ud.textContent=m[1];}
+  if(ud){const m=(document.querySelector('details')?.textContent||'').match(/🗓\s*(\d{4}년\s*\d{1,2}월\s*\d{1,2}일)/);if(m)ud.textContent=m[1];}
 
   // ── 어플 요청드리기 ──
   const ideaOverlay=document.getElementById('ideaOverlay');
