@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나이스 시장조사 자동입력 — 급식"소리"함</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--primary:#5c63eb;--line:#e5e7ef;--mu:#6b7280;--bg:#f6f7fb;--danger:#dc2626;--ok:#0f6b4d}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:#172033;padding:18px}
+.wrap{max-width:980px;margin:0 auto}
+h1{font-size:22px;margin:6px 0 4px}
+.sub{color:var(--mu);font-size:13.5px;margin-bottom:16px;word-break:keep-all}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.card h2{font-size:16px;margin-bottom:10px}
+.step{display:inline-block;background:var(--primary);color:#fff;border-radius:999px;font-size:12px;font-weight:900;padding:2px 10px;margin-right:6px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mu);cursor:pointer;transition:.15s;font-size:14px}
+.drop:hover,.drop.on{border-color:var(--primary);color:var(--primary);background:#f6f7ff}
+.drop b{color:#172033}
+.badge{display:inline-block;background:#e8f6ef;color:var(--ok);border:1px solid #bfe6d4;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;margin-top:10px}
+.badge.warn{background:#fff6ed;color:#b45309;border-color:#fcd9a8}
+.badge.err{background:#fdf0f0;color:var(--danger);border-color:#f3c1c1}
+.slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.slot{border:1px solid var(--line);border-radius:12px;padding:12px}
+.slot h3{font-size:13.5px;margin-bottom:8px}
+.slot .fname{font-size:12px;color:var(--mu);word-break:break-all;margin-top:6px}
+.slot input[type=text]{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-top:6px;font-size:13px}
+.btn{display:inline-block;background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:14.5px;font-weight:800;cursor:pointer}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:#fff;color:#374151;border:1px solid var(--line)}
+.btn.small{padding:6px 11px;font-size:12.5px;border-radius:8px}
+.sum{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.sum span{background:#f3f4f8;border-radius:8px;padding:6px 11px;font-size:13px;font-weight:700}
+.sum b{color:var(--primary)}
+.item{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding:8px 0;font-size:13px}
+.item b{flex:none}
+.item select,.item input[list]{padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;min-width:230px;flex:1}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;flex:none}
+.tag.a{background:#eef0ff;color:var(--primary)}
+.tag.warn{background:#fff6ed;color:#b45309}
+.help{font-size:12.5px;color:var(--mu);margin-top:8px;word-break:keep-all}
+.footer{color:var(--mu);font-size:12px;text-align:center;margin:22px 0 8px}
+#dl{background:var(--ok)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 나이스 시장조사 자동입력</h1>
+  <p class="sub">나이스에서 내려받은 <b>시장조사자료등록</b> 파일과 업체가 단가를 적어 보낸 <b>현품설명서</b>를 올리면,
+  식품명으로 자동 매칭해서 <b>조사가1·2·3</b>이 채워진 나이스 업로드용 엑셀을 만들어 드려요.
+  (컴퓨터 안에서만 처리되고 서버로 전송되지 않아요)</p>
+
+  <div class="card">
+    <h2><span class="step">1</span>나이스 시장조사자료등록 파일</h2>
+    <div class="drop" id="dropN"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 나이스 [시장조사자료등록] 화면에서 내려받은 .xlsx</div>
+    <input type="file" id="fileN" accept=".xlsx,.xls" class="hidden">
+    <div id="statN"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>업체 현품설명서 (최대 3개 업체)</h2>
+    <p class="help" style="margin:0 0 4px">업체별 파일을 각 칸에 올리면 순서대로 <b>조사가1 → 조사가2 → 조사가3</b>에 들어가요. 한 업체만 있어도 돼요.</p>
+    <div class="slots">
+      <div class="slot" data-slot="0">
+        <h3>조사가1 (업체 A)</h3>
+        <div class="drop small" data-drop="0">파일 올리기</div>
+        <input type="file" data-file="0" accept=".xls,.xlsx" class="hidden">
+        <div class="fname" data-fname="0"></div>
+      </div>
+      <div class="slot" data-slot="1">
+        <h3>조사가2 (업체 B)</h3>
+        <div class="drop small" data-drop="1">파일 올리기</div>
+        <input type="file" data-file="1" accept=".xls,.xlsx" class="hidden">
+        <div class="fname" data-fname="1"></div>
+      </div>
+      <div class="slot" data-slot="2">
+        <h3>조사가3 (업체 C)</h3>
+        <div class="drop small" data-drop="2">파일 올리기</div>
+        <input type="file" data-file="2" accept=".xls,.xlsx" class="hidden">
+        <div class="fname" data-fname="2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="resultCard">
+    <h2><span class="step">3</span>매칭 결과 확인</h2>
+    <div id="summary"></div>
+    <div id="issues"></div>
+    <div style="margin-top:14px">
+      <button class="btn" id="dl">📥 나이스 업로드 파일 만들기</button>
+      <button class="btn ghost" id="reset" style="margin-left:6px">처음부터</button>
+    </div>
+    <p class="help">내려받은 파일을 나이스 [시장조사자료등록 → 파일 업로드]에 그대로 올리면 돼요. 적용가는 나이스가 자동 계산해요.</p>
+  </div>
+
+  <p class="footer">급식"소리"함 · 시장조사 자동입력 β — 문의: geupsik-soriham.vercel.app</p>
+</div>
+
+<datalist id="neisList"></datalist>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const norm=s=>String(s||'').replace(/\s/g,'').trim();
+
+let neisWB=null, neisSheet=null, neisRows=[], neis=[], byName={};
+const vendors=[null,null,null]; /* {name, items:[{name,price,attr}], matched, un:[], multi:[], conflicts:[]} */
+const manual={}; /* slot|itemName -> neis idx */
+const conflictPick={}; /* slot|normName -> price */
+
+/* ── 파일 읽기 공통 ── */
+function readWB(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{try{res(XLSX.read(new Uint8Array(e.target.result),{type:'array'}));}catch(err){rej(err);}};
+    r.onerror=rej;
+    r.readAsArrayBuffer(file);
+  });
+}
+
+/* ── STEP1: 나이스 파일 ── */
+function bindDrop(el, input, handler){
+  el.onclick=()=>input.click();
+  el.ondragover=e=>{e.preventDefault();el.classList.add('on');};
+  el.ondragleave=()=>el.classList.remove('on');
+  el.ondrop=e=>{e.preventDefault();el.classList.remove('on');if(e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);};
+  input.onchange=()=>{if(input.files[0])handler(input.files[0]);};
+}
+
+bindDrop($('#dropN'), $('#fileN'), async file=>{
+  try{
+    neisWB=await readWB(file);
+    neisSheet=neisWB.Sheets[neisWB.SheetNames[0]];
+    neisRows=XLSX.utils.sheet_to_json(neisSheet,{header:1});
+    const head=(neisRows[0]||[]).map(norm);
+    if(head[1]!=='공통식품명'||!head.includes('조사가1')){
+      $('#statN').innerHTML='<div class="badge err">⚠️ 시장조사자료등록 파일이 아닌 것 같아요 (공통식품명·조사가1 열이 없어요)</div>';
+      neisWB=null;return;
+    }
+    neis=[];byName={};
+    for(let i=1;i<neisRows.length;i++){
+      const r=neisRows[i];if(!r||!r[1])continue;
+      const o={code:String(r[0]||''),name:String(r[1]).trim(),attr:String(r[2]||''),idx:i};
+      neis.push(o);(byName[norm(o.name)]=byName[norm(o.name)]||[]).push(o);
+    }
+    $('#statN').innerHTML=`<div class="badge">✅ ${file.name} — 품목 ${neis.length}개 로드</div>`;
+    $('#neisList').innerHTML=neis.map(n=>`<option value="${n.name.replace(/"/g,'&quot;')}">`).join('');
+    refresh();
+  }catch(e){$('#statN').innerHTML=`<div class="badge err">읽기 실패: ${e.message}</div>`;}
+});
+
+/* ── STEP2: 업체 파일 ── */
+function parseVendor(wb){
+  const sh=wb.Sheets[wb.SheetNames[0]];
+  const rows=XLSX.utils.sheet_to_json(sh,{header:1});
+  let hIdx=-1,cName=-1,cPrice=-1,cAttr=-1;
+  for(let i=0;i<Math.min(20,rows.length);i++){
+    const cells=(rows[i]||[]).map(v=>norm(v));
+    const ni=cells.indexOf('식품명'), pi=cells.indexOf('단가');
+    if(ni>=0&&pi>=0){hIdx=i;cName=ni;cPrice=pi;cAttr=cells.indexOf('속성설명');break;}
+  }
+  if(hIdx<0)throw new Error('식품명·단가 열을 찾지 못했어요. 현품설명서 파일이 맞는지 확인해주세요.');
+  const items=[];
+  for(let i=hIdx+1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const name=r[cName];if(!name||norm(name)==='식품명')continue;
+    const p=parseFloat(String(r[cPrice]).replace(/,/g,''));
+    if(!isFinite(p)||p<=0)continue;
+    items.push({name:String(name).trim(),price:p,attr:String(cAttr>=0?(r[cAttr]||''):'')});
+  }
+  return items;
+}
+
+$$('.slot').forEach(slot=>{
+  const i=+slot.dataset.slot;
+  bindDrop(slot.querySelector('[data-drop]'), slot.querySelector('[data-file]'), async file=>{
+    try{
+      const items=parseVendor(await readWB(file));
+      vendors[i]={file:file.name,items};
+      slot.querySelector('[data-fname]').innerHTML=`<span class="badge">✅ ${file.name} · ${items.length}품목</span>`;
+      refresh();
+    }catch(e){
+      slot.querySelector('[data-fname]').innerHTML=`<span class="badge err">${e.message}</span>`;
+    }
+  });
+});
+
+/* ── 매칭 ── */
+function matchVendor(v,slot){
+  const un=[],multi=[],conflicts=[],map={};/* normName -> price */
+  v.items.forEach(it=>{
+    const k=norm(it.name);
+    if(map[k]!==undefined && map[k]!==it.price){
+      if(!conflicts.find(c=>norm(c.name)===k))conflicts.push({name:it.name,prices:[map[k],it.price]});
+      else{const c=conflicts.find(c=>norm(c.name)===k);if(!c.prices.includes(it.price))c.prices.push(it.price);}
+    }
+    if(map[k]===undefined)map[k]=it.price;
+    const cands=byName[k]||[];
+    if(cands.length===0){if(!un.find(u=>norm(u.name)===k))un.push(it);}
+    else if(cands.length>1){if(!multi.find(m=>norm(m.it.name)===k))multi.push({it,cands});}
+  });
+  return {map,un,multi,conflicts,matchedCount:Object.keys(map).filter(k=>(byName[k]||[]).length>=1).length};
+}
+
+function refresh(){
+  if(!neisWB||!vendors.some(v=>v)) { $('#resultCard').classList.add('hidden'); return; }
+  $('#resultCard').classList.remove('hidden');
+  let sumHTML='',issueHTML='';
+  vendors.forEach((v,slot)=>{
+    if(!v)return;
+    const m=matchVendor(v,slot);v.m=m;
+    sumHTML+=`<div class="sum"><span>조사가${slot+1} · ${v.file}</span>
+      <span>매칭 <b>${m.matchedCount}</b></span>
+      <span>미매칭 <b style="color:${m.un.length?'var(--danger)':'inherit'}">${m.un.length}</b></span>
+      <span>단가상이 <b style="color:${m.conflicts.length?'#b45309':'inherit'}">${m.conflicts.length}</b></span></div>`;
+
+    m.un.forEach(u=>{
+      const key=slot+'|'+norm(u.name);
+      issueHTML+=`<div class="item"><span class="tag a">조사가${slot+1}</span><b>❌ ${u.name}</b>
+        <span style="color:var(--mu)">${u.price.toLocaleString()}원 · ${(u.attr||'').slice(0,26)}</span>
+        <input list="neisList" placeholder="나이스 품목 검색해 연결 (비우면 제외)" data-manual="${key}" value="${manual[key]||''}"></div>`;
+    });
+    m.multi.forEach(x=>{
+      const key=slot+'|'+norm(x.it.name);
+      issueHTML+=`<div class="item"><span class="tag a">조사가${slot+1}</span><b>⚠️ ${x.it.name}</b>
+        <span style="color:var(--mu)">나이스에 ${x.cands.length}개 — 선택하세요</span>
+        <select data-manual="${key}"><option value="">(제외)</option>${x.cands.map(c=>`<option value="${c.name.replace(/"/g,'&quot;')}" ${manual[key]===c.name?'selected':''}>${c.name} · ${c.attr.slice(0,30)}</option>`).join('')}</select></div>`;
+    });
+    m.conflicts.forEach(c=>{
+      const key=slot+'|'+norm(c.name);
+      issueHTML+=`<div class="item"><span class="tag warn">단가상이</span><b>${c.name}</b>
+        <select data-conflict="${key}">${c.prices.map(p=>`<option value="${p}" ${conflictPick[key]===p?'selected':''}>${p.toLocaleString()}원</option>`).join('')}</select>
+        <span style="color:var(--mu)">같은 품목이 다른 단가로 두 번 적혀 있어요</span></div>`;
+    });
+  });
+  $('#summary').innerHTML=sumHTML;
+  $('#issues').innerHTML=issueHTML||'<p class="help">🎉 확인할 항목이 없어요 — 바로 파일을 만들면 돼요!</p>';
+
+  $$('#issues [data-manual]').forEach(el=>{
+    el.onchange=()=>{const v=el.value.trim();if(v)manual[el.dataset.manual]=v;else delete manual[el.dataset.manual];};
+  });
+  $$('#issues [data-conflict]').forEach(el=>{
+    el.onchange=()=>{conflictPick[el.dataset.conflict]=parseFloat(el.value);};
+  });
+}
+
+/* ── 파일 생성 ── */
+$('#dl').onclick=()=>{
+  if(!neisWB)return;
+  let filled=0;
+  vendors.forEach((v,slot)=>{
+    if(!v)return;
+    const col=8+slot; /* I=8, J=9, K=10 */
+    const priceFor={};
+    Object.entries(v.m.map).forEach(([k,p])=>{
+      const key=slot+'|'+k;
+      priceFor[k]=(conflictPick[key]!==undefined)?conflictPick[key]:p;
+    });
+    /* 자동 매칭 (1:1) */
+    Object.entries(priceFor).forEach(([k,p])=>{
+      const cands=byName[k]||[];
+      if(cands.length===1){
+        neisSheet[XLSX.utils.encode_cell({r:cands[0].idx,c:col})]={t:'n',v:p};filled++;
+      }
+    });
+    /* 수동 연결 + 동명 선택 */
+    v.items.forEach(it=>{
+      const key=slot+'|'+norm(it.name);
+      const target=manual[key];
+      if(!target)return;
+      const t=neis.find(n=>n.name===target);
+      if(t){
+        const p=(conflictPick[key]!==undefined)?conflictPick[key]:it.price;
+        neisSheet[XLSX.utils.encode_cell({r:t.idx,c:8+slot})]={t:'n',v:p};filled++;
+      }
+    });
+  });
+  const d=new Date(),pad=n=>String(n).padStart(2,'0');
+  XLSX.writeFile(neisWB, `시장조사자료등록_업로드_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.xlsx`);
+  alert(`✅ 완료! 조사가 ${filled}칸을 채웠어요.\n내려받은 파일을 나이스에 업로드하세요.`);
+};
+
+$('#reset').onclick=()=>location.reload();
+</script>
+<script src="/sori-gate.js"></script>
+</body>
+</html>
