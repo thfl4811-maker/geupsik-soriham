@@ -258,7 +258,7 @@ const CATS = [
       { featured:true, featOrder:2, featName:'스마트 월간식단 뷰어', featCat:'식단 기획·급식 운영', name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
       { featured:true, featOrder:3, featCat:'식단 기획·급식 운영', name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
       { featured:true, featOrder:4, featCat:'식단 기획·급식 운영', name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
-      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:null, tier:2 },
+      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2 },
       { name:'추천 식단', desc:'아카이브 데이터 기반 식단 추천', url:null, tier:2 },
     ]
   },
@@ -751,7 +751,7 @@ function renderHub() {
     <div class="idea-modal">
       <h3>💡 어플 아이디어 제안하기</h3>
       <p class="im-sub">"이런 앱이 있으면 좋겠어요!" 아이디어를 보내주시면 김소리 선생님에게 관리자 쪽지로 전달돼요.</p>
-      <div class="form-group"><label class="form-label">앱 이름(가제)</label><input class="form-input" id="ideaTitle" placeholder="예: 우유 급식 관리기" maxlength="60"></div>
+      <div class="form-group"><label class="form-label">앱 이름(가제)</label><input class="form-input" id="ideaTitle" placeholder="예: 발주량 계산기, AI 급식 업무 챗봇" maxlength="60"></div>
       <div class="form-group"><label class="form-label">어떤 앱인가요?</label><textarea id="ideaBody" rows="6" placeholder="어떤 업무가 힘든지, 앱이 무엇을 해주면 좋을지 자유롭게 적어주세요. 자세할수록 채택 확률이 올라가요!" maxlength="2000"></textarea></div>
       <div class="idea-credit">🏅 아이디어가 채택되면 실제 앱으로 개발하고 <b>"○○○ 선생님의 아이디어로 만들었습니다!"</b>라고 소개해요. 제안해 주신 선생님께는 <b>원하시는 회차의 강의자료</b>와 해당 앱의 개발·활용 자료를 열람하실 수 있도록 제공해 드려요. (자료의 개인 판매·전달은 하지 않습니다)</div>
       <div id="ideaStatus" style="font-size:12.5px;margin-bottom:8px;"></div>
