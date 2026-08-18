@@ -492,7 +492,7 @@ bindDrop($('#dropF2'), $('#fileF2'), async file=>{
       if(both[b]===undefined)both[b]=it.price;
       (byName[n]=byName[n]||[]).push(it.price);
     });
-    quote={both,byName,count:items.length,file:file.name};
+    quote={both,byName,items,count:items.length,file:file.name};
     $('#fnF2').innerHTML=`<span class="badge">✅ ${file.name} · ${items.length}품목</span>`;
     fillRefresh();
   }catch(e){ quote=null; $('#fnF2').innerHTML=`<span class="badge err">${e.message}</span>`; }
@@ -572,7 +572,23 @@ async function fillRefresh(){
         <span>병합 ${ws.model.merges?ws.model.merges.length:0}개 유지</span></div>`
       + (miss.length?`<p class="help" style="color:var(--danger)">❌ 견적서에 없는 품목 — ${[...new Set(miss)].slice(0,10).join(', ')}${miss.length>10?' 외 '+(miss.length-10)+'건':''}</p>`:'')
       + (ambiguous.length?`<p class="help" style="color:#b45309">⚠️ 같은 이름에 단가가 여러 개라 첫 번째 값을 썼어요 — ${[...new Set(ambiguous)].slice(0,8).join(', ')} (속성설명이 같으면 정확히 맞춰집니다)</p>`:'')
-      + `<div style="margin-top:12px"><a class="btn ok" id="dlFill" href="${url}" download="${base}_단가입력.xlsx">📥 채워진 현품설명서 내려받기</a></div>`;
+      + `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+           <a class="btn ok" id="dlFill" href="${url}" download="${base}_단가입력.xlsx">📥 채워진 현품설명서 내려받기</a>
+           <button class="btn" id="toSurvey">⬆️ 이 단가로 나이스 업로드 파일 만들기</button>
+         </div>
+         <p class="help">위 ②번 칸에 다시 올리실 필요 없어요 — 오른쪽 버튼을 누르면 <b>조사가1</b>에 그대로 들어갑니다.</p>`;
+    $('#toSurvey').onclick=()=>{
+      vendors[0]={file:quote.file,items:quote.items};
+      const slot=document.querySelector('.slot[data-slot="0"]');
+      slot.querySelector('[data-fname]').innerHTML=`<span class="badge">✅ ${quote.file} · ${quote.items.length}품목</span>`;
+      refresh();
+      if(!neisWB){
+        alert('①번에 나이스 시장조사자료등록 파일을 먼저 올려주세요.\n단가는 조사가1에 넣어뒀습니다.');
+        $('#dropN').scrollIntoView({behavior:'smooth',block:'center'});
+      } else {
+        $('#resultCard').scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    };
   }catch(e){
     box.innerHTML=`<div class="badge err">${e.message}</div>`;
   }
