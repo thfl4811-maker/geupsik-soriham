@@ -67,8 +67,36 @@ h1{font-size:22px;margin:6px 0 4px}
 <div class="wrap">
   <h1>📊 나이스 시장조사 자동입력</h1>
   <p class="sub">나이스에서 내려받은 <b>시장조사자료등록</b> 파일과 업체가 단가를 적어 보낸 <b>현품설명서</b>를 올리면,
-  식품명으로 자동 매칭해서 <b>조사가1·2·3</b>이 채워진 나이스 업로드용 엑셀을 만들어 드려요.
+  식품명·속성으로 자동 매칭해서 <b>조사가1·2·3</b>과 <b>적용가</b>가 채워진 <b>나이스 업로드용 엑셀</b>을 만들어 드려요.
   (컴퓨터 안에서만 처리되고 서버로 전송되지 않아요)</p>
+
+  <div class="card fill">
+    <h2><span class="step" style="background:var(--ok)">0</span>견적서만 받으셨나요? — 현품설명서 채우기 <span class="mu">선택</span></h2>
+    <p class="help" style="margin:0 0 10px">업체가 <b>견적서만</b> 보내왔다면 여기서 먼저 <b>현품설명서에 단가를 옮겨 적어</b> 드려요 (원본 서식·병합 그대로).
+    채운 단가는 그대로 <b>아래 ①②③으로 이어져</b> 최종 <b>나이스 업로드 파일</b>이 됩니다.<br>
+    업체가 <b>현품설명서에 단가를 적어 보냈다면</b> 이 단계는 건너뛰고 바로 ①번부터 하세요.</p>
+    <div class="slots">
+      <div class="slot">
+        <h3>① 빈 현품설명서 양식 <span class="mu">.xlsx</span></h3>
+        <div class="drop small" id="dropF1">파일 올리기</div>
+        <input type="file" id="fileF1" accept=".xlsx" class="hidden">
+        <div class="fname" id="fnF1"></div>
+      </div>
+      <div class="slot">
+        <h3>② 업체 견적서 <span class="mu">또는 단가 적힌 현품</span></h3>
+        <div class="drop small" id="dropF2">파일 올리기</div>
+        <input type="file" id="fileF2" accept=".xls,.xlsx" class="hidden">
+        <div class="fname" id="fnF2"></div>
+      </div>
+    </div>
+    <div class="seg" style="margin-top:12px">
+      <span class="seglabel">단가를 어디에 적을까요?</span>
+      <button type="button" data-mode="insert" class="on">단가·총금액 열 추가</button>
+      <button type="button" data-mode="spec">규격 칸에 단가만</button>
+    </div>
+    <p class="help" id="modeHelp" style="margin:8px 0 0"></p>
+    <div id="fillResult"></div>
+  </div>
 
   <div class="card">
     <h2><span class="step">1</span>나이스 시장조사자료등록 파일</h2>
@@ -153,33 +181,6 @@ h1{font-size:22px;margin:6px 0 4px}
       <p class="help" style="margin-top:8px">💡 예정단가가 품의에 안 붙으면 <b>공통식품코드·규격·단위</b>가 예정단가등록 식품과 품의 식품 사이에 어긋난 경우예요.
       이번에 조사하지 않은 품목은 <b>예전 조사일자의 단가</b>가 그대로 남아 있으니 조사일자도 함께 확인하세요.</p>
     </details>
-  </div>
-
-  <div class="card fill">
-    <h2>🔄 견적서 → 현품설명서 채우기</h2>
-    <p class="help" style="margin:0 0 10px">업체 견적서를 보고 <b>현품설명서에 단가를 옮겨 적는 일</b>을 대신해 드려요.
-    식품명끼리 맞춰서 채우고, <b>원본 서식·병합은 그대로</b> 둡니다. 위 시장조사와는 따로 쓰셔도 돼요.</p>
-    <div class="slots">
-      <div class="slot">
-        <h3>① 빈 현품설명서 양식 <span class="mu">.xlsx</span></h3>
-        <div class="drop small" id="dropF1">파일 올리기</div>
-        <input type="file" id="fileF1" accept=".xlsx" class="hidden">
-        <div class="fname" id="fnF1"></div>
-      </div>
-      <div class="slot">
-        <h3>② 업체 견적서 <span class="mu">또는 단가 적힌 현품</span></h3>
-        <div class="drop small" id="dropF2">파일 올리기</div>
-        <input type="file" id="fileF2" accept=".xls,.xlsx" class="hidden">
-        <div class="fname" id="fnF2"></div>
-      </div>
-    </div>
-    <div class="seg" style="margin-top:12px">
-      <span class="seglabel">단가를 어디에 적을까요?</span>
-      <button type="button" data-mode="insert" class="on">단가·총금액 열 추가</button>
-      <button type="button" data-mode="spec">규격 칸에 단가만</button>
-    </div>
-    <p class="help" id="modeHelp" style="margin:8px 0 0"></p>
-    <div id="fillResult"></div>
   </div>
 
   <p class="footer">급식"소리"함 · 시장조사 자동입력 β — 문의: geupsik-soriham.vercel.app</p>
@@ -316,11 +317,30 @@ $$('.slot[data-slot]').forEach(slot=>{
   });
 });
 
+/* ── 속성 비교 ──
+   같은 식품명이 단가만 다르게 두 번 적힌 경우(간장(재래간장) 3,960 / 6,820 등)
+   나이스 '공통식품속성'과 업체 '속성설명'을 견줘 맞는 쪽을 고른다.
+   나이스 속성은 앞에 '1000g/kg/' 같은 규격이 붙어 있어 떼어내고 비교한다. */
+const stripSpec=s=>norm(s).replace(/^[\d.]+(g|kg|ml|l)\/(kg|l|g|ml)\//i,'');
+function attrScore(a,b){
+  a=stripSpec(a); b=stripSpec(b);
+  if(!a||!b) return 0;
+  if(a===b) return 1000;                      /* 글자까지 같으면 확정 */
+  let hit=0; for(let i=0;i<a.length-1;i++) if(b.indexOf(a.substr(i,2))>=0) hit++;
+  return hit/Math.max(1,a.length-1);          /* 두 글자씩 겹치는 비율 */
+}
+function bestByAttr(neisAttr,cands){
+  let best=cands[0], bs=-1;
+  cands.forEach(c=>{ const s=attrScore(neisAttr,c.attr); if(s>bs){bs=s;best=c;} });
+  return {pick:best,score:bs};
+}
+
 /* ── 매칭 ── */
 function matchVendor(v,slot){
-  const un=[],multi=[],conflicts=[],map={};/* normName -> price */
+  const un=[],multi=[],conflicts=[],map={},pool={};/* normName -> price / [{price,attr}] */
   v.items.forEach(it=>{
     const k=norm(it.name);
+    (pool[k]=pool[k]||[]).push({price:it.price,attr:it.attr||''});
     if(map[k]!==undefined && map[k]!==it.price){
       if(!conflicts.find(c=>norm(c.name)===k))conflicts.push({name:it.name,prices:[map[k],it.price]});
       else{const c=conflicts.find(c=>norm(c.name)===k);if(!c.prices.includes(it.price))c.prices.push(it.price);}
@@ -330,7 +350,7 @@ function matchVendor(v,slot){
     if(cands.length===0){if(!un.find(u=>norm(u.name)===k))un.push(it);}
     else if(cands.length>1){if(!multi.find(m=>norm(m.it.name)===k))multi.push({it,cands});}
   });
-  return {map,un,multi,conflicts,matchedCount:Object.keys(map).filter(k=>(byName[k]||[]).length>=1).length};
+  return {map,pool,un,multi,conflicts,matchedCount:Object.keys(map).filter(k=>(byName[k]||[]).length>=1).length};
 }
 
 function refresh(){
@@ -352,10 +372,20 @@ function refresh(){
         <select data-manual="${key}"><option value="">(제외)</option>${x.cands.map(c=>`<option value="${c.name.replace(/"/g,'&quot;')}" ${manual[key]===c.name?'selected':''}>${c.name} · ${c.attr.slice(0,30)}</option>`).join('')}</select></div>`;
     });
     m.conflicts.forEach(c=>{
-      const key=slot+'|'+norm(c.name);
+      const k=norm(c.name), key=slot+'|'+k;
+      const nm=(byName[k]||[])[0];                       /* 나이스 쪽 같은 품목 */
+      const list=m.pool[k]||[];
+      const {pick,score}=bestByAttr(nm?nm.attr:'',list);
+      const auto=score>=1000;
       issueHTML+=`<div class="item"><span class="tag warn">단가상이</span><b>${c.name}</b>
-        <select data-conflict="${key}">${c.prices.map(p=>`<option value="${p}" ${conflictPick[key]===p?'selected':''}>${p.toLocaleString()}원</option>`).join('')}</select>
-        <span style="color:var(--mu)">같은 품목이 다른 단가로 두 번 적혀 있어요</span></div>`;
+        <select data-conflict="${key}">${list.map(x=>{
+          const sel=(conflictPick[key]!==undefined?conflictPick[key]===x.price:x.price===pick.price);
+          const mark=(x.price===pick.price&&auto)?'★ 속성 일치 · ':'';
+          return `<option value="${x.price}" ${sel?'selected':''}>${mark}${x.price.toLocaleString()}원 · ${(x.attr||'속성 없음').slice(0,40)}</option>`;
+        }).join('')}</select>
+        <span style="color:var(--mu)">${auto?'나이스 속성과 같은 것을 골라뒀어요':'속성이 딱 맞는 게 없어요 — 확인해 주세요'}
+        ${nm?`<br><span style="font-size:11.5px">나이스 속성: ${nm.attr.slice(0,60)}</span>`:''}</span></div>`;
+      if(conflictPick[key]===undefined) conflictPick[key]=pick.price;   /* 자동 선택을 기본값으로 */
     });
   });
   /* 나이스 파일과 업체 파일의 품목이 전혀 안 겹치면(예: 공산 나이스 파일에 김치 견적서)
@@ -624,11 +654,11 @@ async function fillRefresh(){
         <span>병합 ${ws.model.merges?ws.model.merges.length:0}개 유지</span></div>`
       + (miss.length?`<p class="help" style="color:var(--danger)">❌ 견적서에 없는 품목 — ${[...new Set(miss)].slice(0,10).join(', ')}${miss.length>10?' 외 '+(miss.length-10)+'건':''}</p>`:'')
       + (ambiguous.length?`<p class="help" style="color:#b45309">⚠️ 같은 이름에 단가가 여러 개라 첫 번째 값을 썼어요 — ${[...new Set(ambiguous)].slice(0,8).join(', ')} (속성설명이 같으면 정확히 맞춰집니다)</p>`:'')
-      + `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
-           <a class="btn ok" id="dlFill" href="${url}" download="${base}_단가입력.xlsx">📥 채워진 현품설명서 내려받기</a>
-           <button class="btn" id="toSurvey">⬆️ 이 단가로 나이스 업로드 파일 만들기</button>
+      + `<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+           <button class="btn ok" id="toSurvey">이 단가로 계속 → 나이스 업로드 파일 만들기</button>
+           <a class="btn ghost" id="dlFill" href="${url}" download="${base}_단가입력.xlsx">📥 현품설명서 내려받기 <span class="mu">학교 보관용</span></a>
          </div>
-         <p class="help">위 ②번 칸에 다시 올리실 필요 없어요 — 오른쪽 버튼을 누르면 <b>조사가1</b>에 그대로 들어갑니다.</p>`;
+         <p class="help">②번 칸에 다시 올리실 필요 없어요 — 왼쪽 버튼을 누르면 <b>조사가1</b>에 그대로 들어갑니다.</p>`;
     $('#toSurvey').onclick=()=>{
       vendors[0]={file:quote.file,items:quote.items};
       const slot=document.querySelector('.slot[data-slot="0"]');
