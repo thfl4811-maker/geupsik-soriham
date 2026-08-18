@@ -11,23 +11,24 @@
 body{font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:#172033;padding:18px}
 .wrap{max-width:1040px;margin:0 auto}
 h1{font-size:22px;margin:6px 0 4px}
-.sub{color:var(--mu);font-size:13.5px;margin-bottom:16px;word-break:keep-all}
+.sub{color:var(--mu);font-size:13.5px;margin-bottom:16px;word-break:keep-all;line-height:1.7}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
 .card h2{font-size:16px;margin-bottom:10px}
 .step{display:inline-block;background:var(--primary);color:#fff;border-radius:999px;font-size:12px;font-weight:900;padding:2px 10px;margin-right:6px}
 .drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mu);cursor:pointer;transition:.15s;font-size:14px}
 .drop:hover,.drop.on{border-color:var(--primary);color:var(--primary);background:#f6f7ff}
 .drop b{color:#172033}
-.badge{display:inline-block;background:#e8f6ef;color:var(--ok);border:1px solid #bfe6d4;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;margin-top:10px}
+.badge{display:inline-block;background:#e8f6ef;color:var(--ok);border:1px solid #bfe6d4;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;margin-top:10px;margin-right:6px}
 .badge.warn{background:#fff6ed;color:var(--warn);border-color:#fcd9a8}
 .badge.err{background:#fdf0f0;color:var(--danger);border-color:#f3c1c1}
 .btn{display:inline-block;background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit}
-.btn:disabled{opacity:.4;cursor:not-allowed}
 .btn.ghost{background:#fff;color:#374151;border:1px solid var(--line)}
 .btn.small{padding:7px 12px;font-size:12.5px;border-radius:8px}
 .btn.ok{background:var(--ok)}
 .help{font-size:12.5px;color:var(--mu);margin-top:8px;word-break:keep-all;line-height:1.7}
 .hidden{display:none}
+.flist{font-size:12.5px;color:var(--mu);margin-top:8px;line-height:1.9}
+.flist b{color:#172033}
 table.sum{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
 table.sum th,table.sum td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}
 table.sum th{color:var(--mu);font-size:12px;font-weight:700}
@@ -41,7 +42,7 @@ details.blk.err{border-color:#f3c1c1;background:#fdf5f5}
 .item{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding:8px 0;font-size:13px}
 .item:first-of-type{border-top:0}
 .tag{font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;flex:none;background:#eef0ff;color:var(--primary)}
-.item select,.item input[list]{padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;min-width:250px;flex:1;font-family:inherit}
+.item select,.item input[list]{padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;min-width:230px;flex:1;font-family:inherit}
 .diffrow{display:grid;grid-template-columns:64px 1fr 96px 96px 92px;gap:8px;font-size:12.5px;padding:5px 0;border-top:1px solid var(--line);align-items:center}
 .diffrow.head{font-weight:800;color:var(--mu);border-top:0}
 .diffrow .r{text-align:right}
@@ -56,29 +57,32 @@ details.blk.err{border-color:#f3c1c1;background:#fdf5f5}
 <body>
 <div class="wrap">
   <h1>🧾 계약단가 · 검수단가 자동 매칭</h1>
-  <p class="sub"><b>계약단가표</b>와 나이스 <b>식재료검수처리</b> 파일을 올리면, <b>식품코드</b>로 대조해서 검수단가를 계약단가로 맞춰 드려요.
-  업체(시트)별 업로드 파일까지 따로 만들어 줍니다. (컴퓨터 안에서만 처리되고 서버로 전송되지 않아요)</p>
+  <p class="sub"><b>계약단가표</b>와 나이스 <b>식재료검수처리</b> 파일을 올리면, <b>식품코드</b>로 대조해 검수단가를 계약단가로 맞춰 드려요.<br>
+  파일·시트가 흩어져 있어도 <b>하나로 합친 뒤</b>, 계약단가표를 보고 <b>품목별 업체군을 자동으로 찾아</b> 업체군별 업로드 파일로 다시 나눠 줍니다.
+  (컴퓨터 안에서만 처리되고 서버로 전송되지 않아요)</p>
 
   <div class="card">
     <h2><span class="step">1</span>계약단가표</h2>
     <div class="drop" id="dropC"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 공산·농산·축산·수산·김치·쌀 시트가 든 .xlsx</div>
     <input type="file" id="fileC" accept=".xlsx,.xls" class="hidden">
     <div id="statC"></div>
+    <p class="help">여기 있는 <b>시트 이름이 곧 업체군</b>이 됩니다. 검수 품목의 코드가 어느 시트에 있는지로 업체군을 자동 판별해요.</p>
   </div>
 
   <div class="card">
-    <h2><span class="step">2</span>식재료검수처리 파일</h2>
-    <div class="drop" id="dropG"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 나이스 [식재료검수처리]에서 내려받은 .xlsx</div>
-    <input type="file" id="fileG" accept=".xlsx,.xls" class="hidden">
+    <h2><span class="step">2</span>식재료검수처리 파일 <span style="font-size:12.5px;font-weight:600;color:var(--mu)">— 여러 개 한꺼번에 올려도 돼요</span></h2>
+    <div class="drop" id="dropG"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 나이스 [식재료검수처리]에서 내려받은 .xlsx (여러 개 선택 가능)</div>
+    <input type="file" id="fileG" accept=".xlsx,.xls" multiple class="hidden">
     <div id="statG"></div>
+    <div class="flist" id="flist"></div>
     <details class="guide">
       <summary>📌 나이스에서 검수처리 파일 내려받는 법</summary>
       <ol>
         <li>[식단] → <b>식재료검수처리</b> → 검수일자 범위 선택 → <b>조회</b></li>
         <li>식품 <b>전체선택</b> → <b>자료내려받기</b></li>
-        <li>업체군(공산·농산·축산·수산·김치 등)별로 따로 받으셨다면, 파일을 하나씩 올려서 각각 처리하시면 돼요</li>
+        <li>업체군별로 나눠 받으셨다면 <b>받은 파일을 전부 한 번에</b> 올리세요 — 알아서 합칩니다</li>
       </ol>
-      <p class="note">계약단가표는 학교장터(에듀파인) 낙찰 결과에서 받은 <b>①입찰수량 · ②입찰단가 · ③입찰금액</b> 형식 그대로면 됩니다.</p>
+      <p class="note">한 장으로 받아도 괜찮아요. 계약단가표를 보고 품목마다 업체군을 찾아 다시 나눠 줍니다.</p>
     </details>
   </div>
 
@@ -88,7 +92,7 @@ details.blk.err{border-color:#f3c1c1;background:#fdf5f5}
     <div id="issues"></div>
     <div id="diffs"></div>
     <div class="dls" id="dls"></div>
-    <p class="help">시트(업체군)별 파일을 나이스 <b>[식재료검수처리 → 자료올리기]</b>에 각각 올리시면 됩니다.
+    <p class="help">업체군별 파일을 나이스 <b>[식재료검수처리 → 자료올리기]</b>에 각각 올리시면 됩니다.
     올리기 전에 <b>단가 0인 품목</b>이 남아 있지 않은지 꼭 확인하세요.</p>
     <div style="margin-top:12px"><button class="btn ghost small" id="reset">처음부터</button></div>
   </div>
@@ -101,18 +105,18 @@ details.blk.err{border-color:#f3c1c1;background:#fdf5f5}
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const norm=s=>String(s==null?'':s).replace(/\s/g,'').trim();
-const code=v=>{ // 코드 정규화: 숫자로 읽힌 경우 지수표기·소수점 제거
+const codeOf=v=>{
   if(v==null)return '';
   let s=String(v).trim();
   if(/e\+/i.test(s)&&isFinite(v))s=BigInt(Math.round(Number(v))).toString();
   return s.replace(/\.0+$/,'').replace(/[^0-9]/g,'');
 };
 const won=n=>(typeof n==='number'&&isFinite(n))?n.toLocaleString(undefined,{maximumFractionDigits:2}):'—';
+const UNSET='미분류';
 
-let conWB=null, conMap={}, conList=[];      /* 계약: 코드 -> {name,prices:[{price,sheet}]} */
-let gWB=null, gSheets=[];                    /* 검수: [{name, rows:[{r,code,name,cur}], codeCol,priceCol}] */
-const dupPick={};                            /* 코드 -> 고른 단가 */
-const manual={};                             /* 시트|행 -> 계약 품목명 */
+let conMap={}, conList=[], conSheets=[];
+let header=null, items=[], files=[], dropped=0;
+const dupPick={}, manual={}, groupFix={};
 
 function readWB(file){
   return new Promise((res,rej)=>{
@@ -125,10 +129,9 @@ function bindDrop(el,input,handler){
   el.onclick=()=>input.click();
   el.ondragover=e=>{e.preventDefault();el.classList.add('on');};
   el.ondragleave=()=>el.classList.remove('on');
-  el.ondrop=e=>{e.preventDefault();el.classList.remove('on');if(e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);};
-  input.onchange=()=>{if(input.files[0])handler(input.files[0]);};
+  el.ondrop=e=>{e.preventDefault();el.classList.remove('on');if(e.dataTransfer.files.length)handler([...e.dataTransfer.files]);};
+  input.onchange=()=>{if(input.files.length)handler([...input.files]);};
 }
-/* 헤더 행 찾기 — 앞쪽 20행에서 조건을 만족하는 행 */
 function findHeader(rows,test){
   for(let i=0;i<Math.min(20,rows.length);i++){
     const cells=(rows[i]||[]).map(norm);
@@ -139,12 +142,13 @@ function findHeader(rows,test){
 }
 
 /* ── 1. 계약단가표 ── */
-bindDrop($('#dropC'),$('#fileC'),async file=>{
+bindDrop($('#dropC'),$('#fileC'),async fs=>{
+  const file=fs[0];
   try{
-    conWB=await readWB(file); conMap={}; conList=[];
-    let sheetsOK=0,total=0;
-    conWB.SheetNames.forEach(sn=>{
-      const rows=XLSX.utils.sheet_to_json(conWB.Sheets[sn],{header:1});
+    const wb=await readWB(file); conMap={}; conList=[]; conSheets=[];
+    let sheetsOK=0;
+    wb.SheetNames.forEach(sn=>{
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1});
       const h=findHeader(rows,cells=>{
         const c=cells.indexOf('식품공통코드');
         if(c<0)return null;
@@ -154,176 +158,192 @@ bindDrop($('#dropC'),$('#fileC'),async file=>{
         return {c,p,n:cells.indexOf('식품공통코드명')};
       });
       if(!h)return;
-      sheetsOK++;
+      sheetsOK++; conSheets.push(sn);
       for(let i=h.row+1;i<rows.length;i++){
-        const r=rows[i]||[]; const cd=code(r[h.idx.c]);
+        const r=rows[i]||[]; const cd=codeOf(r[h.idx.c]);
         if(!cd||cd.length<6)continue;
         const price=parseFloat(String(r[h.idx.p]==null?'':r[h.idx.p]).replace(/,/g,''));
         if(!isFinite(price))continue;
         const name=String((h.idx.n>=0?r[h.idx.n]:'')||'').trim();
         if(!conMap[cd])conMap[cd]={name,prices:[]};
         if(!conMap[cd].name&&name)conMap[cd].name=name;
-        if(!conMap[cd].prices.some(x=>x.price===price))conMap[cd].prices.push({price,sheet:sn});
-        total++;
+        if(!conMap[cd].prices.some(x=>x.price===price&&x.sheet===sn))conMap[cd].prices.push({price,sheet:sn});
       }
     });
     conList=Object.entries(conMap).map(([cd,v])=>({cd,name:v.name}));
-    if(!sheetsOK){$('#statC').innerHTML='<div class="badge err">⚠️ 계약단가표가 아닌 것 같아요 (‘식품 공통코드’·‘입찰단가’ 열을 못 찾았어요)</div>';conWB=null;return;}
+    if(!sheetsOK){$('#statC').innerHTML='<div class="badge err">⚠️ 계약단가표가 아닌 것 같아요 (‘식품 공통코드’·‘입찰단가’ 열을 못 찾았어요)</div>';conMap={};return;}
     const dups=Object.values(conMap).filter(v=>v.prices.length>1).length;
-    $('#statC').innerHTML=`<div class="badge">✅ ${file.name} — 시트 ${sheetsOK}개 · 계약 품목 ${Object.keys(conMap).length}개</div>`
-      +(dups?`<div class="badge warn">같은 코드에 단가가 여러 개인 품목 ${dups}건 — 아래에서 골라주세요</div>`:'');
+    $('#statC').innerHTML=`<div class="badge">✅ ${file.name} — 업체군 ${sheetsOK}개(${conSheets.join('·')}) · 계약 품목 ${conList.length}개</div>`
+      +(dups?`<div class="badge warn">같은 코드가 여러 번 등장 ${dups}건 — 아래에서 골라주세요</div>`:'');
     $('#conList').innerHTML=conList.map(c=>`<option value="${(c.name||c.cd).replace(/"/g,'&quot;')}">`).join('');
     refresh();
   }catch(e){$('#statC').innerHTML=`<div class="badge err">읽기 실패: ${e.message}</div>`;}
 });
 
-/* ── 2. 검수처리 파일 ── */
-bindDrop($('#dropG'),$('#fileG'),async file=>{
+/* ── 2. 검수처리 파일 (여러 개 → 하나로 합치기) ── */
+bindDrop($('#dropG'),$('#fileG'),async fs=>{
   try{
-    gWB=await readWB(file); gSheets=[];
-    gWB.SheetNames.forEach(sn=>{
-      const rows=XLSX.utils.sheet_to_json(gWB.Sheets[sn],{header:1});
-      const h=findHeader(rows,cells=>{
-        const c=cells.indexOf('학교식품코드');
-        if(c<0)return null;
-        let p=cells.indexOf('단가');
-        if(p<0)p=cells.findIndex(v=>v.indexOf('단가')>=0);
-        if(p<0)return null;
-        return {c,p,n:cells.indexOf('식품명'),g:cells.indexOf('규격')};
+    header=null; items=[]; files=[]; dropped=0;
+    const seen={};
+    for(const file of fs){
+      const wb=await readWB(file);
+      let n=0;
+      wb.SheetNames.forEach(sn=>{
+        const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1});
+        const h=findHeader(rows,cells=>{
+          const c=cells.indexOf('학교식품코드');
+          if(c<0)return null;
+          let p=cells.indexOf('단가');
+          if(p<0)p=cells.findIndex(v=>v.indexOf('단가')>=0);
+          if(p<0)return null;
+          return {c,p,n:cells.indexOf('식품명')};
+        });
+        if(!h)return;
+        if(!header)header={cells:(rows[h.row]||[]).slice(),idx:h.idx};
+        for(let i=h.row+1;i<rows.length;i++){
+          const r=rows[i]||[]; const cd=codeOf(r[h.idx.c]);
+          if(!cd||cd.length<6)continue;
+          if(seen[cd]){dropped++;continue;}
+          seen[cd]=1;
+          const cur=parseFloat(String(r[h.idx.p]==null?'':r[h.idx.p]).replace(/,/g,''));
+          items.push({code:cd,name:String((h.idx.n>=0?r[h.idx.n]:'')||'').trim(),
+                      cur:isFinite(cur)?cur:null, raw:r.slice(), srcSheet:sn, srcFile:files.length});
+          n++;
+        }
       });
-      if(!h)return;
-      const list=[];
-      for(let i=h.row+1;i<rows.length;i++){
-        const r=rows[i]||[]; const cd=code(r[h.idx.c]);
-        if(!cd||cd.length<6)continue;
-        const cur=parseFloat(String(r[h.idx.p]==null?'':r[h.idx.p]).replace(/,/g,''));
-        list.push({r:i,code:cd,name:String((h.idx.n>=0?r[h.idx.n]:'')||'').trim(),cur:isFinite(cur)?cur:null});
-      }
-      if(list.length)gSheets.push({name:sn,rows:list,codeCol:h.idx.c,priceCol:h.idx.p});
-    });
-    if(!gSheets.length){$('#statG').innerHTML='<div class="badge err">⚠️ 검수처리 파일이 아닌 것 같아요 (‘학교식품코드’·‘단가’ 열을 못 찾았어요)</div>';gWB=null;return;}
-    const n=gSheets.reduce((s,x)=>s+x.rows.length,0);
-    $('#statG').innerHTML=`<div class="badge">✅ ${file.name} — 시트 ${gSheets.length}개 · 검수 품목 ${n}개</div>`;
+      files.push({name:file.name,n});
+    }
+    if(!items.length){$('#statG').innerHTML='<div class="badge err">⚠️ 검수처리 파일이 아닌 것 같아요 (‘학교식품코드’·‘단가’ 열을 못 찾았어요)</div>';header=null;return;}
+    $('#statG').innerHTML=`<div class="badge">✅ 파일 ${files.length}개 합침 — 검수 품목 ${items.length}개</div>`
+      +(dropped?`<div class="badge warn">코드가 겹쳐 제외한 줄 ${dropped}개</div>`:'');
+    $('#flist').innerHTML=files.map(f=>`· <b>${f.name}</b> — ${f.n}품목`).join('<br>');
     refresh();
   }catch(e){$('#statG').innerHTML=`<div class="badge err">읽기 실패: ${e.message}</div>`;}
 });
 
-/* ── 계약단가 결정 ── */
-function conPrice(cd){
+/* ── 매칭 ── */
+function pick(cd){
   const e=conMap[cd]; if(!e)return null;
-  if(e.prices.length===1)return e.prices[0].price;
-  return (dupPick[cd]!==undefined)?dupPick[cd]:null; /* 중복은 고르기 전까지 보류 */
+  if(e.prices.length===1)return e.prices[0];
+  if(dupPick[cd]!==undefined)return e.prices.find(p=>p.price+'|'+p.sheet===dupPick[cd])||null;
+  return null;
 }
 function analyze(){
-  const out=[];
-  gSheets.forEach(sh=>{
-    let same=0,chg=0,un=0,hold=0; const diff=[],unm=[],zero=[];
-    sh.rows.forEach(row=>{
-      const key=sh.name+'|'+row.r;
-      const target=manual[key];
-      let np=null;
-      if(target){ const hit=conList.find(c=>(c.name||c.cd)===target); if(hit)np=conPrice(hit.cd); }
-      else np=conPrice(row.code);
-      const known=!!conMap[row.code]||!!target;
-      row.newPrice=np;
-      if(np==null){ if(known){hold++;} else {un++;unm.push(row);} }
-      else if(np===row.cur){same++;}
-      else {chg++;diff.push({...row,np});}
-      if(np===0||(np==null&&row.cur===0))zero.push(row);
-    });
-    out.push({sh,same,chg,un,hold,diff,unm,zero});
+  items.forEach(it=>{
+    const target=manual[it.code];
+    let hit=null, cd=it.code;
+    if(target){const c=conList.find(x=>(x.name||x.cd)===target); if(c){cd=c.cd;hit=pick(cd);}}
+    else hit=pick(cd);
+    it.known = !!conMap[cd] || !!target;
+    it.np = hit?hit.price:null;
+    /* 업체군 결정: ① 수동지정 ② 매칭된 계약 시트 ③ 단가는 못 골랐어도 계약 시트가 하나뿐이면 그것
+       ④ 원본 시트명이 계약 시트명과 같으면 그것 — 없으면 아래에서 파일 다수결로 채움 */
+    let g=groupFix[it.code];
+    if(!g&&hit)g=hit.sheet;
+    if(!g&&conMap[cd]){const ss=[...new Set(conMap[cd].prices.map(p=>p.sheet))];if(ss.length===1)g=ss[0];}
+    if(!g&&conSheets.includes(it.srcSheet))g=it.srcSheet;
+    it.group=g||null;
   });
-  return out;
+  /* 계약에 없는 품목은 같은 파일에서 판별된 업체군을 물려받음 (예: 공산 파일의 신규 품목 → 공산) */
+  const vote={};
+  items.forEach(it=>{ if(it.group){vote[it.srcFile]=vote[it.srcFile]||{}; vote[it.srcFile][it.group]=(vote[it.srcFile][it.group]||0)+1;} });
+  const major={};
+  Object.entries(vote).forEach(([f,m])=>{ major[f]=Object.entries(m).sort((a,b)=>b[1]-a[1])[0][0]; });
+  items.forEach(it=>{ if(!it.group)it.group=major[it.srcFile]||UNSET; it.inherited=!conMap[it.code]&&!groupFix[it.code]; });
+  const groups={};
+  items.forEach(it=>{(groups[it.group]=groups[it.group]||[]).push(it);});
+  return groups;
 }
 
 function refresh(){
-  if(!conWB||!gWB){$('#resultCard').classList.add('hidden');return;}
+  if(!conList.length||!header){$('#resultCard').classList.add('hidden');return;}
   $('#resultCard').classList.remove('hidden');
-  const res=analyze();
-  const T=(k)=>res.reduce((s,x)=>s+x[k],0);
-  const totRows=gSheets.reduce((s,x)=>s+x.rows.length,0);
+  const groups=analyze();
+  const order=[...conSheets.filter(s=>groups[s]),...Object.keys(groups).filter(g=>!conSheets.includes(g))];
+
+  const st=g=>{const l=groups[g];return{
+    n:l.length,
+    chg:l.filter(x=>x.np!=null&&x.np!==x.cur).length,
+    same:l.filter(x=>x.np!=null&&x.np===x.cur).length,
+    un:l.filter(x=>x.np==null&&!x.known).length,
+    hold:l.filter(x=>x.np==null&&x.known).length};};
+  const rows=order.map(g=>({g,...st(g)}));
+  const T=k=>rows.reduce((s,x)=>s+x[k],0);
 
   $('#summary').innerHTML=`<table class="sum">
-    <tr><th>시트(업체군)</th><th>품목</th><th>단가 변경</th><th>이미 일치</th><th>미매칭</th></tr>
-    ${res.map(r=>`<tr><td>${r.sh.name}</td><td>${r.sh.rows.length}</td>
+    <tr><th>업체군</th><th>품목</th><th>단가 변경</th><th>이미 일치</th><th>미매칭</th></tr>
+    ${rows.map(r=>`<tr><td>${r.g==UNSET?'❓ '+UNSET:r.g}</td><td>${r.n}</td>
       <td class="chg">${r.chg}</td><td>${r.same}</td>
       <td class="${r.un?'bad':''}">${r.un}${r.hold?` <span style="color:var(--warn)">+보류 ${r.hold}</span>`:''}</td></tr>`).join('')}
-    <tr style="font-weight:900"><td>합계</td><td>${totRows}</td><td class="chg">${T('chg')}</td><td>${T('same')}</td><td class="${T('un')?'bad':''}">${T('un')}</td></tr>
+    <tr style="font-weight:900"><td>합계</td><td>${T('n')}</td><td class="chg">${T('chg')}</td><td>${T('same')}</td><td class="${T('un')?'bad':''}">${T('un')}</td></tr>
   </table>`;
 
-  /* 확인이 필요한 것들 */
   let ih='';
-  const dupCodes=Object.entries(conMap).filter(([,v])=>v.prices.length>1);
-  const usedDup=dupCodes.filter(([cd])=>gSheets.some(sh=>sh.rows.some(r=>r.code===cd)));
-  if(usedDup.length){
-    ih+=`<details class="blk attn" open><summary>⚠️ 계약단가표에 같은 코드가 여러 번 — 어느 단가를 쓸지 골라주세요 (${usedDup.length}건)</summary>`;
-    usedDup.forEach(([cd,v])=>{
+  const dupUsed=Object.entries(conMap).filter(([cd,v])=>v.prices.length>1&&items.some(i=>i.code===cd));
+  if(dupUsed.length){
+    ih+=`<details class="blk attn" open><summary>⚠️ 계약단가표에 같은 코드가 여러 번 — 단가·업체군을 골라주세요 (${dupUsed.length}건)</summary>`;
+    dupUsed.forEach(([cd,v])=>{
       ih+=`<div class="item"><span class="tag">계약 중복</span><b>${v.name||cd}</b>
-        <select data-dup="${cd}"><option value="">(선택 전 — 이 품목은 변경 안 됨)</option>
-        ${v.prices.map(p=>`<option value="${p.price}" ${dupPick[cd]===p.price?'selected':''}>${won(p.price)}원 · ${p.sheet}</option>`).join('')}</select></div>`;
+        <select data-dup="${cd}"><option value="">(선택 전 — 변경 안 됨)</option>
+        ${v.prices.map(p=>{const k=p.price+'|'+p.sheet;return `<option value="${k}" ${dupPick[cd]===k?'selected':''}>${won(p.price)}원 · ${p.sheet}</option>`;}).join('')}</select></div>`;
     });
     ih+='</details>';
   }
-  const allUn=res.flatMap(r=>r.unm.map(x=>({sh:r.sh.name,x})));
-  if(allUn.length){
-    ih+=`<details class="blk err" open><summary>❌ 계약단가표에 없는 품목 (${allUn.length}건) — 필요하면 직접 연결하세요</summary>`;
-    allUn.forEach(({sh,x})=>{
-      const key=sh+'|'+x.r;
-      ih+=`<div class="item"><span class="tag">${sh}</span><b>${x.name||x.code}</b>
+  const un=items.filter(x=>x.np==null&&!x.known);
+  if(un.length){
+    ih+=`<details class="blk err" open><summary>❌ 계약단가표에 없는 품목 (${un.length}건) — 연결하거나 업체군을 지정하세요</summary>`;
+    un.forEach(x=>{
+      ih+=`<div class="item"><span class="tag">${x.group==UNSET?'미분류':x.group}</span><b>${x.name||x.code}</b>
         <span style="color:var(--mu)">현재 ${won(x.cur)}원</span>
-        <input list="conList" placeholder="계약 품목 검색해 연결 (비우면 그대로 둠)" data-manual="${key}" value="${manual[key]||''}"></div>`;
+        <input list="conList" placeholder="계약 품목 검색해 연결" data-manual="${x.code}" value="${manual[x.code]||''}">
+        <select data-group="${x.code}"><option value="">업체군 그대로(${x.group})</option>
+        ${conSheets.map(s=>`<option value="${s}" ${groupFix[x.code]===s?'selected':''}>${s}(으)로 보내기</option>`).join('')}</select></div>`;
     });
     ih+='</details>';
   }
-  const zeros=res.flatMap(r=>r.sh.rows.filter(x=>x.newPrice===0||(x.newPrice==null&&(x.cur===0||(x.cur!=null&&x.cur<100)))).map(x=>({sh:r.sh.name,x})));
+  const zeros=items.filter(x=>{const v=(x.np==null?x.cur:x.np);return v===0||(typeof v==='number'&&v<100);});
   if(zeros.length){
     ih+=`<details class="blk attn"><summary>🔎 단가가 0이거나 비정상적으로 낮은 품목 (${zeros.length}건) — 나이스 올리기 전 확인</summary>`
-      +zeros.map(({sh,x})=>`<div class="item"><span class="tag">${sh}</span><b>${x.name||x.code}</b>
-        <span style="color:var(--mu)">검수 ${won(x.cur)}원 → 적용 ${won(x.newPrice==null?x.cur:x.newPrice)}원</span></div>`).join('')+'</details>';
+      +zeros.map(x=>`<div class="item"><span class="tag">${x.group}</span><b>${x.name||x.code}</b>
+        <span style="color:var(--mu)">검수 ${won(x.cur)}원 → 적용 ${won(x.np==null?x.cur:x.np)}원</span></div>`).join('')+'</details>';
   }
   $('#issues').innerHTML=ih;
 
-  /* 변경 내역 */
-  const allDiff=res.flatMap(r=>r.diff.map(d=>({sh:r.sh.name,d})));
-  $('#diffs').innerHTML = allDiff.length? `<details class="blk"><summary>📋 바뀌는 단가 전체 보기 (${allDiff.length}건)</summary>
-    <div class="diffrow head"><span>시트</span><span>식품명</span><span class="r">검수단가</span><span class="r">계약단가</span><span class="r">차액</span></div>
-    ${allDiff.map(({sh,d})=>`<div class="diffrow"><span>${sh}</span><span>${d.name||d.code}</span>
+  const diff=items.filter(x=>x.np!=null&&x.np!==x.cur);
+  $('#diffs').innerHTML = diff.length? `<details class="blk"><summary>📋 바뀌는 단가 전체 보기 (${diff.length}건)</summary>
+    <div class="diffrow head"><span>업체군</span><span>식품명</span><span class="r">검수단가</span><span class="r">계약단가</span><span class="r">차액</span></div>
+    ${diff.map(d=>`<div class="diffrow"><span>${d.group}</span><span>${d.name||d.code}</span>
       <span class="r">${won(d.cur)}</span><span class="r" style="font-weight:800">${won(d.np)}</span>
-      <span class="r" style="color:${d.np>(d.cur||0)?'var(--ok)':'var(--danger)'}">${(d.cur==null?'':(d.np-d.cur>0?'+':''))}${d.cur==null?'신규':won(d.np-d.cur)}</span></div>`).join('')}
+      <span class="r" style="color:${d.np>(d.cur||0)?'var(--ok)':'var(--danger)'}">${d.cur==null?'신규':(d.np-d.cur>0?'+':'')+won(d.np-d.cur)}</span></div>`).join('')}
     </details>`:'<p class="help">바뀔 단가가 없어요 — 이미 계약단가와 모두 일치합니다.</p>';
 
-  /* 내려받기 버튼 */
-  $('#dls').innerHTML = res.map((r,i)=>`<button class="btn ok small" data-dl="${i}">📥 ${r.sh.name}_업로드.xlsx</button>`).join('')
-    + `<button class="btn small" data-dlall="1">📦 전체 시트 내려받기</button>`;
+  $('#dls').innerHTML = order.map(g=>`<button class="btn ok small" data-dl="${g}">📥 ${g}_업로드.xlsx <span style="opacity:.75">(${groups[g].length})</span></button>`).join('')
+    + `<button class="btn small" data-dlall="1">📦 업체군별 전부 내려받기</button>`
+    + `<button class="btn ghost small" data-dlmerged="1">📄 합친 것 한 파일로</button>`;
 
-  $$('[data-dup]').forEach(el=>el.onchange=()=>{const v=el.value;if(v==='')delete dupPick[el.dataset.dup];else dupPick[el.dataset.dup]=parseFloat(v);refresh();});
+  $$('[data-dup]').forEach(el=>el.onchange=()=>{const v=el.value;if(v==='')delete dupPick[el.dataset.dup];else dupPick[el.dataset.dup]=v;refresh();});
   $$('[data-manual]').forEach(el=>el.onchange=()=>{const v=el.value.trim();if(v)manual[el.dataset.manual]=v;else delete manual[el.dataset.manual];refresh();});
-  $$('[data-dl]').forEach(el=>el.onclick=()=>download(+el.dataset.dl));
-  $$('[data-dlall]').forEach(el=>el.onclick=()=>{res.forEach((_,i)=>setTimeout(()=>download(i),i*450));});
+  $$('[data-group]').forEach(el=>el.onchange=()=>{const v=el.value;if(v)groupFix[el.dataset.group]=v;else delete groupFix[el.dataset.group];refresh();});
+  $$('[data-dl]').forEach(el=>el.onclick=()=>save(el.dataset.dl,groups[el.dataset.dl]));
+  $$('[data-dlall]').forEach(el=>el.onclick=()=>order.forEach((g,i)=>setTimeout(()=>save(g,groups[g]),i*450)));
+  $$('[data-dlmerged]').forEach(el=>el.onclick=()=>save('검수단가_전체',items));
 }
 
-/* ── 파일 생성 (시트별) ── */
-function applyPrices(){
-  let n=0;
-  analyze().forEach(r=>{
-    const ws=gWB.Sheets[r.sh.name];
-    r.sh.rows.forEach(row=>{
-      if(row.newPrice==null||row.newPrice===row.cur)return;
-      ws[XLSX.utils.encode_cell({r:row.r,c:r.sh.priceCol})]={t:'n',v:row.newPrice};
-      n++;
-    });
+/* ── 파일 생성 ── */
+function save(name,list){
+  const pc=header.idx.p;
+  const aoa=[header.cells.slice()];
+  list.forEach(it=>{
+    const r=it.raw.slice();
+    if(it.np!=null)r[pc]=it.np;
+    aoa.push(r);
   });
-  return n;
-}
-function download(i){
-  applyPrices();
-  const sn=gSheets[i].name;
-  const wb={SheetNames:[sn],Sheets:{[sn]:gWB.Sheets[sn]}};
-  /* 한글 파일명이 유지되도록 Blob + a[download] 로 직접 내려받기 */
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  const wb={SheetNames:[name],Sheets:{[name]:ws}};
   const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
   const url=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
   const a=document.createElement('a');
-  a.href=url; a.download=`${sn}_업로드.xlsx`;
+  a.href=url; a.download=`${name}_업로드.xlsx`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1500);
 }
