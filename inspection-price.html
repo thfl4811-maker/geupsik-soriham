@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>계약단가·검수단가 자동 매칭 — 급식"소리"함</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--primary:#5c63eb;--line:#e5e7ef;--mu:#6b7280;--bg:#f6f7fb;--danger:#dc2626;--ok:#0f6b4d;--warn:#b45309}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:#172033;padding:18px}
+.wrap{max-width:1040px;margin:0 auto}
+h1{font-size:22px;margin:6px 0 4px}
+.sub{color:var(--mu);font-size:13.5px;margin-bottom:16px;word-break:keep-all}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.card h2{font-size:16px;margin-bottom:10px}
+.step{display:inline-block;background:var(--primary);color:#fff;border-radius:999px;font-size:12px;font-weight:900;padding:2px 10px;margin-right:6px}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--mu);cursor:pointer;transition:.15s;font-size:14px}
+.drop:hover,.drop.on{border-color:var(--primary);color:var(--primary);background:#f6f7ff}
+.drop b{color:#172033}
+.badge{display:inline-block;background:#e8f6ef;color:var(--ok);border:1px solid #bfe6d4;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800;margin-top:10px}
+.badge.warn{background:#fff6ed;color:var(--warn);border-color:#fcd9a8}
+.badge.err{background:#fdf0f0;color:var(--danger);border-color:#f3c1c1}
+.btn{display:inline-block;background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:14.5px;font-weight:800;cursor:pointer;font-family:inherit}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:#fff;color:#374151;border:1px solid var(--line)}
+.btn.small{padding:7px 12px;font-size:12.5px;border-radius:8px}
+.btn.ok{background:var(--ok)}
+.help{font-size:12.5px;color:var(--mu);margin-top:8px;word-break:keep-all;line-height:1.7}
+.hidden{display:none}
+table.sum{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+table.sum th,table.sum td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:right}
+table.sum th{color:var(--mu);font-size:12px;font-weight:700}
+table.sum th:first-child,table.sum td:first-child{text-align:left;font-weight:800}
+td.chg{color:var(--primary);font-weight:800}
+td.bad{color:var(--danger);font-weight:800}
+details.blk{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px;background:#fbfbfe}
+details.blk summary{cursor:pointer;font-size:13.5px;font-weight:800;color:#374151}
+details.blk.attn{border-color:#fcd9a8;background:#fff9f1}
+details.blk.err{border-color:#f3c1c1;background:#fdf5f5}
+.item{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid var(--line);padding:8px 0;font-size:13px}
+.item:first-of-type{border-top:0}
+.tag{font-size:11px;font-weight:800;border-radius:6px;padding:2px 7px;flex:none;background:#eef0ff;color:var(--primary)}
+.item select,.item input[list]{padding:7px 9px;border:1px solid var(--line);border-radius:8px;font-size:12.5px;min-width:250px;flex:1;font-family:inherit}
+.diffrow{display:grid;grid-template-columns:64px 1fr 96px 96px 92px;gap:8px;font-size:12.5px;padding:5px 0;border-top:1px solid var(--line);align-items:center}
+.diffrow.head{font-weight:800;color:var(--mu);border-top:0}
+.diffrow .r{text-align:right}
+.dls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.footer{color:var(--mu);font-size:12px;text-align:center;margin:22px 0 8px}
+.guide{margin-top:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fbfbfe}
+.guide summary{cursor:pointer;font-size:13.5px;font-weight:800;color:#374151}
+.guide ol{margin:10px 0 0 18px;font-size:13px;line-height:1.85;word-break:keep-all}
+.guide .note{font-size:12.3px;color:var(--mu);line-height:1.6;margin:3px 0 6px;font-weight:400}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧾 계약단가 · 검수단가 자동 매칭</h1>
+  <p class="sub"><b>계약단가표</b>와 나이스 <b>식재료검수처리</b> 파일을 올리면, <b>식품코드</b>로 대조해서 검수단가를 계약단가로 맞춰 드려요.
+  업체(시트)별 업로드 파일까지 따로 만들어 줍니다. (컴퓨터 안에서만 처리되고 서버로 전송되지 않아요)</p>
+
+  <div class="card">
+    <h2><span class="step">1</span>계약단가표</h2>
+    <div class="drop" id="dropC"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 공산·농산·축산·수산·김치·쌀 시트가 든 .xlsx</div>
+    <input type="file" id="fileC" accept=".xlsx,.xls" class="hidden">
+    <div id="statC"></div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step">2</span>식재료검수처리 파일</h2>
+    <div class="drop" id="dropG"><b>클릭</b>하거나 파일을 끌어다 놓으세요 — 나이스 [식재료검수처리]에서 내려받은 .xlsx</div>
+    <input type="file" id="fileG" accept=".xlsx,.xls" class="hidden">
+    <div id="statG"></div>
+    <details class="guide">
+      <summary>📌 나이스에서 검수처리 파일 내려받는 법</summary>
+      <ol>
+        <li>[식단] → <b>식재료검수처리</b> → 검수일자 범위 선택 → <b>조회</b></li>
+        <li>식품 <b>전체선택</b> → <b>자료내려받기</b></li>
+        <li>업체군(공산·농산·축산·수산·김치 등)별로 따로 받으셨다면, 파일을 하나씩 올려서 각각 처리하시면 돼요</li>
+      </ol>
+      <p class="note">계약단가표는 학교장터(에듀파인) 낙찰 결과에서 받은 <b>①입찰수량 · ②입찰단가 · ③입찰금액</b> 형식 그대로면 됩니다.</p>
+    </details>
+  </div>
+
+  <div class="card hidden" id="resultCard">
+    <h2><span class="step">3</span>대조 결과</h2>
+    <div id="summary"></div>
+    <div id="issues"></div>
+    <div id="diffs"></div>
+    <div class="dls" id="dls"></div>
+    <p class="help">시트(업체군)별 파일을 나이스 <b>[식재료검수처리 → 자료올리기]</b>에 각각 올리시면 됩니다.
+    올리기 전에 <b>단가 0인 품목</b>이 남아 있지 않은지 꼭 확인하세요.</p>
+    <div style="margin-top:12px"><button class="btn ghost small" id="reset">처음부터</button></div>
+  </div>
+
+  <p class="footer">급식"소리"함 · 계약·검수단가 자동 매칭 β</p>
+</div>
+
+<datalist id="conList"></datalist>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const norm=s=>String(s==null?'':s).replace(/\s/g,'').trim();
+const code=v=>{ // 코드 정규화: 숫자로 읽힌 경우 지수표기·소수점 제거
+  if(v==null)return '';
+  let s=String(v).trim();
+  if(/e\+/i.test(s)&&isFinite(v))s=BigInt(Math.round(Number(v))).toString();
+  return s.replace(/\.0+$/,'').replace(/[^0-9]/g,'');
+};
+const won=n=>(typeof n==='number'&&isFinite(n))?n.toLocaleString(undefined,{maximumFractionDigits:2}):'—';
+
+let conWB=null, conMap={}, conList=[];      /* 계약: 코드 -> {name,prices:[{price,sheet}]} */
+let gWB=null, gSheets=[];                    /* 검수: [{name, rows:[{r,code,name,cur}], codeCol,priceCol}] */
+const dupPick={};                            /* 코드 -> 고른 단가 */
+const manual={};                             /* 시트|행 -> 계약 품목명 */
+
+function readWB(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader();
+    r.onload=e=>{try{res(XLSX.read(new Uint8Array(e.target.result),{type:'array'}));}catch(err){rej(err);}};
+    r.onerror=rej; r.readAsArrayBuffer(file);
+  });
+}
+function bindDrop(el,input,handler){
+  el.onclick=()=>input.click();
+  el.ondragover=e=>{e.preventDefault();el.classList.add('on');};
+  el.ondragleave=()=>el.classList.remove('on');
+  el.ondrop=e=>{e.preventDefault();el.classList.remove('on');if(e.dataTransfer.files[0])handler(e.dataTransfer.files[0]);};
+  input.onchange=()=>{if(input.files[0])handler(input.files[0]);};
+}
+/* 헤더 행 찾기 — 앞쪽 20행에서 조건을 만족하는 행 */
+function findHeader(rows,test){
+  for(let i=0;i<Math.min(20,rows.length);i++){
+    const cells=(rows[i]||[]).map(norm);
+    const idx=test(cells);
+    if(idx) return {row:i,cells,idx};
+  }
+  return null;
+}
+
+/* ── 1. 계약단가표 ── */
+bindDrop($('#dropC'),$('#fileC'),async file=>{
+  try{
+    conWB=await readWB(file); conMap={}; conList=[];
+    let sheetsOK=0,total=0;
+    conWB.SheetNames.forEach(sn=>{
+      const rows=XLSX.utils.sheet_to_json(conWB.Sheets[sn],{header:1});
+      const h=findHeader(rows,cells=>{
+        const c=cells.indexOf('식품공통코드');
+        if(c<0)return null;
+        let p=cells.findIndex(v=>v.indexOf('입찰단가')>=0);
+        if(p<0)p=cells.findIndex(v=>v.indexOf('단가')>=0&&v.indexOf('금액')<0);
+        if(p<0)return null;
+        return {c,p,n:cells.indexOf('식품공통코드명')};
+      });
+      if(!h)return;
+      sheetsOK++;
+      for(let i=h.row+1;i<rows.length;i++){
+        const r=rows[i]||[]; const cd=code(r[h.idx.c]);
+        if(!cd||cd.length<6)continue;
+        const price=parseFloat(String(r[h.idx.p]==null?'':r[h.idx.p]).replace(/,/g,''));
+        if(!isFinite(price))continue;
+        const name=String((h.idx.n>=0?r[h.idx.n]:'')||'').trim();
+        if(!conMap[cd])conMap[cd]={name,prices:[]};
+        if(!conMap[cd].name&&name)conMap[cd].name=name;
+        if(!conMap[cd].prices.some(x=>x.price===price))conMap[cd].prices.push({price,sheet:sn});
+        total++;
+      }
+    });
+    conList=Object.entries(conMap).map(([cd,v])=>({cd,name:v.name}));
+    if(!sheetsOK){$('#statC').innerHTML='<div class="badge err">⚠️ 계약단가표가 아닌 것 같아요 (‘식품 공통코드’·‘입찰단가’ 열을 못 찾았어요)</div>';conWB=null;return;}
+    const dups=Object.values(conMap).filter(v=>v.prices.length>1).length;
+    $('#statC').innerHTML=`<div class="badge">✅ ${file.name} — 시트 ${sheetsOK}개 · 계약 품목 ${Object.keys(conMap).length}개</div>`
+      +(dups?`<div class="badge warn">같은 코드에 단가가 여러 개인 품목 ${dups}건 — 아래에서 골라주세요</div>`:'');
+    $('#conList').innerHTML=conList.map(c=>`<option value="${(c.name||c.cd).replace(/"/g,'&quot;')}">`).join('');
+    refresh();
+  }catch(e){$('#statC').innerHTML=`<div class="badge err">읽기 실패: ${e.message}</div>`;}
+});
+
+/* ── 2. 검수처리 파일 ── */
+bindDrop($('#dropG'),$('#fileG'),async file=>{
+  try{
+    gWB=await readWB(file); gSheets=[];
+    gWB.SheetNames.forEach(sn=>{
+      const rows=XLSX.utils.sheet_to_json(gWB.Sheets[sn],{header:1});
+      const h=findHeader(rows,cells=>{
+        const c=cells.indexOf('학교식품코드');
+        if(c<0)return null;
+        let p=cells.indexOf('단가');
+        if(p<0)p=cells.findIndex(v=>v.indexOf('단가')>=0);
+        if(p<0)return null;
+        return {c,p,n:cells.indexOf('식품명'),g:cells.indexOf('규격')};
+      });
+      if(!h)return;
+      const list=[];
+      for(let i=h.row+1;i<rows.length;i++){
+        const r=rows[i]||[]; const cd=code(r[h.idx.c]);
+        if(!cd||cd.length<6)continue;
+        const cur=parseFloat(String(r[h.idx.p]==null?'':r[h.idx.p]).replace(/,/g,''));
+        list.push({r:i,code:cd,name:String((h.idx.n>=0?r[h.idx.n]:'')||'').trim(),cur:isFinite(cur)?cur:null});
+      }
+      if(list.length)gSheets.push({name:sn,rows:list,codeCol:h.idx.c,priceCol:h.idx.p});
+    });
+    if(!gSheets.length){$('#statG').innerHTML='<div class="badge err">⚠️ 검수처리 파일이 아닌 것 같아요 (‘학교식품코드’·‘단가’ 열을 못 찾았어요)</div>';gWB=null;return;}
+    const n=gSheets.reduce((s,x)=>s+x.rows.length,0);
+    $('#statG').innerHTML=`<div class="badge">✅ ${file.name} — 시트 ${gSheets.length}개 · 검수 품목 ${n}개</div>`;
+    refresh();
+  }catch(e){$('#statG').innerHTML=`<div class="badge err">읽기 실패: ${e.message}</div>`;}
+});
+
+/* ── 계약단가 결정 ── */
+function conPrice(cd){
+  const e=conMap[cd]; if(!e)return null;
+  if(e.prices.length===1)return e.prices[0].price;
+  return (dupPick[cd]!==undefined)?dupPick[cd]:null; /* 중복은 고르기 전까지 보류 */
+}
+function analyze(){
+  const out=[];
+  gSheets.forEach(sh=>{
+    let same=0,chg=0,un=0,hold=0; const diff=[],unm=[],zero=[];
+    sh.rows.forEach(row=>{
+      const key=sh.name+'|'+row.r;
+      const target=manual[key];
+      let np=null;
+      if(target){ const hit=conList.find(c=>(c.name||c.cd)===target); if(hit)np=conPrice(hit.cd); }
+      else np=conPrice(row.code);
+      const known=!!conMap[row.code]||!!target;
+      row.newPrice=np;
+      if(np==null){ if(known){hold++;} else {un++;unm.push(row);} }
+      else if(np===row.cur){same++;}
+      else {chg++;diff.push({...row,np});}
+      if(np===0||(np==null&&row.cur===0))zero.push(row);
+    });
+    out.push({sh,same,chg,un,hold,diff,unm,zero});
+  });
+  return out;
+}
+
+function refresh(){
+  if(!conWB||!gWB){$('#resultCard').classList.add('hidden');return;}
+  $('#resultCard').classList.remove('hidden');
+  const res=analyze();
+  const T=(k)=>res.reduce((s,x)=>s+x[k],0);
+  const totRows=gSheets.reduce((s,x)=>s+x.rows.length,0);
+
+  $('#summary').innerHTML=`<table class="sum">
+    <tr><th>시트(업체군)</th><th>품목</th><th>단가 변경</th><th>이미 일치</th><th>미매칭</th></tr>
+    ${res.map(r=>`<tr><td>${r.sh.name}</td><td>${r.sh.rows.length}</td>
+      <td class="chg">${r.chg}</td><td>${r.same}</td>
+      <td class="${r.un?'bad':''}">${r.un}${r.hold?` <span style="color:var(--warn)">+보류 ${r.hold}</span>`:''}</td></tr>`).join('')}
+    <tr style="font-weight:900"><td>합계</td><td>${totRows}</td><td class="chg">${T('chg')}</td><td>${T('same')}</td><td class="${T('un')?'bad':''}">${T('un')}</td></tr>
+  </table>`;
+
+  /* 확인이 필요한 것들 */
+  let ih='';
+  const dupCodes=Object.entries(conMap).filter(([,v])=>v.prices.length>1);
+  const usedDup=dupCodes.filter(([cd])=>gSheets.some(sh=>sh.rows.some(r=>r.code===cd)));
+  if(usedDup.length){
+    ih+=`<details class="blk attn" open><summary>⚠️ 계약단가표에 같은 코드가 여러 번 — 어느 단가를 쓸지 골라주세요 (${usedDup.length}건)</summary>`;
+    usedDup.forEach(([cd,v])=>{
+      ih+=`<div class="item"><span class="tag">계약 중복</span><b>${v.name||cd}</b>
+        <select data-dup="${cd}"><option value="">(선택 전 — 이 품목은 변경 안 됨)</option>
+        ${v.prices.map(p=>`<option value="${p.price}" ${dupPick[cd]===p.price?'selected':''}>${won(p.price)}원 · ${p.sheet}</option>`).join('')}</select></div>`;
+    });
+    ih+='</details>';
+  }
+  const allUn=res.flatMap(r=>r.unm.map(x=>({sh:r.sh.name,x})));
+  if(allUn.length){
+    ih+=`<details class="blk err" open><summary>❌ 계약단가표에 없는 품목 (${allUn.length}건) — 필요하면 직접 연결하세요</summary>`;
+    allUn.forEach(({sh,x})=>{
+      const key=sh+'|'+x.r;
+      ih+=`<div class="item"><span class="tag">${sh}</span><b>${x.name||x.code}</b>
+        <span style="color:var(--mu)">현재 ${won(x.cur)}원</span>
+        <input list="conList" placeholder="계약 품목 검색해 연결 (비우면 그대로 둠)" data-manual="${key}" value="${manual[key]||''}"></div>`;
+    });
+    ih+='</details>';
+  }
+  const zeros=res.flatMap(r=>r.sh.rows.filter(x=>x.newPrice===0||(x.newPrice==null&&(x.cur===0||(x.cur!=null&&x.cur<100)))).map(x=>({sh:r.sh.name,x})));
+  if(zeros.length){
+    ih+=`<details class="blk attn"><summary>🔎 단가가 0이거나 비정상적으로 낮은 품목 (${zeros.length}건) — 나이스 올리기 전 확인</summary>`
+      +zeros.map(({sh,x})=>`<div class="item"><span class="tag">${sh}</span><b>${x.name||x.code}</b>
+        <span style="color:var(--mu)">검수 ${won(x.cur)}원 → 적용 ${won(x.newPrice==null?x.cur:x.newPrice)}원</span></div>`).join('')+'</details>';
+  }
+  $('#issues').innerHTML=ih;
+
+  /* 변경 내역 */
+  const allDiff=res.flatMap(r=>r.diff.map(d=>({sh:r.sh.name,d})));
+  $('#diffs').innerHTML = allDiff.length? `<details class="blk"><summary>📋 바뀌는 단가 전체 보기 (${allDiff.length}건)</summary>
+    <div class="diffrow head"><span>시트</span><span>식품명</span><span class="r">검수단가</span><span class="r">계약단가</span><span class="r">차액</span></div>
+    ${allDiff.map(({sh,d})=>`<div class="diffrow"><span>${sh}</span><span>${d.name||d.code}</span>
+      <span class="r">${won(d.cur)}</span><span class="r" style="font-weight:800">${won(d.np)}</span>
+      <span class="r" style="color:${d.np>(d.cur||0)?'var(--ok)':'var(--danger)'}">${(d.cur==null?'':(d.np-d.cur>0?'+':''))}${d.cur==null?'신규':won(d.np-d.cur)}</span></div>`).join('')}
+    </details>`:'<p class="help">바뀔 단가가 없어요 — 이미 계약단가와 모두 일치합니다.</p>';
+
+  /* 내려받기 버튼 */
+  $('#dls').innerHTML = res.map((r,i)=>`<button class="btn ok small" data-dl="${i}">📥 ${r.sh.name}_업로드.xlsx</button>`).join('')
+    + `<button class="btn small" data-dlall="1">📦 전체 시트 내려받기</button>`;
+
+  $$('[data-dup]').forEach(el=>el.onchange=()=>{const v=el.value;if(v==='')delete dupPick[el.dataset.dup];else dupPick[el.dataset.dup]=parseFloat(v);refresh();});
+  $$('[data-manual]').forEach(el=>el.onchange=()=>{const v=el.value.trim();if(v)manual[el.dataset.manual]=v;else delete manual[el.dataset.manual];refresh();});
+  $$('[data-dl]').forEach(el=>el.onclick=()=>download(+el.dataset.dl));
+  $$('[data-dlall]').forEach(el=>el.onclick=()=>{res.forEach((_,i)=>setTimeout(()=>download(i),i*450));});
+}
+
+/* ── 파일 생성 (시트별) ── */
+function applyPrices(){
+  let n=0;
+  analyze().forEach(r=>{
+    const ws=gWB.Sheets[r.sh.name];
+    r.sh.rows.forEach(row=>{
+      if(row.newPrice==null||row.newPrice===row.cur)return;
+      ws[XLSX.utils.encode_cell({r:row.r,c:r.sh.priceCol})]={t:'n',v:row.newPrice};
+      n++;
+    });
+  });
+  return n;
+}
+function download(i){
+  applyPrices();
+  const sn=gSheets[i].name;
+  const wb={SheetNames:[sn],Sheets:{[sn]:gWB.Sheets[sn]}};
+  /* 한글 파일명이 유지되도록 Blob + a[download] 로 직접 내려받기 */
+  const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+  const url=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  const a=document.createElement('a');
+  a.href=url; a.download=`${sn}_업로드.xlsx`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+$('#reset').onclick=()=>location.reload();
+</script>
+<script src="/sori-gate.js"></script>
+<script>
+/* ── 관리자 전용 잠금 ── 개발·시험 중인 도구 */
+(function(){
+  var ADMIN='thfl4811@gmail.com';
+  function lock(){
+    document.title='준비 중 — 급식"소리"함';
+    document.body.innerHTML='<div style="max-width:520px;margin:16vh auto;padding:34px 28px;'
+      +'font-family:Pretendard,\'Malgun Gothic\',\'Apple SD Gothic Neo\',sans-serif;text-align:center;'
+      +'background:#fff;border:1px solid #e5e7ef;border-radius:16px">'
+      +'<div style="font-size:40px;margin-bottom:14px">🌱</div>'
+      +'<h1 style="font-size:19px;margin-bottom:10px;color:#172033">아직 준비 중인 도구예요</h1>'
+      +'<p style="font-size:14px;line-height:1.75;color:#6b7280;word-break:keep-all">'
+      +'계약단가·검수단가 자동 매칭은 현재 개발·시험 중입니다.<br>'
+      +'완성되면 급식"소리"함에서 바로 열어드릴게요.</p>'
+      +'<p style="margin-top:22px"><a href="https://geupsik-soriham.vercel.app/" '
+      +'style="color:#5c63eb;font-weight:800;font-size:14px;text-decoration:none">← 급식"소리"함으로 돌아가기</a></p></div>';
+  }
+  function check(s){ if(!s||!s.user||s.user.email!==ADMIN) lock(); }
+  if(window.SORI) check(window.SORI);
+  else window.addEventListener('sori-ready', function(e){ check(e.detail); });
+})();
+</script>
+</body>
+</html>
