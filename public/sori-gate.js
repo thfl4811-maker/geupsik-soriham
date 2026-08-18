@@ -131,7 +131,47 @@
         .catch(function () { return profile; });
     }
 
+    /* ── 접속 기록 (관리자 통계용) ──
+       어느 도구를 언제 썼는지 users/{uid}·signups/{uid}에 누적.
+       같은 도구를 30분 안에 다시 열면 1회로 셈(새로고침으로 부풀지 않게). */
+    function appKey() {
+      var h = location.hostname, p = location.pathname;
+      if (h === 'geupsik-soriham.vercel.app') {
+        if (p.indexOf('market-survey') >= 0) return '시장조사변환기';
+        if (p.indexOf('inspection-price') >= 0) return '검수단가매칭';
+        return '포털';
+      }
+      if (h === 'thfl4811-maker.github.io') {
+        if (p.indexOf('choice-meal-menu-finder') >= 0) return '메뉴탐색기';
+        if (p.indexOf('rice-order-planner') >= 0) return '쌀발주계산기';
+        return 'GitHub앱';
+      }
+      var map = {
+        'meal-poster-prompt-builder-five.vercel.app': '프롬프트생성기',
+        'smart-meal-signage.vercel.app': '월간식단뷰어',
+        'smart-meal-archive.vercel.app': '식단아카이브',
+        'school-meal-survey-v2.vercel.app': '선호도조사기',
+        'edu-finance-drafter-3.vercel.app': '품의서작성기'
+      };
+      return map[h] || h;
+    }
+    function track(user) {
+      try {
+        var key = appKey(), now = Date.now(), lk = 'sori_seen_' + key;
+        var last = parseInt(localStorage.getItem(lk) || '0', 10);
+        if (now - last < 30 * 60 * 1000) return;
+        localStorage.setItem(lk, String(now));
+        var FV = firebase.firestore.FieldValue;
+        var iso = new Date(now).toISOString();
+        var apps = {}; apps[key] = { lastAt: iso, count: FV.increment(1) };
+        var patch = { lastSeenAt: iso, lastSeenApp: key, visitCount: FV.increment(1), apps: apps };
+        db.collection('users').doc(user.uid).set(patch, { merge: true }).catch(function () {});
+        db.collection('signups').doc(user.uid).set(patch, { merge: true }).catch(function () {});
+      } catch (e) { /* 기록 실패는 앱 동작에 영향 주지 않음 */ }
+    }
+
     function pass(user, profile) {
+      track(user);
       window.SORI = { user: user, profile: profile };
       var el = document.getElementById('soriGateOverlay');
       if (el && el.parentNode) el.parentNode.removeChild(el);
