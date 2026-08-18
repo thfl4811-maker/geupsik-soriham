@@ -186,6 +186,7 @@ h1{font-size:22px;margin:6px 0 4px}
 </div>
 
 <datalist id="neisList"></datalist>
+<datalist id="vendList"></datalist>
 
 <script>
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -341,15 +342,9 @@ function refresh(){
     const m=matchVendor(v,slot);v.m=m;
     sumHTML+=`<div class="sum"><span>조사가${slot+1} · ${v.file}</span>
       <span>매칭 <b>${m.matchedCount}</b></span>
-      <span>미매칭 <b style="color:${m.un.length?'var(--danger)':'inherit'}">${m.un.length}</b></span>
+      <span title="이번 달 식단에 없어 나이스 목록에 안 나온 품목 — 그냥 두시면 됩니다">나이스에 없는 품목 <b>${m.un.length}</b></span>
       <span>단가상이 <b style="color:${m.conflicts.length?'#b45309':'inherit'}">${m.conflicts.length}</b></span></div>`;
 
-    m.un.forEach(u=>{
-      const key=slot+'|'+norm(u.name);
-      issueHTML+=`<div class="item"><span class="tag a">조사가${slot+1}</span><b>❌ ${u.name}</b>
-        <span style="color:var(--mu)">${u.price.toLocaleString()}원 · ${(u.attr||'').slice(0,26)}</span>
-        <input list="neisList" placeholder="나이스 품목 검색해 연결 (비우면 제외)" data-manual="${key}" value="${manual[key]||''}"></div>`;
-    });
     m.multi.forEach(x=>{
       const key=slot+'|'+norm(x.it.name);
       issueHTML+=`<div class="item"><span class="tag a">조사가${slot+1}</span><b>⚠️ ${x.it.name}</b>
@@ -363,9 +358,66 @@ function refresh(){
         <span style="color:var(--mu)">같은 품목이 다른 단가로 두 번 적혀 있어요</span></div>`;
     });
   });
+  /* 나이스 파일과 업체 파일의 품목이 전혀 안 겹치면(예: 공산 나이스 파일에 김치 견적서)
+     모두 0인 파일이 만들어져 나이스에 올려도 단가가 안 들어간다 → 눈에 띄게 경고 */
+  const totalMatched=vendors.reduce((s,v)=>s+(v&&v.m?v.m.matchedCount:0),0);
+  if(!totalMatched){
+    sumHTML=`<div class="badge err" style="display:block;margin-bottom:8px;padding:10px 14px;line-height:1.7">
+      ⚠️ <b>일치하는 품목이 하나도 없어요.</b> 이대로 만들면 단가가 전부 0인 파일이 나옵니다.<br>
+      나이스 파일과 업체 파일이 <b>같은 업체군</b>인지 확인해 주세요 (예: 공산 나이스 파일에 김치 견적서를 넣은 경우).
+    </div>`+sumHTML;
+  }
   $('#summary').innerHTML=sumHTML;
-  $('#issues').innerHTML=issueHTML||'<p class="help">🎉 확인할 항목이 없어요 — 바로 파일을 만들면 돼요!</p>';
 
+  /* ── 나이스 쪽 미채움 목록 ──
+     업체 파일엔 나이스에 없는 품목이 잔뜩 들어 있어(이번 달 식단에 없는 것) 그쪽 미매칭은 대개 무시해도 된다.
+     실제로 손봐야 하는 건 '나이스 목록에 있는데 단가가 안 들어가는 품목'이므로 그걸 앞세운다. */
+  const filled=new Set(), vendNames=[];
+  vendors.forEach((v,slot)=>{
+    if(!v||!v.m)return;
+    v.items.forEach(it=>{ if(!vendNames.some(x=>x.name===it.name)) vendNames.push({name:it.name,price:it.price,slot}); });
+    Object.keys(v.m.map).forEach(k=>{ const c=byName[k]||[]; if(c.length===1)filled.add(c[0].idx); });
+    Object.entries(manual).forEach(([key,target])=>{
+      const t=neis.find(n=>n.name===target); if(t)filled.add(t.idx);
+    });
+  });
+  $('#vendList').innerHTML=vendNames.map(v=>`<option value="${v.name.replace(/"/g,'&quot;')}">${v.price.toLocaleString()}원</option>`).join('');
+  const unfilled=neis.filter(n=>!filled.has(n.idx));
+  let needHTML='';
+  if(unfilled.length){
+    needHTML=`<details class="blk err" open><summary>❗ 나이스 목록에서 <b>단가가 안 채워지는 품목 ${unfilled.length}건</b> — 여기만 확인하시면 됩니다</summary>`;
+    unfilled.forEach(n=>{
+      const key0=norm(n.name).split('/')[0].replace(/\(.*/,'');
+      const near=vendNames.filter(v=>key0.length>1&&norm(v.name).indexOf(key0)===0).slice(0,1)[0];
+      const cur=Object.entries(manual).find(([,t])=>t===n.name);
+      needHTML+=`<div class="item"><span class="tag warn">나이스</span><b>❌ ${n.name}</b>
+        <span style="color:var(--mu)">${(n.attr||'').slice(0,24)}</span>
+        <input list="vendList" data-link="${n.name.replace(/"/g,'&quot;')}" value="${cur?cur[0].split('|').slice(1).join('|'):''}"
+          placeholder="${near?'예: '+near.name+' ('+near.price.toLocaleString()+'원)':'업체 품목 검색해 연결 (비우면 0원)'}"></div>`;
+    });
+    needHTML+='</details>';
+  } else {
+    needHTML='<p class="help">🎉 나이스 목록 전부에 단가가 들어갔어요!</p>';
+  }
+  const vendorMiss=vendors.reduce((s,v)=>s+(v&&v.m?v.m.un.length:0),0);
+  if(vendorMiss) needHTML+=`<details class="blk"><summary>업체 파일엔 있지만 나이스 목록엔 없는 품목 ${vendorMiss}건 — 그냥 두셔도 됩니다</summary>
+    <p class="help">이번 달 식단에 쓰지 않는 품목이라 나이스가 목록에 내려주지 않은 거예요. 연결할 대상이 없으니 자동으로 제외됩니다.</p>
+    <p class="help" style="color:var(--mu)">${vendors.flatMap(v=>v&&v.m?v.m.un.map(u=>u.name):[]).slice(0,40).join(' · ')}${vendorMiss>40?' …':''}</p></details>`;
+
+  $('#issues').innerHTML=needHTML+issueHTML;
+
+  /* 나이스 품목 ← 업체 품목 연결 (기존 manual 구조에 그대로 얹는다) */
+  $$('#issues [data-link]').forEach(el=>{
+    el.onchange=()=>{
+      const neisName=el.dataset.link, picked=el.value.trim();
+      Object.entries(manual).forEach(([k,t])=>{ if(t===neisName) delete manual[k]; });
+      if(picked){
+        const v=vendNames.find(x=>x.name===picked);
+        if(v) manual[v.slot+'|'+norm(picked)]=neisName;
+      }
+      refresh();
+    };
+  });
   $$('#issues [data-manual]').forEach(el=>{
     el.onchange=()=>{const v=el.value.trim();if(v)manual[el.dataset.manual]=v;else delete manual[el.dataset.manual];};
   });
