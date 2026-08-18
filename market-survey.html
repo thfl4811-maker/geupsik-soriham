@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>나이스 시장조사 자동입력 — 급식"소리"함</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <style>
 :root{--primary:#5c63eb;--line:#e5e7ef;--mu:#6b7280;--bg:#f6f7fb;--danger:#dc2626;--ok:#0f6b4d}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -58,6 +59,8 @@ h1{font-size:22px;margin:6px 0 4px}
 .seg button.on{background:var(--primary);border-color:var(--primary);color:#fff}
 .slot.off{display:none}
 .mu{color:var(--mu);font-weight:600;font-size:12px}
+.card.fill{border-color:#bfe6d4;background:#fbfefc}
+.card.fill h2{color:var(--ok)}
 </style>
 </head>
 <body>
@@ -150,6 +153,33 @@ h1{font-size:22px;margin:6px 0 4px}
       <p class="help" style="margin-top:8px">💡 예정단가가 품의에 안 붙으면 <b>공통식품코드·규격·단위</b>가 예정단가등록 식품과 품의 식품 사이에 어긋난 경우예요.
       이번에 조사하지 않은 품목은 <b>예전 조사일자의 단가</b>가 그대로 남아 있으니 조사일자도 함께 확인하세요.</p>
     </details>
+  </div>
+
+  <div class="card fill">
+    <h2>🔄 견적서 → 현품설명서 채우기</h2>
+    <p class="help" style="margin:0 0 10px">업체 견적서를 보고 <b>현품설명서에 단가를 옮겨 적는 일</b>을 대신해 드려요.
+    식품명끼리 맞춰서 채우고, <b>원본 서식·병합은 그대로</b> 둡니다. 위 시장조사와는 따로 쓰셔도 돼요.</p>
+    <div class="slots">
+      <div class="slot">
+        <h3>① 빈 현품설명서 양식 <span class="mu">.xlsx</span></h3>
+        <div class="drop small" id="dropF1">파일 올리기</div>
+        <input type="file" id="fileF1" accept=".xlsx" class="hidden">
+        <div class="fname" id="fnF1"></div>
+      </div>
+      <div class="slot">
+        <h3>② 업체 견적서 <span class="mu">또는 단가 적힌 현품</span></h3>
+        <div class="drop small" id="dropF2">파일 올리기</div>
+        <input type="file" id="fileF2" accept=".xls,.xlsx" class="hidden">
+        <div class="fname" id="fnF2"></div>
+      </div>
+    </div>
+    <div class="seg" style="margin-top:12px">
+      <span class="seglabel">단가를 어디에 적을까요?</span>
+      <button type="button" data-mode="insert" class="on">단가·총금액 열 추가</button>
+      <button type="button" data-mode="spec">규격 칸에 단가만</button>
+    </div>
+    <p class="help" id="modeHelp" style="margin:8px 0 0"></p>
+    <div id="fillResult"></div>
   </div>
 
   <p class="footer">급식"소리"함 · 시장조사 자동입력 β — 문의: geupsik-soriham.vercel.app</p>
@@ -255,7 +285,7 @@ let vCount=1;
 function setCount(n){
   vCount=n;
   $$('.seg button').forEach(b=>b.classList.toggle('on',+b.dataset.cnt===n));
-  $$('.slot').forEach(s=>{
+  $$('.slot[data-slot]').forEach(s=>{
     const i=+s.dataset.slot, off=i>=n;
     s.classList.toggle('off',off);
     if(off&&vendors[i]){ /* 숨긴 칸의 파일은 비워서 결과에 안 섞이게 */
@@ -271,7 +301,7 @@ function setCount(n){
 }
 $$('.seg button').forEach(b=>b.onclick=()=>setCount(+b.dataset.cnt));
 
-$$('.slot').forEach(slot=>{
+$$('.slot[data-slot]').forEach(slot=>{
   const i=+slot.dataset.slot;
   bindDrop(slot.querySelector('[data-drop]'), slot.querySelector('[data-file]'), async file=>{
     try{
@@ -403,6 +433,150 @@ $('#dl').onclick=()=>{
 $('#reset').onclick=()=>location.reload();
 
 setCount(1); /* 대부분 한 곳만 조사하므로 기본값 1곳 */
+
+/* ═══ 견적서 → 현품설명서 채우기 ═══
+   현품설명서는 학교가 보관·결재하는 서류라 서식이 유지돼야 한다.
+   → SheetJS는 서식을 버리므로, 현품은 ExcelJS로 읽고 써서 병합·테두리·글꼴을 보존한다.
+   견적서는 값만 필요하고 .xls도 들어올 수 있어 SheetJS로 읽는다. */
+let formBuf=null, formName='', quote=null, fillMode='insert';
+
+const cellText=c=>{const v=c.value; if(v==null)return ''; if(typeof v==='object'){ if(v.richText)return v.richText.map(t=>t.text).join(''); if(v.text!==undefined)return String(v.text); if(v.result!==undefined)return String(v.result); return ''; } return String(v);};
+const L2N=s=>{let n=0;for(const ch of s)n=n*26+(ch.charCodeAt(0)-64);return n;};
+const N2L=n=>{let s='';while(n>0){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-m-1)/26;}return s;};
+/* 열을 끼워 넣으면 ExcelJS가 병합 범위를 옮겨주지 않아 값이 번진다 → 직접 옮긴다 */
+const shiftRange=(range,at,by)=>range.split(':').map(a=>{
+  const m=/^([A-Z]+)(\d+)$/.exec(a); let c=L2N(m[1]); if(c>=at)c+=by; return N2L(c)+m[2];
+}).join(':');
+
+const RE={name:/^(식품명|품명)$/, spec:/^규격$/, qty:/^(총량|수량|예정소요량|소요량)/, unit:/^단위$/,
+          price:/단가/, total:/총금액|금액/, attr:/속성설명|비고/, no:/^(no|번호)$/i};
+function findHeader(ws){
+  for(let r=1;r<=Math.min(25,ws.rowCount);r++){
+    const row=ws.getRow(r), cols={};
+    row.eachCell({includeEmpty:false},(cell,c)=>{
+      const v=norm(cellText(cell));
+      Object.entries(RE).forEach(([k,re])=>{ if(cols[k]===undefined&&re.test(v))cols[k]=c; });
+    });
+    if(cols.name!==undefined) return {row:r,cols};
+  }
+  return null;
+}
+
+$$('[data-mode]').forEach(b=>b.onclick=()=>{
+  fillMode=b.dataset.mode;
+  $$('[data-mode]').forEach(x=>x.classList.toggle('on',x===b));
+  fillRefresh();
+});
+function modeHelp(){
+  $('#modeHelp').innerHTML = fillMode==='insert'
+    ? '양식에 단가 칸이 없으면 <b>단위</b>와 <b>속성설명</b> 사이에 <b>단가·총금액</b> 열을 새로 넣습니다(업체가 보내주는 형식과 동일). 총금액은 <b>단가×총량</b>으로 계산돼요.'
+    : '원본 양식은 그대로 두고 <b>규격 칸</b>에 단가 숫자만 적습니다. 열을 늘리고 싶지 않을 때 쓰세요.';
+}
+modeHelp();
+
+bindDrop($('#dropF1'), $('#fileF1'), async file=>{
+  try{
+    if(!/\.xlsx$/i.test(file.name)) throw new Error('현품 양식은 .xlsx 파일이어야 서식을 지킬 수 있어요 (.xls는 엑셀에서 한 번 저장해 주세요)');
+    formBuf=await file.arrayBuffer(); formName=file.name;
+    $('#fnF1').innerHTML=`<span class="badge">✅ ${file.name}</span>`;
+    fillRefresh();
+  }catch(e){ formBuf=null; $('#fnF1').innerHTML=`<span class="badge err">${e.message}</span>`; }
+});
+bindDrop($('#dropF2'), $('#fileF2'), async file=>{
+  try{
+    const items=parseVendor(await readWB(file));
+    /* 같은 식품명이 여러 번 나오는 양식이 있어(예: 간장(양조간장) 3줄) 속성설명까지 붙여 먼저 맞춘다 */
+    const both={}, byName={};
+    items.forEach(it=>{
+      const n=norm(it.name), b=n+'|'+norm(it.attr);
+      if(both[b]===undefined)both[b]=it.price;
+      (byName[n]=byName[n]||[]).push(it.price);
+    });
+    quote={both,byName,count:items.length,file:file.name};
+    $('#fnF2').innerHTML=`<span class="badge">✅ ${file.name} · ${items.length}품목</span>`;
+    fillRefresh();
+  }catch(e){ quote=null; $('#fnF2').innerHTML=`<span class="badge err">${e.message}</span>`; }
+});
+
+async function fillRefresh(){
+  modeHelp();
+  const box=$('#fillResult');
+  if(!formBuf||!quote){ box.innerHTML=''; return; }
+  box.innerHTML='<p class="help">맞춰보는 중…</p>';
+  try{
+    const wb=new ExcelJS.Workbook();
+    await wb.xlsx.load(formBuf);
+    const ws=wb.worksheets[0];
+    let h=findHeader(ws);
+    if(!h) throw new Error('현품설명서에서 ‘식품명’ 열을 찾지 못했어요.');
+    let {cName,cSpec,cQty,cPrice,cTotal,cAttr,cNo}=
+      {cName:h.cols.name,cSpec:h.cols.spec,cQty:h.cols.qty,cPrice:h.cols.price,cTotal:h.cols.total,cAttr:h.cols.attr,cNo:h.cols.no};
+
+    let where;
+    if(cPrice!==undefined){ where='단가(기존 칸)'; }
+    else if(fillMode==='spec'&&cSpec!==undefined){ where='규격'; cPrice=cSpec; cTotal=undefined; }
+    else {
+      /* 단가·총금액 열 새로 끼워 넣기 — 병합 범위도 같이 이동 */
+      const at = cAttr!==undefined ? cAttr : (h.cols.unit!==undefined ? h.cols.unit+1 : cSpec+1);
+      const merges=[...ws.model.merges];
+      merges.forEach(r=>{try{ws.unMergeCells(r);}catch(e){}});
+      ws.spliceColumns(at,0,[],[]);
+      merges.forEach(r=>{try{ws.mergeCells(shiftRange(r,at,2));}catch(e){}});
+      const src=ws.getRow(h.row).getCell(h.cols.unit||cSpec);
+      [['단가',at],['총금액',at+1]].forEach(([label,c])=>{
+        const cell=ws.getRow(h.row).getCell(c);
+        cell.value=label;
+        try{ cell.style=JSON.parse(JSON.stringify(src.style)); }catch(e){}
+      });
+      ws.getColumn(at).width=11; ws.getColumn(at+1).width=13;
+      cPrice=at; cTotal=at+1;
+      [cSpec,cQty,cAttr].forEach(()=>{});
+      if(cSpec>=at)cSpec+=2; if(cQty>=at)cQty+=2; if(cAttr>=at)cAttr+=2; if(cNo>=at)cNo+=2;
+      where='단가·총금액(새 열)';
+    }
+
+    let hit=0; const miss=[], ambiguous=[];
+    for(let r=h.row+1;r<=ws.rowCount;r++){
+      const row=ws.getRow(r);
+      const rawName=cellText(row.getCell(cName)), nm=norm(rawName);
+      if(!nm||RE.name.test(nm)) continue;
+      /* 여러 쪽짜리 양식은 쪽마다 제목·머리글이 반복된다.
+         제목은 가로 병합이라 식품명 칸으로도 읽히므로, NO(또는 총량)가 숫자인 행만 데이터로 본다 */
+      const isData = cNo!==undefined
+        ? isFinite(parseFloat(String(cellText(row.getCell(cNo))).replace(/,/g,'')))
+        : (cQty!==undefined && isFinite(parseFloat(String(cellText(row.getCell(cQty))).replace(/,/g,''))));
+      if(!isData) continue;
+      const attr=cAttr!==undefined?norm(cellText(row.getCell(cAttr))):'';
+      let p=quote.both[nm+'|'+attr];
+      if(p===undefined){
+        const list=quote.byName[nm];
+        if(!list){ miss.push(rawName); continue; }
+        const uniq=[...new Set(list)];
+        p=uniq[0];
+        if(uniq.length>1) ambiguous.push(rawName);
+      }
+      row.getCell(cPrice).value=p;
+      row.getCell(cPrice).numFmt='#,##0';
+      if(cTotal!==undefined&&cQty!==undefined){
+        const q=parseFloat(String(cellText(row.getCell(cQty))).replace(/,/g,''));
+        if(isFinite(q)){ row.getCell(cTotal).value=Math.round(p*q); row.getCell(cTotal).numFmt='#,##0'; }
+      }
+      hit++;
+    }
+    const buf=await wb.xlsx.writeBuffer();
+    const url=URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+    const base=formName.replace(/\.xlsx$/i,'');
+    box.innerHTML=`<div class="sum" style="margin-top:12px"><span>채움 <b>${hit}</b></span>
+        <span>미매칭 <b style="color:${miss.length?'var(--danger)':'inherit'}">${miss.length}</b></span>
+        <span>넣은 칸 <b>${where}</b></span>
+        <span>병합 ${ws.model.merges?ws.model.merges.length:0}개 유지</span></div>`
+      + (miss.length?`<p class="help" style="color:var(--danger)">❌ 견적서에 없는 품목 — ${[...new Set(miss)].slice(0,10).join(', ')}${miss.length>10?' 외 '+(miss.length-10)+'건':''}</p>`:'')
+      + (ambiguous.length?`<p class="help" style="color:#b45309">⚠️ 같은 이름에 단가가 여러 개라 첫 번째 값을 썼어요 — ${[...new Set(ambiguous)].slice(0,8).join(', ')} (속성설명이 같으면 정확히 맞춰집니다)</p>`:'')
+      + `<div style="margin-top:12px"><a class="btn ok" id="dlFill" href="${url}" download="${base}_단가입력.xlsx">📥 채워진 현품설명서 내려받기</a></div>`;
+  }catch(e){
+    box.innerHTML=`<div class="badge err">${e.message}</div>`;
+  }
+}
 </script>
 <script src="/sori-gate.js"></script>
 <script>
