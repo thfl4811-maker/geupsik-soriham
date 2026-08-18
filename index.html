@@ -78,6 +78,7 @@
     .tier-badge-0 { background: #F1F3F1; color: #6B7B72; }
     .tier-badge-1 { background: var(--al); color: var(--am); }
     .tier-badge-2 { background: var(--gl); color: var(--g); }
+    .tier-badge-3 { background: #1F2937; color: #fff; }
     .tier-text { font-size: 13px; color: var(--mu); flex: 1; }
     .tier-text strong { color: var(--tx); }
 
@@ -248,7 +249,8 @@ async function sha256Hex(s){
   const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
   return Array.from(new Uint8Array(d)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
-const TIER_LABELS = { 0: '기본', 1: '1차 강의', 2: '2차 강의' };
+const TIER_LABELS = { 0: '기본', 1: '1차 강의', 2: '2차 강의', 3: '관리자' };
+/* tier 3 = 관리자 전용(개발 중 내부 시험용). 관리자 외에는 '개발 중 · 배포 예정' 카드로만 보임 */
 
 // ── 도구 데이터 (tier: 접근에 필요한 강의 티어) ──
 const CATS = [
@@ -272,7 +274,7 @@ const CATS = [
   },
   { id:'inspect', name:'검수·엑셀', icon:'📊', c:'var(--bl)', cl:'var(--bll)',
     tools:[
-      { name:'시장조사 자료 변환기', desc:'업체 단가를 시장조사 자료로 변환해 나이스 단가입력에 등록', url:null, tier:2 },
+      { name:'시장조사 자료 변환기', desc:'업체 단가를 시장조사 자료로 변환해 나이스 단가입력에 등록', url:'https://geupsik-soriham.vercel.app/market-survey.html', tier:3 },
       { name:'계약단가·검수단가 자동 매칭', desc:'품의로 흐트러진 계약·검수단가를 한 번에 자동 업로드', url:null, tier:2 },
       { name:'나이스 자료 표준 변환기', desc:'떠도는 표준레시피를 나이스 내 레시피로 등록되게 변환', url:null, tier:2 },
     ]
@@ -703,7 +705,7 @@ window.goGuide=function(){ view='guide'; render(); };
 
 function renderHub() {
   const isAdmin  = currentUser.email === ADMIN;
-  const userTier = isAdmin ? 2 : (userProfile.tier || 0);
+  const userTier = isAdmin ? 3 : (userProfile.tier || 0);
   const totalTools = CATS.reduce((s,c)=>s+c.tools.length,0);
   const visibleTools = CATS.reduce((s,c)=>s+c.tools.filter(t=>t.tier<=userTier&&t.url).length,0);
 
@@ -826,7 +828,8 @@ function renderHub() {
       <span class="tier-text">
         ${userTier===0?'웹앱이 개발되고 강의 코드를 입력하면 더 많은 도구가 열려요.':
           userTier===1?'1차 강의 코드가 적용됐어요. 개발이 되어 웹앱이 배포되면 2차 강의 코드로 웹앱을 더 열 수 있어요.':
-          '<strong>2차 강의</strong>까지 적용됐어요. 모든 도구 열람 가능!'}
+          userTier===2?'<strong>2차 강의</strong>까지 적용됐어요. 모든 도구 열람 가능!':
+          '<strong>관리자</strong> 계정이에요. 시험 중인 🔒 도구까지 모두 보입니다.'}
       </span>
       <button class="btn btn-code" onclick="document.getElementById('codeBtn').click()">🔑 코드 입력</button>
     </div>
@@ -853,7 +856,20 @@ function renderHub() {
     </div>
     <div class="tool-grid">
       ${c.tools.map(t=>{
-        if(t.tier>userTier) {
+        if(t.tier>=3 && !isAdmin) {
+          /* 관리자 전용 도구 — 다른 분들께는 개발 중으로만 보임 */
+          return `<div class="tool-card soon">
+            <div class="tool-ico gray">🌱</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">한창 만드는 중이에요 · 개발이 끝나는 대로 여기서 바로 열려요</div></div>
+            <span class="badge badge-soon">개발 중 · 배포 예정</span>
+          </div>`;
+        } else if(t.tier>=3 && isAdmin) {
+          return `<a class="tool-card link" href="${t.url}" target="_blank" rel="noopener">
+            <div class="tool-ico" style="background:${c.cl}">🔒</div>
+            <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">관리자 전용 · 시험 중 (다른 분께는 ‘개발 중’으로 보여요)</div></div>
+            <span class="ext">↗</span>
+          </a>`;
+        } else if(t.tier>userTier) {
           return `<div class="tool-card soon">
             <div class="tool-ico gray">🔑</div>
             <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${t.tier>=2?'2차':'1차'} 직무연수에서 공개되는 도구예요 · 연수 후 강의 코드를 입력하면 열려요</div></div>
