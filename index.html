@@ -221,409 +221,48 @@
   
 
   /* ====== 관리자 대시보드 + Q&A 패널 ====== */
-  /* 관리자 대시보드 탭 스타일 */
-  #admin-panel {
-    background: #f5f7fa;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-top: 2rem;
-  }
-
-  .admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 10px;
-    border-left: 4px solid var(--g);
-  }
-
-  .admin-header h2 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--tx);
-    margin: 0;
-  }
-
-  .admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 2rem;
-  }
-
-  .admin-stat-card {
-    background: #fff;
-    padding: 16px;
-    border-radius: 10px;
-    border-left: 4px solid;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-  }
-
+  #admin-panel { background: #f5f7fa; border-radius: 12px; padding: 2rem; margin-top: 2rem; }
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #fff; padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--g); }
+  .admin-header h2 { font-size: 20px; font-weight: 700; color: var(--tx); margin: 0; }
+  .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem; }
+  .admin-stat-card { background: #fff; padding: 16px; border-radius: 10px; border-left: 4px solid; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
   .admin-stat-card.blue { border-left-color: var(--bl); }
   .admin-stat-card.green { border-left-color: var(--g); }
-  .admin-stat-card.orange { border-left-color: var(--am); }
-  .admin-stat-card.red { border-left-color: var(--co); }
-
-  .stat-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--mu);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--tx);
-    margin-bottom: 4px;
-  }
-
-  .stat-detail {
-    font-size: 12px;
-    color: var(--mu);
-  }
-
-  .admin-new-users {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.08);
-  }
-
-  .admin-new-users h3 {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--tx);
-    margin-bottom: 1rem;
-    border-bottom: 1px solid var(--bd);
-    padding-bottom: 0.75rem;
-  }
-
-  .user-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .user-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 14px;
-    background: #fff;
-    border: 1px solid var(--bd);
-    border-radius: 10px;
-    font-size: 13px;
-    transition: all 0.2s;
-    gap: 12px;
-  }
-
-  .user-item:hover {
-    background: var(--bg);
-    border-color: var(--g);
-    box-shadow: 0 2px 8px rgba(42, 133, 88, 0.1);
-  }
-
-  .user-info {
-    flex: 0 0 auto;
-    min-width: 180px;
-  }
-
-  .user-name {
-    font-weight: 700;
-    color: var(--tx);
-    font-size: 14px;
-    margin-bottom: 3px;
-  }
-
-  .user-school {
-    font-size: 13px;
-    color: var(--g);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-
-  .user-email {
-    font-size: 12px;
-    color: var(--mu);
-    word-break: break-all;
-  }
-
-  .user-stats {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
-    min-width: 200px;
-  }
-
-  .stat-row {
-    display: flex;
-    gap: 6px;
-    font-size: 12px;
-    padding: 6px;
-    background: #f9fafb;
-    border-radius: 6px;
-  }
-
-  .stat-label {
-    font-weight: 600;
-    color: var(--mu);
-    min-width: 35px;
-  }
-
-  .stat-value {
-    color: var(--g);
-    font-weight: 600;
-    word-break: break-word;
-  }
-
-  .user-meta {
-    flex: 0 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 6px;
-  }
-
-  .new-badge {
-    display: inline-block;
-    background: var(--cl);
-    color: var(--co);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 99px;
-    margin-left: 8px;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 2rem;
-    color: var(--mu);
-  }
-
-  /* Q&A 패널 스타일 */
-  .qa-tab {
-    position: fixed;
-    right: 0;
-    top: calc(42% + 200px);
-    z-index: 290;
-    background: linear-gradient(135deg, var(--bl) 0%, #2563eb 100%);
-    color: #fff;
-    font-weight: 700;
-    font-size: 12px;
-    writing-mode: vertical-rl;
-    padding: 14px 9px;
-    border-radius: 12px 0 0 12px;
-    cursor: pointer;
-    letter-spacing: .08em;
-    user-select: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(43, 104, 172, 0.3);
-  }
-
-  .qa-tab:hover {
-    padding-right: 12px;
-    box-shadow: 0 6px 16px rgba(43, 104, 172, 0.4);
-  }
-
-  .qa-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: var(--co);
-    color: #fff;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 800;
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    animation: pulse-badge 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse-badge {
-    0%, 100% {
-      transform: scale(1);
-      box-shadow: 0 0 0 0 rgba(192, 72, 72, 0.7);
-    }
-    50% {
-      transform: scale(1.1);
-      box-shadow: 0 0 0 6px rgba(192, 72, 72, 0);
-    }
-  }
-
-  .qa-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 30, 20, .35);
-    z-index: 400;
-    display: none;
-  }
-
-  .qa-overlay.show {
-    display: block;
-  }
-
-  .qa-panel {
-    position: fixed;
-    top: 0;
-    right: -450px;
-    width: min(420px, 95vw);
-    height: 100%;
-    background: #fff;
-    z-index: 401;
-    box-shadow: -12px 0 34px rgba(0, 0, 0, .15);
-    transition: right .3s ease;
-    display: flex;
-    flex-direction: column;
-    border-radius: 16px 0 0 16px;
-  }
-
-  .qa-panel.show {
-    right: 0;
-  }
-
-  .qa-head {
-    padding: 20px 22px 16px;
-    border-bottom: 1px solid var(--bd);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-shrink: 0;
-  }
-
-  .qa-head h3 {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--tx);
-    margin: 0;
-  }
-
-  .qa-close {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--bg);
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-    color: var(--mu);
-  }
-
-  .qa-close:hover {
-    background: var(--bd);
-    color: var(--tx);
-  }
-
-  .qa-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 18px 20px 24px;
-  }
-
-  .qa-section {
-    margin-bottom: 20px;
-  }
-
-  .qa-section-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--bl);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--bd);
-  }
-
-  .qa-item {
-    background: #f9fafb;
-    border: 1px solid var(--bd);
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .qa-item:hover {
-    background: var(--bg);
-    border-color: var(--bl);
-    transform: translateX(-3px);
-  }
-
-  .qa-item-q {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--tx);
-    margin-bottom: 6px;
-  }
-
-  .qa-item-a {
-    font-size: 12.5px;
-    color: var(--mu);
-    line-height: 1.5;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-  }
-
-  .qa-item.open .qa-item-a {
-    max-height: 200px;
-  }
-
-  .qa-item-icon {
-    float: right;
-    color: var(--bl);
-    font-size: 14px;
-    transition: transform 0.3s;
-  }
-
-  .qa-item.open .qa-item-icon {
-    transform: rotate(180deg);
-  }
-
-  .qa-cta {
-    background: var(--bll);
-    border: 1px solid var(--bd);
-    border-radius: 10px;
-    padding: 13px 15px;
-    font-size: 12.5px;
-    color: var(--bl);
-    line-height: 1.7;
-    word-break: keep-all;
-    margin-top: 16px;
-  }
-
-  .qa-cta strong {
-    display: block;
-    color: var(--tx);
-    margin-bottom: 8px;
-    font-weight: 700;
-  }
-
-  @media (max-width: 640px) {
-    .qa-panel {
-      width: 100vw;
-      right: -100vw;
-    }
-
-    .qa-tab {
-      top: 
+  .stat-label { font-size: 11px; font-weight: 600; color: var(--mu); text-transform: uppercase; margin-bottom: 6px; }
+  .stat-value { font-size: 24px; font-weight: 700; color: var(--tx); margin-bottom: 4px; }
+  .stat-detail { font-size: 12px; color: var(--mu); }
+  .user-list { display: flex; flex-direction: column; gap: 12px; }
+  .user-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px; background: #fff; border: 1px solid var(--bd); border-radius: 10px; gap: 12px; }
+  .user-item:hover { background: var(--bg); border-color: var(--g); box-shadow: 0 2px 8px rgba(42, 133, 88, 0.1); }
+  .user-info { flex: 0 0 auto; min-width: 180px; }
+  .user-name { font-weight: 700; color: var(--tx); font-size: 14px; margin-bottom: 3px; }
+  .user-school { font-size: 13px; color: var(--g); font-weight: 600; margin-bottom: 4px; }
+  .user-email { font-size: 12px; color: var(--mu); }
+  .user-stats { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 12px; min-width: 200px; }
+  .stat-row { display: flex; gap: 6px; font-size: 12px; padding: 6px; background: #f9fafb; border-radius: 6px; }
+  .stat-row .stat-label { font-weight: 600; color: var(--mu); min-width: 35px; margin: 0; }
+  .stat-row .stat-value { color: var(--g); font-weight: 600; }
+  .user-meta { flex: 0 0 auto; }
+  .new-badge { display: inline-block; background: var(--cl); color: var(--co); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+  .qa-tab { position: fixed; right: 0; top: calc(42% + 200px); z-index: 290; background: linear-gradient(135deg, var(--bl) 0%, #2563eb 100%); color: #fff; font-weight: 700; font-size: 12px; writing-mode: vertical-rl; padding: 14px 9px; border-radius: 12px 0 0 12px; cursor: pointer; letter-spacing: .08em; user-select: none; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(43, 104, 172, 0.3); }
+  .qa-tab:hover { padding-right: 12px; box-shadow: 0 6px 16px rgba(43, 104, 172, 0.4); }
+  .qa-overlay { position: fixed; inset: 0; background: rgba(15, 30, 20, .35); z-index: 400; display: none; }
+  .qa-overlay.show { display: block; }
+  .qa-panel { position: fixed; top: 0; right: -450px; width: min(420px, 95vw); height: 100%; background: #fff; z-index: 401; box-shadow: -12px 0 34px rgba(0, 0, 0, .15); transition: right .3s ease; display: flex; flex-direction: column; border-radius: 16px 0 0 16px; }
+  .qa-panel.show { right: 0; }
+  .qa-head { padding: 20px 22px 16px; border-bottom: 1px solid var(--bd); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+  .qa-head h3 { font-size: 17px; font-weight: 700; color: var(--tx); margin: 0; }
+  .qa-close { width: 28px; height: 28px; border-radius: 50%; background: var(--bg); border: none; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background 0.2s; color: var(--mu); }
+  .qa-close:hover { background: var(--bd); color: var(--tx); }
+  .qa-body { flex: 1; overflow-y: auto; padding: 18px 20px 24px; }
+  .qa-item { background: #f9fafb; border: 1px solid var(--bd); border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; cursor: pointer; transition: all 0.2s; }
+  .qa-item:hover { background: var(--bg); border-color: var(--bl); transform: translateX(-3px); }
+  .qa-item-q { font-size: 13px; font-weight: 600; color: var(--tx); margin-bottom: 6px; }
+  .qa-item-a { font-size: 12.5px; color: var(--mu); line-height: 1.5; max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+  .qa-item.open .qa-item-a { max-height: 200px; }
+  .qa-item-icon { float: right; color: var(--bl); font-size: 14px; transition: transform 0.3s; }
+  .qa-item.open .qa-item-icon { transform: rotate(180deg); }
+  @media (max-width: 640px) { .qa-panel { width: 100vw; right: -100vw; } }
 
 </style>
 </head>
@@ -1170,7 +809,7 @@ function renderGuide() {
 window.goGuide=function(){ view='guide'; render(); };
 
 function renderHub() {
-  const isAdmin  = currentUser.email === ADMIN;
+  const isAdmin  = currentUser && currentUser.email === ADMIN_EMAIL;
   const userTier = isAdmin ? 3 : (userProfile.tier || 0);
   const totalTools = CATS.reduce((s,c)=>s+c.tools.length,0);
   const visibleTools = CATS.reduce((s,c)=>s+c.tools.filter(t=>t.tier<=userTier&&t.url).length,0);
@@ -1435,287 +1074,100 @@ window.scrollTo_=function(id){
   if(el)window.scrollTo({top:el.offsetTop-64,behavior:'smooth'});
 };
 
+
+// ────────────────────────────────────────────────────
+// 관리자 대시보드 - 글로벌 함수 & 변수
+// ────────────────────────────────────────────────────
+let adminData = { users: [], ideas: [], visits: [] };
+const ADMIN_EMAIL = 'thfl4811@gmail.com';
+
+window.showAdminTab = function() {
+  const panel = document.getElementById('admin-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+};
+
+window.toggleQAPanel = function() {
+  const panel = document.getElementById('qaPanel');
+  const overlay = document.getElementById('qaOverlay');
+  panel.classList.toggle('show');
+  overlay.classList.toggle('show');
+};
+
+window.closeQAPanel = function() {
+  const panel = document.getElementById('qaPanel');
+  const overlay = document.getElementById('qaOverlay');
+  panel.classList.remove('show');
+  overlay.classList.remove('show');
+};
+
+window.toggleQA = function(element) {
+  element.classList.toggle('open');
+};
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') window.closeQAPanel();
+});
+
+
 onAuthStateChanged(auth, async user=>{
   currentUser=user;
-
-  // ────────────────────────────────────────
-  // 관리자 대시보드 초기화
-  // ────────────────────────────────────────
-  let allUsers = [], allIdeas = [], allVisits = [];
-  const ADMIN_EMAIL = 'thfl4811@gmail.com';
-  let isAdmin = false;
-
-  // 관리자 데이터 로드
-  async function loadAdminData() {
-    if (currentUser?.email !== ADMIN_EMAIL) return;
-    
-    try {
-      // 1. 사용자 목록
-      const usersRef = collection(db, 'users');
-      const usersSnap = await getDocs(usersRef);
-      allUsers = usersSnap.docs.map(doc => ({
-        uid: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || doc.data().createdAt || new Date()
-      })).filter(u => u.email !== ADMIN_EMAIL);
-
-      // 2. 어플 요청
-      const ideasRef = collection(db, 'ideas');
-      const ideasSnap = await getDocs(ideasRef);
-      allIdeas = ideasSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date()
-      })).sort((a, b) => b.createdAt - a.createdAt);
-
-      // 3. 접속 기록
-      const visitsRef = collection(db, 'visits');
-      const visitsSnap = await getDocs(visitsRef);
-      allVisits = visitsSnap.docs.map(doc => ({
-        ...doc.data(),
-        timestamp: doc.data().timestamp?.toDate?.() || new Date()
-      })).filter(v => v.email !== ADMIN_EMAIL);
-
-      updateAdminStats();
-      updateLastUpdate();
-    } catch (error) {
-      console.error('데이터 로드 오류:', error);
-    }
-  }
-
-  function updateAdminStats() {
-    const now = new Date();
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    // 전체 가입자
-    document.getElementById('totalUsers').textContent = allUsers.length;
-
-    // 7일 신규
-    const newUsers7d = allUsers.filter(u => {
-      const createdAt = u.createdAt?.toDate?.() || u.createdAt || new Date();
-      return createdAt >= sevenDaysAgo;
-    }).length;
-    document.getElementById('newUsers7d').textContent = newUsers7d;
-
-    // 7일 활성
-    const activeUsers7d = new Set(allVisits.filter(v => v.timestamp >= sevenDaysAgo).map(v => v.email)).size;
-    document.getElementById('activeUsers7d').textContent = activeUsers7d;
-
-    // 어제 활성
-    const activeYesterday = new Set(allVisits.filter(v => {
-      const vDate = v.timestamp;
-      return vDate >= yesterday && vDate < todayStart;
-    }).map(v => v.email)).size;
-    document.getElementById('activeUsersYesterday').textContent = activeYesterday;
-
-    // 오늘 활성
-    const activeToday = new Set(allVisits.filter(v => v.timestamp >= todayStart).map(v => v.email)).size;
-    document.getElementById('activeUsersToday').textContent = activeToday;
-
-    // 요청 통계
-    const unreadCount = allIdeas.filter(i => i.status !== 'read' && i.status !== 'archived').length;
-    document.getElementById('unreadIdeas').textContent = unreadCount;
-    document.getElementById('totalIdeas').textContent = allIdeas.length;
-
-    // 인기 도구
-    const toolCounts = {};
-    allVisits.forEach(v => {
-      if (v.tool) toolCounts[v.tool] = (toolCounts[v.tool] || 0) + 1;
-    });
-    const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
-    if (topTool) {
-      document.getElementById('topTool').textContent = topTool[0].substring(0, 15);
-      document.getElementById('topToolDetail').textContent = `${topTool[1]}회 접속`;
-    }
-
-    // 최근 가입자 (3일)
-    const recentUsers = allUsers.sort((a, b) => {
-      const aDate = a.createdAt?.toDate?.() || a.createdAt || new Date();
-      const bDate = b.createdAt?.toDate?.() || b.createdAt || new Date();
-      return bDate - aDate;
-    }).slice(0, 10);
-
-    const recentHtml = recentUsers.map(u => {
-      const isNew = u.createdAt && new Date(u.createdAt) >= threeDaysAgo;
-      const createdDate = u.createdAt?.toDate?.() || u.createdAt || new Date();
-      const createdStr = createdDate.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\./g, '.').slice(0, -1);
-      
-      // 이 사용자의 접속 기록
-      const userVisits = allVisits.filter(v => v.email === u.email);
-      const lastVisit = userVisits.length > 0 
-        ? userVisits.sort((a, b) => b.timestamp - a.timestamp)[0].timestamp 
-        : null;
-      const lastVisitStr = lastVisit ? formatDate(lastVisit) : '접속 없음';
-      const visitCount = userVisits.length;
-      
-      // 자주 사용하는 도구
-      const toolCounts = {};
-      userVisits.forEach(v => {
-        if (v.tool) toolCounts[v.tool] = (toolCounts[v.tool] || 0) + 1;
-      });
-      const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
-      const topToolStr = topTool ? `${topTool[0].substring(0, 12)} (${topTool[1]}회)` : '방문 기록 없음';
-      
-      return `
-        <div class="user-item">
-          <div class="user-info">
-            <div class="user-name">${u.name || '이름없음'}</div>
-            <div class="user-school">🏫 ${u.school || '학교 미지정'}</div>
-            <div class="user-email">📧 ${u.email || 'N/A'}</div>
-          </div>
-          <div class="user-stats">
-            <div class="stat-row">
-              <span class="stat-label">가입:</span>
-              <span class="stat-value">${createdStr}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">접속:</span>
-              <span class="stat-value">${lastVisitStr}</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">방문:</span>
-              <span class="stat-value">${visitCount}회</span>
-            </div>
-            <div class="stat-row">
-              <span class="stat-label">도구:</span>
-              <span class="stat-value" style="font-size: 11px;">${topToolStr}</span>
-            </div>
-          </div>
-          <div class="user-meta">
-            ${isNew ? '<span class="new-badge">🆕 신규</span>' : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const listEl = document.getElementById('recentUsersList');
-    if (listEl) listEl.innerHTML = recentHtml || '<div class="empty-state">가입자가 없습니다</div>';
-  }
-
-  function updateLastUpdate() {
-    const now = new Date();
-    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    const dateStr = now.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }).slice(0, -1);
-    document.getElementById('lastUpdate').textContent = `${dateStr} ${timeStr}`;
-  }
-
-  function formatDate(date) {
-    if (!date) return '-';
-    const d = new Date(date);
-    const now = new Date();
-    const diff = now - d;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (days > 0) return `${days}일 전`;
-    if (hours > 0) return `${hours}시간 전`;
-    if (minutes > 0) return `${minutes}분 전`;
-    return '방금';
-  }
-
-  // 글로벌 함수들
-  window.showAdminTab = function() {
-    const panel = document.getElementById('admin-panel');
-    if (panel.style.display === 'none') {
-      loadAdminData();
-      panel.style.display = 'block';
-    } else {
-      panel.style.display = 'none';
-    }
-  };
-
-  window.toggleQAPanel = function() {
-    const panel = document.getElementById('qaPanel');
-    const overlay = document.getElementById('qaOverlay');
-    panel.classList.toggle('show');
-    overlay.classList.toggle('show');
-  };
-
-  window.closeQAPanel = function() {
-    const panel = document.getElementById('qaPanel');
-    const overlay = document.getElementById('qaOverlay');
-    panel.classList.remove('show');
-    overlay.classList.remove('show');
-  };
-
-  window.toggleQA = function(element) {
-    element.classList.toggle('open');
-  };
-
-  // ESC 키로 닫기
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') window.closeQAPanel();
-  });
-
-  // 5분마다 새로고침
-  setInterval(() => {
-    if (document.getElementById('admin-panel').style.display !== 'none') {
-      loadAdminData();
-    }
-  }, 5 * 60 * 1000);
-
-
   if(user){ userProfile=await loadProfile(user.uid); }
   else { userProfile=null; view='hub'; }
   render();
   if(user&&userProfile) autoResolveSchool(); // 기존 가입자 학교코드 자동 매칭(1회)
-  if(user&&userProfile){trackVisit(user.uid);if(user.email===ADMIN_EMAIL){isAdmin=true;loadAdminData();}} // 접속 기록
+  if(user&&userProfile) trackVisit(user.uid); // 접속 기록
 });
 </script>
 
 
-<!-- 관리자 대시보드 탭 -->
+<!-- 관리자 대시보드 -->
 <div id="admin-panel" style="display: none;">
   <div class="admin-header">
     <h2>📊 관리자 대시보드</h2>
-    <div style="font-size: 12px; color: var(--mu);">
-      마지막 업데이트: <span id="lastUpdate">로딩중...</span>
-    </div>
+    <div style="font-size: 12px; color: var(--mu);">마지막 업데이트: <span id="lastUpdate">-</span></div>
   </div>
-
   <div class="admin-stats">
     <div class="admin-stat-card blue">
       <div class="stat-label">전체 가입자</div>
       <div class="stat-value" id="totalUsers">-</div>
       <div class="stat-detail">7일 신규: <strong id="newUsers7d">-</strong>명</div>
     </div>
-
     <div class="admin-stat-card green">
-      <div class="stat-label">최근 활성 (7일)</div>
+      <div class="stat-label">최근 활성</div>
       <div class="stat-value" id="activeUsers7d">-</div>
-      <div class="stat-detail">어제: <strong id="activeUsersYesterday">-</strong> / 오늘: <strong id="activeUsersToday">-</strong></div>
-    </div>
-
-    <div class="admin-stat-card orange">
-      <div class="stat-label">미처리 요청</div>
-      <div class="stat-value" id="unreadIdeas">-</div>
-      <div class="stat-detail">총 요청: <strong id="totalIdeas">-</strong>건</div>
-    </div>
-
-    <div class="admin-stat-card red">
-      <div class="stat-label">인기 도구 TOP 1</div>
-      <div class="stat-value" id="topTool" style="font-size: 18px;">-</div>
-      <div class="stat-detail" id="topToolDetail">-</div>
+      <div class="stat-detail">어제: <strong id="activeUsersYesterday">-</strong></div>
     </div>
   </div>
-
-  <div class="admin-new-users">
-    <h3>🆕 최근 가입자 (3일)</h3>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 10px;">
+    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--bd); padding-bottom: 0.75rem;">🆕 최근 가입자</h3>
     <div class="user-list" id="recentUsersList">
-      <div class="empty-state">로딩 중...</div>
+      <div style="text-align: center; padding: 2rem; color: var(--mu);">로딩 중...</div>
     </div>
   </div>
 </div>
 
-<!-- Q&A 패널 탭 -->
-<div class="qa-tab" onclick="toggleQAPanel()">
-  무엇이든
-  <br>물어보세요
-  <div class="qa-badge" id="newUserBadge" style="display: none;">0</div>
+<!-- Q&A 패널 -->
+<div class="qa-tab" onclick="toggleQAPanel()">무엇이든<br>물어보세요</div>
+<div class="qa-overlay" id="qaOverlay" onclick="closeQAPanel()"></div>
+<div class="qa-panel" id="qaPanel">
+  <div class="qa-head">
+    <h3>❓ 자주 묻는 질문</h3>
+    <button class="qa-close" onclick="closeQAPanel()">✕</button>
+  </div>
+  <div class="qa-body">
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-item-q">가입은 어떻게 하나요? <span class="qa-item-icon">▼</span></div>
+      <div class="qa-item-a"><strong>1단계:</strong> "코드 입력" 클릭<br><strong>2단계:</strong> 학교 선택<br><strong>3단계:</strong> 구글 로그인<br><strong>끝!</strong> 모든 도구 사용 가능</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-item-q">학교를 옮겼는데? <span class="qa-item-icon">▼</span></div>
+      <div class="qa-item-a">"🏫 학교변경" 버튼으로 바꿀 수 있어요. 연 1회 제한</div>
+    </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-item-q">나이스 급식이 안 떠요 <span class="qa-item-icon">▼</span></div>
+      <div class="qa-item-a">학교가 아직 안 올렸거나 유치원일 수 있습니다. 엑셀로 직접 업로드하세요!</div>
+    </div>
+  </div>
 </div>
 
 </body>
