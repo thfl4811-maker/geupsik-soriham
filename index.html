@@ -259,7 +259,7 @@
   .stat-row .stat-value { color: var(--g); font-weight: 600; }
   .user-meta { flex: 0 0 auto; }
   .new-badge { display: inline-block; background: var(--cl); color: var(--co); font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
-  .qa-tab { position: fixed; right: 0; top: calc(42% + 200px); z-index: 290; background: linear-gradient(135deg, var(--bl) 0%, #2563eb 100%); color: #fff; font-weight: 700; font-size: 12px; writing-mode: vertical-rl; text-orientation: upright; padding: 14px 9px; border-radius: 12px 0 0 12px; cursor: pointer; letter-spacing: .08em; user-select: none; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(43, 104, 172, 0.3); }
+  .qa-tab { position: fixed; right: 0; top: calc(42% + 300px); z-index: 290; background: linear-gradient(135deg, var(--bl) 0%, #2563eb 100%); color: #fff; font-weight: 700; font-size: 12px; writing-mode: vertical-rl; text-orientation: upright; padding: 14px 9px; border-radius: 12px 0 0 12px; cursor: pointer; letter-spacing: .08em; user-select: none; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(43, 104, 172, 0.3); }
   .qa-tab:hover { padding-right: 12px; box-shadow: 0 6px 16px rgba(43, 104, 172, 0.4); }
   .qa-overlay { position: fixed; inset: 0; background: rgba(15, 30, 20, .35); z-index: 400; display: none; }
   .qa-overlay.show { display: block; }
@@ -846,7 +846,7 @@ function renderHub() {
     </div>
   </div></nav>
 
-  <div class="l2-tab" id="l2Tab">📣 2차 강의 [배포예정]</div>
+  <div class="l2-tab" id="l2Tab">📣 2차 강의 <span style="text-orientation:mixed">[배포예정]</span></div>
   <div class="l2-overlay" id="l2Overlay"></div>
   <aside class="l2-panel" id="l2Panel">
     <div class="l2-head">
