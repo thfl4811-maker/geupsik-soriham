@@ -1286,6 +1286,10 @@ onAuthStateChanged(auth, async user=>{
       <div class="qa-item-q">사이트에 연결할 수 없어요 <span class="qa-item-icon">▼</span></div>
       <div class="qa-item-a">서버는 정상 작동 중이에요. 일부 학교(업무포털 등) 인터넷망에서 vercel.app 접속이 간헐적으로 차단되는 문제입니다.<br><br>✓ 휴대폰 LTE/5G로 접속해 보세요<br>✓ 계속되면 학교 정보담당자에게 "vercel.app 허용" 요청해 주세요</div>
     </div>
+    <div class="qa-item" onclick="toggleQA(this)">
+      <div class="qa-item-q">구글 로그인이 안 되거나 화면이 안 떠요 <span class="qa-item-icon">▼</span></div>
+      <div class="qa-item-a"><strong>① 팝업 차단 확인</strong><br>크롬 주소창에 <code>chrome://settings/content/popups</code> 입력 → "팝업 및 리디렉션 사용이 허용됨" 목록에 "추가" 클릭 → <code>https://geupsik-soriham.vercel.app</code> 입력<br>→ 급식소리함으로 돌아가 새로고침 후 다시 로그인<br><br><strong>② 그래도 안 되면</strong><br>Ctrl+Shift+N으로 시크릿 창을 열어 같은 주소로 접속 후 로그인 시도<br>→ 여기서 되면 크롬의 다른 설정이나 확장 프로그램이 원인이에요<br><br><strong>③ 그래도 안 되면</strong><br>Microsoft Edge 등 다른 브라우저에서 접속해 보세요<br><br>어느 방법에서 로그인이 되는지 문의처로 알려주시면 원인을 확인해 드릴게요</div>
+    </div>
   </div>
 </div>
 
