@@ -1093,8 +1093,100 @@ window.scrollTo_=function(id){
 // ────────────────────────────────────────────────────
 // 관리자 대시보드 - 글로벌 함수 & 변수
 // ────────────────────────────────────────────────────
-let adminData = { users: [], ideas: [], visits: [] };
+let adminData = { users: [], ideas: [] };
 const ADMIN_EMAIL = 'thfl4811@gmail.com';
+
+async function loadAdminData() {
+  const listEl = document.getElementById('recentUsersList');
+  if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--mu)">불러오는 중...</div>';
+  try {
+    const [users, ideas] = await Promise.all([loadSignups(), loadIdeas()]);
+    adminData.users = (users || []).filter(u => u.email !== ADMIN_EMAIL);
+    adminData.ideas = ideas || [];
+    updateAdminStats();
+    updateLastUpdate();
+  } catch (e) {
+    console.error('관리자 데이터 로드 실패', e);
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--co)">데이터를 불러오지 못했어요.</div>';
+  }
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diff = now - d;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  if (days > 0) return `${days}일 전`;
+  if (hours > 0) return `${hours}시간 전`;
+  if (minutes > 0) return `${minutes}분 전`;
+  return '방금';
+}
+
+function updateLastUpdate() {
+  const el = document.getElementById('lastUpdate');
+  if (el) el.textContent = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function updateAdminStats() {
+  const users = adminData.users;
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  const totalEl = document.getElementById('totalUsers');
+  if (totalEl) totalEl.textContent = users.length;
+
+  const newUsers7d = users.filter(u => u.joinedAt && new Date(u.joinedAt) >= sevenDaysAgo).length;
+  const newEl = document.getElementById('newUsers7d');
+  if (newEl) newEl.textContent = newUsers7d;
+
+  const active7d = users.filter(u => u.lastSeenAt && new Date(u.lastSeenAt) >= sevenDaysAgo).length;
+  const activeEl = document.getElementById('activeUsers7d');
+  if (activeEl) activeEl.textContent = active7d;
+
+  const activeYesterday = users.filter(u => u.lastSeenAt && new Date(u.lastSeenAt) >= yesterday).length;
+  const yEl = document.getElementById('activeUsersYesterday');
+  if (yEl) yEl.textContent = activeYesterday;
+
+  // 최근 가입자 (최대 15명)
+  const recent = [...users].sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0)).slice(0, 15);
+
+  const html = recent.map(u => {
+    const isNew = u.joinedAt && new Date(u.joinedAt) >= threeDaysAgo;
+    const joinedStr = u.joinedAt ? new Date(u.joinedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '-';
+    const lastSeenStr = u.lastSeenAt ? formatDate(u.lastSeenAt) : '접속 기록 없음';
+    const visitCount = u.visitCount || 0;
+
+    let topApp = '방문 기록 없음';
+    if (u.apps && typeof u.apps === 'object') {
+      const entries = Object.entries(u.apps).sort((a, b) => (b[1]?.count || 0) - (a[1]?.count || 0));
+      if (entries.length && entries[0][1]) topApp = `${entries[0][0]} (${entries[0][1].count || 0}회)`;
+    }
+
+    return `
+      <div class="user-item">
+        <div class="user-info">
+          <div class="user-name">${u.name || '이름없음'}</div>
+          <div class="user-school">🏫 ${u.school || '학교 미지정'}</div>
+          <div class="user-email">📧 ${u.email || '-'}</div>
+        </div>
+        <div class="user-stats">
+          <div class="stat-row"><span class="stat-label">가입:</span><span class="stat-value">${joinedStr}</span></div>
+          <div class="stat-row"><span class="stat-label">접속:</span><span class="stat-value">${lastSeenStr}</span></div>
+          <div class="stat-row"><span class="stat-label">방문:</span><span class="stat-value">${visitCount}회</span></div>
+          <div class="stat-row"><span class="stat-label">도구:</span><span class="stat-value" style="font-size:11px">${topApp}</span></div>
+        </div>
+        <div class="user-meta">${isNew ? '<span class="new-badge">🆕 신규</span>' : ''}</div>
+      </div>`;
+  }).join('');
+
+  const listEl = document.getElementById('recentUsersList');
+  if (listEl) listEl.innerHTML = html || '<div style="text-align:center;padding:2rem;color:var(--mu)">가입자가 없습니다</div>';
+}
 
 window.showAdminTab = function() {
   const panel = document.getElementById('admin-panel');
