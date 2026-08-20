@@ -221,7 +221,22 @@
   
 
   /* ====== 관리자 대시보드 + Q&A 패널 ====== */
-  #admin-panel { background: #f5f7fa; border-radius: 12px; padding: 2rem; margin-top: 2rem; }
+  #admin-panel { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    background: #fff; 
+    z-index: 500; 
+    overflow-y: auto; 
+    padding: 2rem; 
+    display: none;
+  }
+  
+  #admin-panel.show {
+    display: block !important;
+  }
   .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #fff; padding: 1.5rem; border-radius: 10px; border-left: 4px solid var(--g); }
   .admin-header h2 { font-size: 20px; font-weight: 700; color: var(--tx); margin: 0; }
   .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem; }
@@ -1083,11 +1098,10 @@ const ADMIN_EMAIL = 'thfl4811@gmail.com';
 
 window.showAdminTab = function() {
   const panel = document.getElementById('admin-panel');
-  const isHidden = panel.style.display === 'none';
-  panel.style.display = isHidden ? 'block' : 'none';
+  panel.classList.toggle('show');
   
   // 패널이 보일 때 데이터 로드
-  if (isHidden && typeof loadAdminData === 'function') {
+  if (panel.classList.contains('show') && typeof loadAdminData === 'function') {
     loadAdminData();
   }
 };
@@ -1127,7 +1141,10 @@ onAuthStateChanged(auth, async user=>{
 
 
 <!-- 관리자 대시보드 -->
-<div id="admin-panel" style="display: none;">
+<div id="admin-panel">
+  <div style="text-align: right; margin-bottom: 2rem;">
+    <button onclick="window.showAdminTab()" style="background: none; border: none; font-size: 16px; cursor: pointer; color: var(--mu);">← 뒤로 돌아가기</button>
+  </div>
   <div class="admin-header">
     <h2>📊 관리자 대시보드</h2>
     <div style="font-size: 12px; color: var(--mu);">마지막 업데이트: <span id="lastUpdate">-</span></div>
