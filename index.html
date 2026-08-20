@@ -1027,7 +1027,7 @@ function renderHub() {
   document.getElementById('logoutBtn').onclick = doSignOut;
   document.getElementById('schoolChangeBtn').onclick = changeSchoolFlow;
   document.getElementById('codeBtn').onclick = renderCodeModal;
-  if(isAdmin) document.getElementById('adminBtn').onclick=()=>{view='admin';render()};
+  if(isAdmin) document.getElementById('adminBtn').onclick=()=>{window.showAdminTab()};
 
   // ── 2차 강의 예고 패널 ──
   const l2Panel=document.getElementById('l2Panel'), l2Overlay=document.getElementById('l2Overlay');
@@ -1083,7 +1083,13 @@ const ADMIN_EMAIL = 'thfl4811@gmail.com';
 
 window.showAdminTab = function() {
   const panel = document.getElementById('admin-panel');
-  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  const isHidden = panel.style.display === 'none';
+  panel.style.display = isHidden ? 'block' : 'none';
+  
+  // 패널이 보일 때 데이터 로드
+  if (isHidden && typeof loadAdminData === 'function') {
+    loadAdminData();
+  }
 };
 
 window.toggleQAPanel = function() {
