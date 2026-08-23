@@ -1147,6 +1147,8 @@ function updateAdminStats() {
   const newUsers7d = users.filter(u => u.joinedAt && new Date(u.joinedAt) >= sevenDaysAgo).length;
   const newEl = document.getElementById('newUsers7d');
   if (newEl) newEl.textContent = newUsers7d;
+  const newCardEl = document.getElementById('newUsersCard');
+  if (newCardEl) newCardEl.textContent = newUsers7d + '명';
 
   const active7d = users.filter(u => u.lastSeenAt && new Date(u.lastSeenAt) >= sevenDaysAgo).length;
   const activeEl = document.getElementById('activeUsers7d');
@@ -1214,6 +1216,17 @@ window.filterAdminUsers = function(keyword) {
   ));
 }
 
+window.showNewUsersOnly = function() {
+  const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const base = adminData.sorted || [];
+  const newbies = base.filter(u => u.joinedAt && new Date(u.joinedAt) >= sevenDaysAgo);
+  renderAdminUserList(newbies);
+  const cntEl = document.getElementById('userListCount');
+  if (cntEl) cntEl.innerHTML = `${newbies.length}명 <span style="color:var(--am);font-size:12px">(최근 7일 신규만 표시 중 · <a href="javascript:void(0)" onclick="renderAdminUserList(adminData.sorted)" style="color:var(--bl)">전체 보기</a>)</span>`;
+  const listEl = document.getElementById('recentUsersList');
+  if (listEl) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 window.showAdminTab = function() {
   const panel = document.getElementById('admin-panel');
   panel.classList.toggle('show');
@@ -1277,6 +1290,11 @@ onAuthStateChanged(auth, async user=>{
       <div class="stat-label">최근 활성</div>
       <div class="stat-value" id="activeUsers7d">-</div>
       <div class="stat-detail">어제: <strong id="activeUsersYesterday">-</strong></div>
+    </div>
+    <div class="admin-stat-card" style="border-left-color: var(--am); cursor: pointer;" onclick="showNewUsersOnly()" title="클릭하면 신규 가입자만 보여요">
+      <div class="stat-label">최근 가입 (7일) 👆</div>
+      <div class="stat-value" id="newUsersCard">-</div>
+      <div class="stat-detail">클릭하면 누가 가입했는지 볼 수 있어요</div>
     </div>
   </div>
   <div style="background: #fff; padding: 1.5rem; border-radius: 10px;">
