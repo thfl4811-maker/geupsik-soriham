@@ -1158,8 +1158,13 @@ function updateAdminStats() {
   const yEl = document.getElementById('activeUsersYesterday');
   if (yEl) yEl.textContent = activeYesterday;
 
-  // 전체 가입자 목록 (가입일 최신순)
-  const sorted = [...users].sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0));
+  // 전체 가입자 목록 (최근 접속순 → 접속 기록 없으면 가입일순으로 뒤에)
+  const sorted = [...users].sort((a, b) => {
+    const aSeen = a.lastSeenAt ? new Date(a.lastSeenAt).getTime() : 0;
+    const bSeen = b.lastSeenAt ? new Date(b.lastSeenAt).getTime() : 0;
+    if (bSeen !== aSeen) return bSeen - aSeen;
+    return new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0);
+  });
   adminData.sorted = sorted;
   renderAdminUserList(sorted);
 }
