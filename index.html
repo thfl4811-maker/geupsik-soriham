@@ -1156,25 +1156,34 @@ function updateAdminStats() {
   const yEl = document.getElementById('activeUsersYesterday');
   if (yEl) yEl.textContent = activeYesterday;
 
-  // 최근 가입자 (최대 15명)
-  const recent = [...users].sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0)).slice(0, 15);
+  // 전체 가입자 목록 (가입일 최신순)
+  const sorted = [...users].sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0));
+  adminData.sorted = sorted;
+  renderAdminUserList(sorted);
+}
 
-  const html = recent.map(u => {
+function renderAdminUserList(list) {
+  const now = new Date();
+  const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
+
+  const html = list.map(u => {
     const isNew = u.joinedAt && new Date(u.joinedAt) >= threeDaysAgo;
     const joinedStr = u.joinedAt ? new Date(u.joinedAt).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' }) : '-';
     const lastSeenStr = u.lastSeenAt ? formatDate(u.lastSeenAt) : '접속 기록 없음';
     const visitCount = u.visitCount || 0;
 
-    let topApp = '방문 기록 없음';
+    let toolsStr = '방문 기록 없음';
     if (u.apps && typeof u.apps === 'object') {
-      const entries = Object.entries(u.apps).sort((a, b) => (b[1]?.count || 0) - (a[1]?.count || 0));
-      if (entries.length && entries[0][1]) topApp = `${entries[0][0]} (${entries[0][1].count || 0}회)`;
+      const entries = Object.entries(u.apps)
+        .filter(e => e[1] && (e[1].count || 0) > 0)
+        .sort((a, b) => (b[1].count || 0) - (a[1].count || 0));
+      if (entries.length) toolsStr = entries.map(e => `${e[0]} ${e[1].count || 0}회`).join(' · ');
     }
 
     return `
       <div class="user-item">
         <div class="user-info">
-          <div class="user-name">${u.name || '이름없음'}</div>
+          <div class="user-name">${u.name || '이름없음'} ${isNew ? '<span class="new-badge">🆕 신규</span>' : ''}</div>
           <div class="user-school">🏫 ${u.school || '학교 미지정'}</div>
           <div class="user-email">📧 ${u.email || '-'}</div>
         </div>
@@ -1182,14 +1191,27 @@ function updateAdminStats() {
           <div class="stat-row"><span class="stat-label">가입:</span><span class="stat-value">${joinedStr}</span></div>
           <div class="stat-row"><span class="stat-label">접속:</span><span class="stat-value">${lastSeenStr}</span></div>
           <div class="stat-row"><span class="stat-label">방문:</span><span class="stat-value">${visitCount}회</span></div>
-          <div class="stat-row"><span class="stat-label">도구:</span><span class="stat-value" style="font-size:11px">${topApp}</span></div>
+          <div class="stat-row" style="grid-column:1/-1"><span class="stat-label">도구:</span><span class="stat-value" style="font-size:11px">${toolsStr}</span></div>
         </div>
-        <div class="user-meta">${isNew ? '<span class="new-badge">🆕 신규</span>' : ''}</div>
       </div>`;
   }).join('');
 
   const listEl = document.getElementById('recentUsersList');
   if (listEl) listEl.innerHTML = html || '<div style="text-align:center;padding:2rem;color:var(--mu)">가입자가 없습니다</div>';
+
+  const cntEl = document.getElementById('userListCount');
+  if (cntEl) cntEl.textContent = `${list.length}명`;
+}
+
+window.filterAdminUsers = function(keyword) {
+  const kw = (keyword || '').trim().toLowerCase();
+  const base = adminData.sorted || [];
+  if (!kw) { renderAdminUserList(base); return; }
+  renderAdminUserList(base.filter(u =>
+    (u.name || '').toLowerCase().includes(kw) ||
+    (u.school || '').toLowerCase().includes(kw) ||
+    (u.email || '').toLowerCase().includes(kw)
+  ));
 }
 
 window.showAdminTab = function() {
@@ -1258,7 +1280,8 @@ onAuthStateChanged(auth, async user=>{
     </div>
   </div>
   <div style="background: #fff; padding: 1.5rem; border-radius: 10px;">
-    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--bd); padding-bottom: 0.75rem;">🆕 최근 가입자</h3>
+    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--bd); padding-bottom: 0.75rem;">👥 전체 가입자 <span id="userListCount" style="color:var(--g)"></span></h3>
+    <input type="text" placeholder="🔍 이름·학교·이메일로 검색" oninput="filterAdminUsers(this.value)" style="width:100%;padding:10px 12px;margin-bottom:14px;border:1px solid var(--bd);border-radius:8px;font-size:13px;box-sizing:border-box">
     <div class="user-list" id="recentUsersList">
       <div style="text-align: center; padding: 2rem; color: var(--mu);">로딩 중...</div>
     </div>
