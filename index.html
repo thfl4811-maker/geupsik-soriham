@@ -1158,6 +1158,49 @@ function updateAdminStats() {
   const yEl = document.getElementById('activeUsersYesterday');
   if (yEl) yEl.textContent = activeYesterday;
 
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const activeToday = users.filter(u => u.lastSeenAt && new Date(u.lastSeenAt) >= todayStart).length;
+  const tEl = document.getElementById('activeUsersToday');
+  if (tEl) tEl.textContent = activeToday;
+
+  // 어플 요청
+  const ideas = adminData.ideas || [];
+  const iEl = document.getElementById('ideasCount');
+  if (iEl) iEl.textContent = ideas.length + '건';
+  const iList = document.getElementById('adminIdeasList');
+  if (iList) {
+    iList.innerHTML = ideas.length ? ideas.map(i => `
+      <div style="background:#f9fafb;border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:9px;">
+        <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
+          <span style="font-weight:700;font-size:13.5px;">💡 ${esc(i.title || '(제목 없음)')}</span>
+          <span style="font-size:11px;color:var(--mu)">${i.createdAt ? new Date(i.createdAt).toLocaleString('ko-KR') : '-'}</span>
+        </div>
+        <div style="font-size:12px;color:var(--mu);margin-bottom:6px;">${esc(i.name || '이름 미상')} · ${esc(i.school || '학교 미상')} · ${esc(i.email || '')}</div>
+        <div style="font-size:13px;white-space:pre-wrap;word-break:keep-all;">${esc(i.idea || '')}</div>
+      </div>`).join('') : '<p style="color:var(--mu)">아직 도착한 아이디어가 없어요.</p>';
+  }
+
+  // 도구별 사용 현황 (전체 가입자 apps 집계)
+  const toolAgg = {};
+  users.forEach(u => {
+    if (u.apps && typeof u.apps === 'object') {
+      Object.entries(u.apps).forEach(([tool, v]) => {
+        if (!v || !(v.count > 0)) return;
+        if (!toolAgg[tool]) toolAgg[tool] = { count: 0, people: 0 };
+        toolAgg[tool].count += v.count;
+        toolAgg[tool].people += 1;
+      });
+    }
+  });
+  const toolEl = document.getElementById('adminToolStats');
+  if (toolEl) {
+    const sortedTools = Object.entries(toolAgg).sort((a, b) => b[1].count - a[1].count);
+    toolEl.innerHTML = sortedTools.length ? sortedTools.map(([tool, v]) => `
+      <span style="background:#f9fafb;border:1px solid var(--bd);border-radius:99px;padding:7px 14px;font-size:12.5px;">
+        <b>${esc(tool)}</b> <span style="color:var(--g);font-weight:700">${v.count}회</span> <span style="color:var(--mu)">· ${v.people}명</span>
+      </span>`).join('') : '<span style="color:var(--mu)">아직 사용 기록이 없어요.</span>';
+  }
+
   // 전체 가입자 목록 (최근 접속순 → 접속 기록 없으면 가입일순으로 뒤에)
   const sorted = [...users].sort((a, b) => {
     const aSeen = a.lastSeenAt ? new Date(a.lastSeenAt).getTime() : 0;
@@ -1260,8 +1303,18 @@ window.toggleQA = function(element) {
   element.classList.toggle('open');
 };
 
+window.toggleAdminIdeas = function() {
+  const box = document.getElementById('adminIdeasBox');
+  if (box) box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+window.loadAdminData = loadAdminData;
+
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') window.closeQAPanel();
+  if (e.key === 'Escape') {
+    window.closeQAPanel();
+    const ap = document.getElementById('admin-panel');
+    if (ap) ap.classList.remove('show');
+  }
 });
 
 
@@ -1283,7 +1336,7 @@ onAuthStateChanged(auth, async user=>{
   </div>
   <div class="admin-header">
     <h2>📊 관리자 대시보드</h2>
-    <div style="font-size: 12px; color: var(--mu);">마지막 업데이트: <span id="lastUpdate">-</span></div>
+    <div style="font-size: 12px; color: var(--mu);">마지막 업데이트: <span id="lastUpdate">-</span> <button onclick="loadAdminData()" style="margin-left:8px;padding:4px 10px;border:1px solid var(--bd);border-radius:8px;background:#fff;cursor:pointer;font-size:12px">🔄 새로고침</button></div>
   </div>
   <div class="admin-stats">
     <div class="admin-stat-card blue">
@@ -1294,13 +1347,26 @@ onAuthStateChanged(auth, async user=>{
     <div class="admin-stat-card green">
       <div class="stat-label">최근 활성</div>
       <div class="stat-value" id="activeUsers7d">-</div>
-      <div class="stat-detail">어제: <strong id="activeUsersYesterday">-</strong></div>
+      <div class="stat-detail">오늘: <strong id="activeUsersToday">-</strong> · 어제: <strong id="activeUsersYesterday">-</strong></div>
     </div>
     <div class="admin-stat-card" style="border-left-color: var(--am); cursor: pointer;" onclick="showNewUsersOnly()" title="클릭하면 신규 가입자만 보여요">
       <div class="stat-label">최근 가입 (7일) 👆</div>
       <div class="stat-value" id="newUsersCard">-</div>
       <div class="stat-detail">클릭하면 누가 가입했는지 볼 수 있어요</div>
     </div>
+    <div class="admin-stat-card" style="border-left-color: var(--co); cursor: pointer;" onclick="toggleAdminIdeas()" title="클릭하면 요청 내용을 보여요">
+      <div class="stat-label">💡 어플 요청 👆</div>
+      <div class="stat-value" id="ideasCount">-</div>
+      <div class="stat-detail">클릭하면 요청 내용이 펼쳐져요</div>
+    </div>
+  </div>
+  <div id="adminIdeasBox" style="display:none;background:#fff;padding:1.5rem;border-radius:10px;margin-bottom:2rem;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:1rem;border-bottom:1px solid var(--bd);padding-bottom:.75rem;">💡 어플 요청 쪽지함</h3>
+    <div id="adminIdeasList"></div>
+  </div>
+  <div style="background:#fff;padding:1.5rem;border-radius:10px;margin-bottom:2rem;">
+    <h3 style="font-size:14px;font-weight:700;margin-bottom:1rem;border-bottom:1px solid var(--bd);padding-bottom:.75rem;">🏆 도구별 사용 현황</h3>
+    <div id="adminToolStats" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
   </div>
   <div style="background: #fff; padding: 1.5rem; border-radius: 10px;">
     <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 1rem; border-bottom: 1px solid var(--bd); padding-bottom: 0.75rem;">👥 전체 가입자 <span id="userListCount" style="color:var(--g)"></span></h3>
