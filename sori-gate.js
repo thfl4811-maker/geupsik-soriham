@@ -87,11 +87,38 @@
       msg('이 도구는 급식소리함 가입 선생님 전용이에요.<br>가입하신 구글 계정으로 로그인해주세요.');
       body('<button id="soriGateLogin" style="' + BTN + 'background:#2563eb;color:#fff">구글로 로그인</button>');
       document.getElementById('soriGateLogin').onclick = function () {
-        auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(function (e) {
-          msg('로그인에 실패했어요: ' + (e && e.message ? e.message : '') + '<br>다시 시도해주세요.');
+        var provider = new firebase.auth.GoogleAuthProvider();
+        auth.signInWithPopup(provider).catch(function (e) {
+          var code = e && e.code ? e.code : '';
+          if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+            /* 팝업이 차단된 환경 → 리다이렉트 방식으로 자동 전환 */
+            msg('브라우저가 로그인 창(팝업)을 차단해서<br>다른 방식으로 로그인을 진행할게요…');
+            body('<div style="color:#94a3b8;font-size:14px">구글 로그인 화면으로 이동 중…</div>');
+            auth.signInWithRedirect(provider).catch(function () {
+              msg('로그인 창이 계속 차단되고 있어요.<br>' +
+                '주소창 오른쪽의 <b>팝업 차단 아이콘</b>을 눌러<br>' +
+                '이 사이트의 팝업을 <b>허용</b>한 뒤 다시 시도해주세요.');
+              showLoginButtonOnly();
+            });
+          } else if (code === 'auth/popup-closed-by-user') {
+            msg('로그인 창이 닫혔어요.<br>다시 시도해주세요.');
+          } else {
+            msg('로그인에 실패했어요: ' + (e && e.message ? e.message : '') + '<br>다시 시도해주세요.');
+          }
         });
       };
     }
+
+    function showLoginButtonOnly() {
+      body('<button id="soriGateLogin2" style="' + BTN + 'background:#2563eb;color:#fff">구글로 로그인</button>');
+      var b = document.getElementById('soriGateLogin2');
+      if (b) b.onclick = function () { showLogin(); var l = document.getElementById('soriGateLogin'); if (l) l.click(); };
+    }
+
+    /* 리다이렉트 방식으로 돌아온 경우의 오류 처리 (성공은 onAuthStateChanged가 받음) */
+    auth.getRedirectResult().catch(function (e) {
+      msg('로그인에 실패했어요: ' + (e && e.message ? e.message : '') + '<br>다시 시도해주세요.');
+    });
 
     function showNotMember(email) {
       msg('<b>' + (email || '이 계정') + '</b>은 급식소리함에 가입되어 있지 않아요.<br>' +
