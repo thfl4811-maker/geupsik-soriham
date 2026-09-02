@@ -310,7 +310,9 @@ const ADMIN = 'thfl4811@gmail.com';
 // ── 강의 코드 설정 (여기서 코드 관리) ──
 const CODES = [
   { h:'7042e89645a07deabb1650dfb0684c2ab0a3bcb4b2370683556062adac36b424', tier:1, label:'1차 강의', expiresAt:'2099-12-31' },
-  { h:'67c2d3ad3eda08f6522014b6e7009b1a6a55a3535b41cb464758332a167bb84f', tier:2, label:'2차 강의', expiresAt:'2099-12-31' }
+  { h:'67c2d3ad3eda08f6522014b6e7009b1a6a55a3535b41cb464758332a167bb84f', tier:2, label:'2차 강의', expiresAt:'2099-12-31' },
+  /* 그룹 코드: 등급을 올리지 않고 groups 배열에 해당 그룹만 추가해, groups가 지정된 카드만 열어줌 */
+  { h:'9fab831f526a61f0bee8968c77e15ab2889e09eb3164fa9a2b75f96f0533fb52', group:'policy', label:'정책실행연구회', expiresAt:'2099-12-31' }
 ];
 async function sha256Hex(s){
   const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
@@ -327,7 +329,7 @@ const CATS = [
       { featured:true, featOrder:2, featName:'스마트 월간식단 뷰어', featCat:'식단 기획·급식 운영', name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
       { featured:true, featOrder:3, featCat:'식단 기획·급식 운영', name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
       { featured:true, featOrder:4, featCat:'식단 기획·급식 운영', name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
-      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2 },
+      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2, groups:['policy'] },
       { name:'⭐ 추천식단 캘린더 · 초안 식단 보드', desc:'특일·학사일정 캘린더에 스크랩 식단을 배치해 월간 식단 초안 작성', url:'https://smart-meal-archive.vercel.app/?view=recommend&beta=SORI-2ND', tier:2 },
     ]
   },
@@ -657,9 +659,16 @@ function renderCodeModal() {
     const matched=CODES.find(c=>c.h===hash);
     if(!matched){errEl.textContent='올바르지 않은 코드예요.';input.value='';return;}
     if(matched.expiresAt && new Date() > new Date(matched.expiresAt)){errEl.textContent='만료된 코드예요. 강의 담당자에게 문의해주세요.';return;}
-    if(matched.tier<=( userProfile.tier||0)){errEl.textContent='이미 적용된 코드예요.';return;}
-    userProfile.tier=matched.tier;
-    await saveProfile(currentUser.uid,{...userProfile,tier:matched.tier});
+    if(matched.group){
+      const gs=userProfile.groups||[];
+      if(gs.includes(matched.group)){errEl.textContent='이미 적용된 코드예요.';return;}
+      userProfile.groups=[...gs,matched.group];
+      await saveProfile(currentUser.uid,{...userProfile});
+    } else {
+      if(matched.tier<=( userProfile.tier||0)){errEl.textContent='이미 적용된 코드예요.';return;}
+      userProfile.tier=matched.tier;
+      await saveProfile(currentUser.uid,{...userProfile,tier:matched.tier});
+    }
     div.remove();
     alert(`✅ ${matched.label} 코드가 적용됐어요! 새로운 도구가 열렸어요.`);
     render();
@@ -826,8 +835,11 @@ window.goGuide=function(){ view='guide'; render(); };
 function renderHub() {
   const isAdmin  = currentUser && currentUser.email === ADMIN_EMAIL;
   const userTier = isAdmin ? 3 : (userProfile.tier || 0);
+  const userGroups = userProfile.groups || [];
+  const hasGroup = t => !!(t.groups && t.groups.some(g=>userGroups.includes(g)));
+  const canUse = t => (t.tier<=userTier || hasGroup(t)) && !!t.url;
   const totalTools = CATS.reduce((s,c)=>s+c.tools.length,0);
-  const visibleTools = CATS.reduce((s,c)=>s+c.tools.filter(t=>t.tier<=userTier&&t.url).length,0);
+  const visibleTools = CATS.reduce((s,c)=>s+c.tools.filter(canUse).length,0);
 
   app.innerHTML=`
   <nav class="nav"><div class="nav-in">
@@ -952,6 +964,7 @@ function renderHub() {
   <div class="tier-banner">
     <div class="tier-banner-inner">
       <span class="tier-badge tier-badge-${userTier}">${TIER_LABELS[userTier]||'기본'}</span>
+      ${userGroups.includes('policy')?'<span class="tier-badge" style="background:#E8F0FE;color:#2B68AC">🤝 정책실행연구회</span>':''}
       <span class="tier-text">
         ${userTier===0?'웹앱이 개발되고 강의 코드를 입력하면 더 많은 도구가 열려요.':
           userTier===1?'1차 강의 코드가 적용됐어요. 개발이 되어 웹앱이 배포되면 2차 강의 코드로 웹앱을 더 열 수 있어요.':
@@ -969,7 +982,7 @@ function renderHub() {
       <div class="cat-card" onclick="scrollTo_('${c.id}')">
         <div class="cat-ico" style="background:${c.cl}">${c.icon}</div>
         <div class="cat-name">${esc(c.name)}</div>
-        <div class="cat-meta">${c.tools.filter(t=>t.tier<=userTier&&t.url).length}/${c.tools.length}개 이용 가능</div>
+        <div class="cat-meta">${c.tools.filter(canUse).length}/${c.tools.length}개 이용 가능</div>
       </div>`).join('')}
     </div>
   </div>
@@ -979,11 +992,11 @@ function renderHub() {
     <div class="sec-head" style="border-color:${c.c}">
       <div class="sec-ico" style="background:${c.cl}">${c.icon}</div>
       <span class="sec-title">${esc(c.name)}</span>
-      <span class="sec-meta">${c.tools.filter(t=>t.tier<=userTier&&t.url).length}/${c.tools.length}개 이용 가능</span>
+      <span class="sec-meta">${c.tools.filter(canUse).length}/${c.tools.length}개 이용 가능</span>
     </div>
     <div class="tool-grid">
       ${c.tools.map(t=>{
-        if(t.tier>=3 && !isAdmin) {
+        if(t.tier>=3 && !isAdmin && !hasGroup(t)) {
           /* 관리자 전용 도구 — 다른 분들께는 개발 중으로만 보임 */
           return `<div class="tool-card soon">
             <div class="tool-ico gray">🌱</div>
@@ -996,7 +1009,7 @@ function renderHub() {
             <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">관리자 전용 · 시험 중 (다른 분께는 ‘개발 중’으로 보여요)</div></div>
             <span class="ext">↗</span>
           </a>`;
-        } else if(t.tier>userTier) {
+        } else if(t.tier>userTier && !hasGroup(t)) {
           return `<div class="tool-card soon">
             <div class="tool-ico gray">🔑</div>
             <div class="tool-text"><div class="tool-name">${esc(t.name)}</div><div class="tool-desc">${t.tier>=2?'2차':'1차'} 직무연수에서 공개되는 도구예요 · 연수 후 강의 코드를 입력하면 열려요</div></div>
