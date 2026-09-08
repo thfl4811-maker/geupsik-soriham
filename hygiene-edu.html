@@ -369,11 +369,65 @@ SoriAI.init({
 });
 const ask = p => SoriAI.run(p);
 function clean(html){
-  return String(html)
+  let t = String(html)
     .replace(/```html|```/g, '')
     .replace(/<\/?(html|head|body|script|style)[^>]*>/gi, '')
     .replace(/ style="[^"]*"/gi, '')
     .trim();
+  /* 무물위는 챗봇용이라 마크다운으로 답할 때가 있다. 그럴 땐 서식으로 바꿔 준다. */
+  if (!/<h[1-3]|<table|<p>/i.test(t)) t = md2html(t);
+  return t;
+}
+
+function md2html(src){
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = s => esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/(?<![*\w])\*([^*\n]+)\*(?!\*)/g, '<i>$1</i>');
+  const lines = src.split('\n');
+  const out = [];
+  let list = null, tbl = null;
+
+  const closeList = () => { if (list){ out.push('</' + list + '>'); list = null; } };
+  const closeTbl = () => {
+    if (!tbl) return;
+    const rows = tbl.filter(r => !/^[\s|:-]+$/.test(r));
+    const cells = r => r.replace(/^\||\|$/g,'').split('|').map(c => inline(c.trim()));
+    let h = '<table>';
+    rows.forEach((r,i) => {
+      const tag = i === 0 ? 'th' : 'td';
+      h += '<tr>' + cells(r).map(c => `<${tag}>${c}</${tag}>`).join('') + '</tr>';
+    });
+    out.push(h + '</table>');
+    tbl = null;
+  };
+
+  for (let raw of lines){
+    const line = raw.replace(/\s+$/,'');
+    if (/^\s*\|.*\|\s*$/.test(line)){ closeList(); (tbl = tbl || []).push(line.trim()); continue; }
+    closeTbl();
+
+    if (!line.trim()){ closeList(); continue; }
+    if (/^\s*(---|___|\*\*\*)\s*$/.test(line)){ closeList(); continue; }
+
+    let m;
+    if ((m = line.match(/^\s*#{1,2}\s+(.*)$/))){ closeList(); out.push('<h2>' + inline(m[1]) + '</h2>'); continue; }
+    if ((m = line.match(/^\s*#{3,6}\s+(.*)$/))){ closeList(); out.push('<h3>' + inline(m[1]) + '</h3>'); continue; }
+    if ((m = line.match(/^\s*[-*·•]\s+(.*)$/))){
+      if (list !== 'ul'){ closeList(); out.push('<ul>'); list = 'ul'; }
+      out.push('<li>' + inline(m[1]) + '</li>'); continue;
+    }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))){
+      if (list !== 'ol'){ closeList(); out.push('<ol>'); list = 'ol'; }
+      out.push('<li>' + inline(m[1]) + '</li>'); continue;
+    }
+    closeList();
+    const txt = inline(line.trim());
+    if (/^\(?근거\s*[:：]/.test(line.trim())) out.push('<p class="ref">' + txt + '</p>');
+    else out.push('<p>' + txt + '</p>');
+  }
+  closeList(); closeTbl();
+  return out.join('\n');
 }
 const esc = s => String(s).replace(/[<>&]/g, m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
 
