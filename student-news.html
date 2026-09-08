@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>영양소식지·가정통신문 만들기 · 급식"소리"함</title>
+<meta name="description" content="월별 절기와 제철 식재료로 영양소식지, 학생 활동지, 가정통신문을 만듭니다.">
+<style>
+:root{
+  --ink:#12203a; --ink-soft:#4a5a76; --line:#dfe6f2; --line-soft:#eef2f9;
+  --blue:#1a4fd6; --blue-dark:#123a9e; --blue-tint:#eef3ff; --bg:#f6f8fc;
+  --white:#fff; --warn-bg:#fff6ec; --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+a{color:var(--blue)}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #7ba0ff;outline-offset:2px}
+
+header{background:var(--white);border-bottom:1px solid var(--line)}
+.head-in{max-width:1180px;margin:0 auto;padding:18px 20px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.head-in h1{font-size:22px}
+.head-in .sub{color:var(--ink-soft);font-size:14px}
+.head-in .home{margin-left:auto;font-size:14px;text-decoration:none;color:var(--ink-soft)}
+.hero{max-width:1180px;margin:0 auto;padding:26px 20px 6px}
+.hero p{margin:0;max-width:64ch;color:var(--ink-soft)}
+.hero strong{color:var(--ink)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 80px;display:grid;gap:22px;
+  grid-template-columns:minmax(0,1fr) 470px;align-items:start}
+@media (max-width:1020px){.wrap{grid-template-columns:1fr}}
+
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.card > h2{font-size:17px;display:flex;align-items:center;gap:10px}
+.step-no{flex:none;width:24px;height:24px;border-radius:7px;background:var(--blue);color:#fff;
+  font-size:13px;font-weight:700;display:grid;place-items:center}
+.hint{color:var(--ink-soft);font-size:14px;margin:6px 0 16px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.label{font-size:14px;font-weight:600;margin-bottom:7px;display:block}
+input[type=text],input[type=date],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);
+  border-radius:10px;background:var(--white)}
+textarea{min-height:76px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--white);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--ink-soft)}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.months{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+@media (max-width:560px){.months{grid-template-columns:repeat(4,1fr)}}
+.mo{border:1px solid var(--line);background:var(--white);border-radius:10px;padding:9px 0;font-size:14px;color:var(--ink-soft)}
+.mo[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:700}
+
+/* 그달 재료 미리보기 */
+.seed{background:var(--blue-tint);border:1px solid #cfdcfb;border-radius:12px;padding:14px 16px;margin-top:14px;font-size:14px}
+.seed dl{margin:0;display:grid;grid-template-columns:74px 1fr;gap:4px 10px}
+.seed dt{color:var(--blue-dark);font-weight:600}
+.seed dd{margin:0}
+.seed .tiny{font-size:12.5px;color:var(--ink-soft);margin-top:10px}
+
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line-soft)}
+.opt:first-of-type{border-top:0}
+.opt input{margin-top:5px;width:17px;height:17px;accent-color:var(--blue)}
+.opt b{font-size:14.5px;font-weight:600}
+.opt span{display:block;font-size:13px;color:var(--ink-soft)}
+
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:10px;padding:11px 16px;font-size:14.5px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--white);color:var(--blue)}
+.btn.quiet{background:var(--white);color:var(--ink-soft);border-color:var(--line)}
+.btn.wide{width:100%}
+
+.panel{position:sticky;top:18px}
+@media (max-width:1020px){.panel{position:static}}
+.sheet{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px;min-height:340px;max-height:66vh;overflow:auto}
+.sheet.placeholder{display:grid;place-items:center;color:var(--ink-soft);text-align:center;font-size:14.5px}
+.panel-actions{display:flex;gap:8px;margin-top:12px}
+.panel-actions .btn{flex:1}
+.note{font-size:13px;color:var(--ink-soft);margin-top:12px;background:var(--white);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+
+.doc h1{font-size:20px;text-align:center;margin-bottom:6px}
+.doc .meta{font-size:13px;color:var(--ink-soft);text-align:center;
+  border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:18px}
+.doc h2{font-size:15.5px;margin:20px 0 8px;background:var(--line-soft);
+  border-left:5px solid var(--blue);padding:7px 10px}
+.doc h3{font-size:14.5px;margin:14px 0 4px}
+.doc p,.doc li{font-size:14.5px}
+.doc ul,.doc ol{padding-left:20px;margin:6px 0}
+.doc li{margin:3px 0}
+.doc table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.doc th,.doc td{border:1px solid #7f8ea8;padding:6px 8px;vertical-align:top}
+.doc th{background:var(--line-soft);font-weight:600;text-align:center}
+.doc blockquote{margin:10px 0;padding:10px 14px;background:var(--warn-bg);border-left:4px solid #e0a35a;font-size:14px}
+.doc .imgprompt{background:#0f1b30;color:#e8eefc;border-radius:10px;padding:14px;font-size:13px;
+  white-space:pre-wrap;line-height:1.6}
+.doc .cut{border:0;border-top:2px dashed #9fb0cc;margin:22px 0}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;color:var(--ink-soft);font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+@media print{
+  body{background:#fff;font-size:11pt}
+  header,.hero,main,footer,.panel-actions,.note,.toast{display:none!important}
+  .wrap{display:block;padding:0;max-width:none}
+  .panel{position:static}
+  .sheet{border:0;border-radius:0;padding:0;max-height:none;overflow:visible}
+  .doc .imgprompt{display:none}
+  .doc .cut{break-after:page;border:0;margin:0}
+  @page{size:A4;margin:16mm 15mm}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <h1>영양소식지·가정통신문 만들기</h1>
+    <span class="sub">그달 절기와 제철 식재료로</span>
+    <a class="home" href="/">← 급식"소리"함</a>
+  </div>
+</header>
+
+<div class="hero">
+  <p>월을 고르면 그달의 절기·기념일·제철 식재료가 재료로 들어갑니다.
+  <strong>A4 한 장짜리 영양소식지</strong>, <strong>학생 활동지</strong>, <strong>가정통신문 문안</strong>을 함께 만들 수 있고,
+  카드뉴스로 꾸미고 싶으면 <strong>그림 프롬프트</strong>까지 뽑아 드립니다.</p>
+</div>
+
+<div class="wrap">
+<main>
+
+  <div id="ai"></div>
+
+  <section class="card">
+    <h2><span class="step-no">1</span>어느 달인가요</h2>
+    <p class="hint">다음 달 것을 미리 만드는 경우가 많아 이번 달과 다음 달을 함께 보여 드립니다.</p>
+    <div class="months" id="months"></div>
+    <div class="seed" id="seed"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">2</span>누구에게 가나요</h2>
+    <div class="field"><label class="label">학교급</label><div class="chips" id="level"></div></div>
+    <div class="field">
+      <label class="label" for="theme">이달 중심 주제 <span style="color:var(--ink-soft);font-weight:400">(비우면 위 재료에서 고릅니다)</span></label>
+      <input type="text" id="theme" placeholder="예: 추석과 햅쌀, 아침밥 먹기, 잔반 줄이기">
+    </div>
+    <div class="field">
+      <label class="label" for="extra">우리 학교 사정 <span style="color:var(--ink-soft);font-weight:400">(선택)</span></label>
+      <textarea id="extra" placeholder="예: 다음 달부터 자율선택급식을 시작해서 배식 방법을 함께 안내하고 싶어요."></textarea>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">3</span>무엇을 만들까요</h2>
+    <label class="opt"><input type="checkbox" id="mNews" checked>
+      <span><b>영양소식지</b><span>A4 한 장. 절기 인사 → 제철 식재료 → 이달 이야기 → 급식 한마디</span></span></label>
+    <label class="opt"><input type="checkbox" id="mAct" checked>
+      <span><b>학생 활동지</b><span>고른 학교급에 맞는 활동 하나. 인쇄해서 바로 나눠 줄 수 있게</span></span></label>
+    <label class="opt"><input type="checkbox" id="mLetter">
+      <span><b>가정통신문 문안</b><span>학교 문서 형식. 제목·본문·안내사항</span></span></label>
+    <label class="opt"><input type="checkbox" id="mImg">
+      <span><b>그림 프롬프트</b><span>카드뉴스용. 복사해서 식단 게시자료 프롬프트 생성기에 넣으세요</span></span></label>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">4</span>학교 정보</h2>
+    <div class="two">
+      <div class="field"><label class="label" for="school">학교명</label>
+        <input type="text" id="school" placeholder="예: 동탄중앙고등학교"></div>
+      <div class="field"><label class="label" for="teacher">작성자</label>
+        <input type="text" id="teacher" placeholder="예: 영양교사 김소리"></div>
+    </div>
+    <button class="btn quiet" id="save">이 학교 정보 기억</button>
+  </section>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn" id="make">자료 만들기</button>
+    <button class="btn ghost" id="copyPrompt">프롬프트 복사</button>
+    <button class="btn quiet" id="reset">처음부터</button>
+  </div>
+  <p class="hint" style="margin-top:10px">20초쯤 걸립니다.</p>
+</main>
+
+<aside class="panel">
+  <div class="sheet placeholder" id="sheet">
+    <div>달을 고르고 <b>자료 만들기</b>를 누르면<br>여기에 완성된 자료가 나옵니다.</div>
+  </div>
+  <div class="panel-actions">
+    <button class="btn" id="print" disabled>인쇄 · PDF로 저장</button>
+    <button class="btn ghost" id="copy" disabled>글자만 복사</button>
+  </div>
+  <div class="panel-actions">
+    <button class="btn quiet wide" id="again" disabled>다시 만들기</button>
+  </div>
+  <p class="note">절기·기념일·제철 식재료는 이 도구에 정리해 둔 표에서만 꺼내 씁니다.
+    절기 날짜는 해마다 하루쯤 달라지니 <b>보내기 전 그해 달력으로 확인</b>해 주세요.
+    영양 정보는 일반적인 안내이고, 알레르기나 질환이 있는 학생은 개별 상담이 필요합니다.</p>
+</aside>
+</div>
+
+<footer>급식"소리"함 · 김소리 영양교사</footer>
+<div class="toast" id="toast"></div>
+
+<script src="/sori-gate.js"></script>
+<script src="/sori-ai.js"></script>
+<script>
+/* 관리자 전용 잠금 (공개 시 false) */
+const ADMIN_ONLY = true;
+const ADMINS = ['thfl4811@gmail.com'];
+window.addEventListener('sori-ready', () => {
+  if (!ADMIN_ONLY) return;
+  const email = (window.SORI && window.SORI.email || '').toLowerCase();
+  if (ADMINS.includes(email)) return;
+  document.body.innerHTML =
+    '<div style="max-width:520px;margin:18vh auto;padding:0 24px;text-align:center">' +
+    '<h1 style="font-size:20px">아직 준비 중인 도구예요</h1>' +
+    '<p style="color:#4a5a76">연수에서 공개되면 급식"소리"함 첫 화면에 카드가 열립니다.</p>' +
+    '<p><a href="/" style="color:#1a4fd6">급식"소리"함으로 돌아가기</a></p></div>';
+});
+
+const $ = id => document.getElementById(id);
+const val = id => ($(id).value || '').trim();
+const on = id => $(id).checked;
+const esc = s => String(s).replace(/[<>&]/g, m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
+
+/* ---------- 월별 재료표 (지어내지 않도록 여기서만 꺼내 씀) ---------- */
+const M = {
+  1:{절기:['소한(1. 6. 무렵)','대한(1. 20. 무렵)'], 기념일:['설날(음력 1. 1.)'],
+     채소:['시금치','우엉','연근','무'], 과일:['귤','사과'], 수산:['굴','명태','과메기'],
+     이야기:['설음식과 떡국','겨울철 따뜻한 국물 음식','방학 중 규칙적인 식사']},
+  2:{절기:['입춘(2. 4. 무렵)','우수(2. 19. 무렵)'], 기념일:['정월대보름(음력 1. 15.)','졸업·종업'],
+     채소:['냉이','달래','봄동'], 과일:['딸기','한라봉'], 수산:['가리비','바지락'],
+     이야기:['정월대보름 오곡밥과 부럼','봄나물로 맞는 입춘','새 학년 준비와 아침밥']},
+  3:{절기:['경칩(3. 6. 무렵)','춘분(3. 21. 무렵)'], 기념일:['새 학기 급식 시작'],
+     채소:['달래','냉이','두릅','시금치'], 과일:['딸기','금귤'], 수산:['주꾸미','도다리','바지락'],
+     이야기:['새 학기 급식 약속과 배식 예절','봄나물의 향과 영양','손 씻기와 식사 전 준비']},
+  4:{절기:['청명(4. 5. 무렵)','곡우(4. 20. 무렵)'], 기념일:['식목일(4. 5.)','과학의 날(4. 21.)'],
+     채소:['봄동','아스파라거스','쑥','미나리'], 과일:['딸기','참외'], 수산:['주꾸미','멍게','키조개'],
+     이야기:['식목일과 텃밭 가꾸기','제철 나물 이야기','음식물 쓰레기와 환경']},
+  5:{절기:['입하(5. 6. 무렵)','소만(5. 21. 무렵)'], 기념일:['어린이날(5. 5.)','식품안전의 날(5. 14.)','발명의 날(5. 19.)'],
+     채소:['양배추','상추','완두콩','마늘종'], 과일:['참외','앵두','수박'], 수산:['멸치','병어'],
+     이야기:['식품안전의 날과 위생','가정의 달 함께 먹는 밥상','기온이 오를 때 음식 보관']},
+  6:{절기:['망종(6. 6. 무렵)','하지(6. 21. 무렵)'], 기념일:['환경의 날(6. 5.)'],
+     채소:['감자','오이','애호박','양파'], 과일:['수박','자두','매실'], 수산:['오징어','민어'],
+     이야기:['하지 감자 이야기','식중독 예방과 손 씻기','잔반 줄이기와 환경']},
+  7:{절기:['소서(7. 7. 무렵)','대서(7. 23. 무렵)'], 기념일:['초복·중복(해마다 날짜 확인)'],
+     채소:['옥수수','가지','풋고추','열무'], 과일:['복숭아','자두','포도'], 수산:['전복','장어'],
+     이야기:['복날 음식과 여름 보양','수분 섭취와 여름철 건강','방학 중 식생활']},
+  8:{절기:['입추(8. 8. 무렵)','처서(8. 23. 무렵)'], 기념일:['말복(해마다 날짜 확인)','광복절(8. 15.)'],
+     채소:['옥수수','고추','열무','토마토'], 과일:['포도','복숭아','무화과'], 수산:['전복','민어'],
+     이야기:['개학과 급식 다시 시작','더위 끝자락 위생 관리','제철 과일 이야기']},
+  9:{절기:['백로(9. 8. 무렵)','추분(9. 23. 무렵)'], 기념일:['추석(음력 8. 15.)'],
+     채소:['버섯','토란','고구마','늙은호박'], 과일:['배','사과','대추','밤'], 수산:['전어','새우','꽃게'],
+     이야기:['추석과 송편','햅쌀과 밥맛','가을 제철 식재료 알아보기']},
+  10:{절기:['한로(10. 8. 무렵)','상강(10. 23. 무렵)'], 기념일:['한글날(10. 9.)','세계 식량의 날(10. 16.)'],
+     채소:['무','배추','당근','시금치'], 과일:['사과','감','석류'], 수산:['꽃게','대하','고등어'],
+     이야기:['세계 식량의 날과 음식 남기지 않기','가을무와 배추 이야기','우리말 음식 이름']},
+  11:{절기:['입동(11. 7. 무렵)','소설(11. 22. 무렵)'], 기념일:['농업인의 날·가래떡 데이(11. 11.)'],
+     채소:['배추','무','우엉','연근'], 과일:['감','유자','사과'], 수산:['과메기','굴','방어'],
+     이야기:['김장 이야기','농업인의 날과 우리 쌀','겨울 채비와 저장 음식']},
+  12:{절기:['대설(12. 7. 무렵)','동지(12. 22. 무렵)'], 기념일:['겨울방학 준비'],
+     채소:['시금치','대파','브로콜리'], 과일:['귤','딸기','유자'], 수산:['굴','명태','방어'],
+     이야기:['동지 팥죽 이야기','겨울철 면역과 골고루 먹기','한 해 급식 돌아보기']}
+};
+const LEVELS = ['초등 저학년','초등 고학년','중학교','고등학교'];
+const state = { month: 0, level: '고등학교' };
+
+const kst = new Date(Date.now() + (new Date().getTimezoneOffset()*60000) + 9*3600000);
+const nowM = kst.getMonth() + 1;
+state.month = nowM;
+
+const mbox = $('months');
+for (let i=1; i<=12; i++){
+  const b = document.createElement('button');
+  b.className='mo'; b.type='button'; b.textContent = i + '월';
+  b.setAttribute('aria-pressed', String(i===state.month));
+  b.onclick = () => {
+    state.month = i;
+    [...mbox.children].forEach((c,j)=>c.setAttribute('aria-pressed', String(j+1===i)));
+    seed();
+  };
+  mbox.appendChild(b);
+}
+const lbox = $('level');
+LEVELS.forEach(l => {
+  const b=document.createElement('button');
+  b.className='chip'; b.type='button'; b.textContent=l;
+  b.setAttribute('aria-pressed', String(state.level===l));
+  b.onclick=()=>{ state.level=l; [...lbox.children].forEach(c=>c.setAttribute('aria-pressed', String(c.textContent===l))); };
+  lbox.appendChild(b);
+});
+
+function seed(){
+  const d = M[state.month];
+  $('seed').innerHTML = `<dl>
+    <dt>절기</dt><dd>${d.절기.join(' · ')}</dd>
+    <dt>기념일</dt><dd>${d.기념일.join(' · ')}</dd>
+    <dt>제철</dt><dd>채소 ${d.채소.join('·')} / 과일 ${d.과일.join('·')} / 수산 ${d.수산.join('·')}</dd>
+    <dt>이야깃거리</dt><dd>${d.이야기.join(' · ')}</dd>
+  </dl><p class="tiny">이 재료 안에서만 글을 씁니다. 절기 날짜는 해마다 하루쯤 다르니 그해 달력으로 확인해 주세요.</p>`;
+}
+seed();
+
+/* ---------- 요청 ---------- */
+function buildRequest(){
+  const d = M[state.month];
+  const m = state.month;
+  const parts = [];
+  if (on('mNews')) parts.push(`영양소식지 — A4 한 장 분량. 구성: ① 절기 인사로 시작하는 짧은 머리글 ② 이달의 제철 식재료(세 가지 정도, 고르는 요령이나 먹는 방법을 곁들여) ③ 이달 이야기(중심 주제를 풀어서, 소제목을 달아) ④ 급식에서 실천할 한마디. <h2>영양소식지</h2>로 시작할 것.`);
+  if (on('mAct')) parts.push(`학생 활동지 — ${state.level} 수준에 맞는 활동 하나. 활동 이름, 준비물, 하는 방법(번호 매겨), 학생이 직접 쓰거나 표시할 빈칸이나 표를 포함. 인쇄해서 그대로 나눠 줄 수 있는 형태로. <h2>학생 활동지</h2>로 시작하고 앞에 <hr class="cut">를 넣을 것.`);
+  if (on('mLetter')) parts.push(`가정통신문 문안 — 학교에서 가정으로 보내는 문서. 제목, 인사말(한두 문장), 본문(이달 주제를 가정에서 함께 실천할 수 있게), 안내사항을 번호로, 끝에 "${val('school')||'○○학교'}장" 표기 자리. 과장된 표현 없이 담백하게. <h2>가정통신문</h2>로 시작하고 앞에 <hr class="cut">를 넣을 것.`);
+  if (on('mImg')) parts.push(`그림 프롬프트 — 위 소식지를 카드뉴스로 꾸밀 때 쓸 이미지 생성 프롬프트 3개(표지 1, 본문 2). 각각 한 문단으로, 무엇이 어떤 구도로 담기는지 구체적으로. 한국 학교급식 맥락에 맞게. <h2>그림 프롬프트</h2>로 시작하고, 프롬프트 각각은 <div class="imgprompt">로 감쌀 것. 앞에 <hr class="cut">를 넣을 것.`);
+
+  return `${m}월 학교급식 영양·식생활 자료를 만들어 주세요.
+
+[쓸 수 있는 재료 — 여기 있는 것만 쓰세요]
+- 절기: ${d.절기.join(', ')}
+- 기념일: ${d.기념일.join(', ')}
+- 제철 채소: ${d.채소.join(', ')}
+- 제철 과일: ${d.과일.join(', ')}
+- 제철 수산물: ${d.수산.join(', ')}
+- 이야깃거리 후보: ${d.이야기.join(', ')}
+
+[받는 사람]
+- ${state.level} 학생과 그 가정
+- 학교: ${val('school')||'(학교명)'} / 작성: ${val('teacher')||'(작성자)'}
+- 중심 주제: ${val('theme') || '위 이야깃거리 중에서 하나를 골라 주세요'}
+${val('extra') ? '\n[우리 학교 사정 — 반드시 반영]\n' + val('extra') : ''}
+
+[만들 것]
+${parts.map((p,i)=>`${i+1}. ${p}`).join('\n\n')}
+
+[작성 규칙 — 반드시]
+- 위 재료에 없는 절기·기념일·제철 식재료를 새로 가져오지 마세요. 날짜를 새로 만들어 적지 마세요.
+- 영양소 함량 수치, 연구 결과, 통계는 적지 마세요. 확실하지 않은 숫자를 쓰지 않습니다.
+- "면역력이 좋아진다", "살이 빠진다" 같은 단정적인 효능 표현을 쓰지 마세요.
+- 특정 학생의 체형이나 식습관을 지적하는 표현을 쓰지 마세요. 알레르기·질환이 있는 학생은 개별 상담이 필요하다는 점을 가정통신문에 한 줄 넣으세요.
+- ${state.level} 학생이 읽을 글이라는 점을 문장 길이와 어휘에 반영하세요.
+
+[출력 형식]
+- HTML 조각만 출력하세요. <html>, <head>, <body>, 코드블록 표시, 설명 문장을 넣지 마세요.
+- 맨 위: <h1>${m}월 영양소식지</h1> 다음에 <div class="meta">학교 · 학교급 · 작성자</div>
+- 큰 항목은 <h2>, 하위는 <h3>, 본문은 <p>·<ul>·<ol>, 표는 <table>.
+- style 속성이나 <style> 태그를 쓰지 마세요. 서식은 이미 준비되어 있습니다.`;
+}
+
+SoriAI.init({
+  mount:'#ai', endpoint:'/api/gen', admins:ADMINS,
+  userKey:true, copyTarget:'쓰시는 AI(클로드·제미나이·챗지피티 등)',
+  onChange:()=>{ $('make').hidden = !SoriAI.canRun(); }
+});
+const ask = p => SoriAI.run(p);
+function clean(html){
+  return String(html).replace(/```html|```/g,'')
+    .replace(/<\/?(html|head|body|script|style)[^>]*>/gi,'')
+    .replace(/ style="[^"]*"/gi,'').trim();
+}
+
+let busy=false;
+async function generate(){
+  if (busy) return;
+  if (!['mNews','mAct','mLetter','mImg'].some(on)) return toast('만들 것을 하나 이상 골라 주세요.');
+  busy=true;
+  const btn=$('make'); btn.disabled=true; btn.innerHTML='<span class="spin"></span>만드는 중…';
+  $('again').disabled=true;
+  $('sheet').className='sheet placeholder';
+  $('sheet').innerHTML='<div>' + state.month + '월 재료로 쓰는 중이에요.<br>20초쯤 걸립니다.</div>';
+  try{
+    $('sheet').className='sheet doc';
+    $('sheet').innerHTML = clean(await ask(buildRequest()));
+    $('sheet').scrollTop=0;
+    $('print').disabled=false; $('copy').disabled=false; $('again').disabled=false;
+    toast('만들었어요. 보내기 전에 한 번 읽어봐 주세요.');
+  }catch(e){
+    $('sheet').className='sheet placeholder';
+    $('sheet').innerHTML='<div>'+esc(e.message)+'<br><br>잠시 뒤 다시 눌러 주세요.</div>';
+  }
+  busy=false; btn.disabled=false; btn.textContent='자료 만들기';
+}
+$('make').hidden = true;
+$('copyPrompt').onclick = async () => {
+  await SoriAI.copy(buildRequest());
+  toast('복사했어요. 쓰시는 AI에 붙여넣으세요.');
+};
+$('make').onclick=generate;
+$('again').onclick=generate;
+$('print').onclick=()=>window.print();
+$('copy').onclick=async()=>{
+  const t=$('sheet').innerText;
+  try{ await navigator.clipboard.writeText(t); toast('복사했어요. 한글이나 워드에 붙여 넣으세요.'); }
+  catch{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); toast('복사했어요.'); }
+};
+
+const KEYS=['school','teacher'];
+try{ const s=JSON.parse(localStorage.getItem('news_pref')||'{}'); KEYS.forEach(k=>{ if(s[k]) $(k).value=s[k]; }); }catch{}
+$('save').onclick=()=>{ const o={}; KEYS.forEach(k=>o[k]=val(k));
+  localStorage.setItem('news_pref', JSON.stringify(o)); toast('이 브라우저에 기억했어요.'); };
+
+$('reset').onclick=()=>{
+  if(!confirm('입력한 내용을 모두 지울까요?')) return;
+  ['theme','extra'].forEach(id=>$(id).value='');
+  $('sheet').className='sheet placeholder';
+  $('sheet').innerHTML='<div>달을 고르고 <b>자료 만들기</b>를 누르면<br>여기에 완성된 자료가 나옵니다.</div>';
+  $('print').disabled=true; $('copy').disabled=true; $('again').disabled=true;
+};
+
+let toastTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'),3200);
+}
+</script>
+</body>
+</html>

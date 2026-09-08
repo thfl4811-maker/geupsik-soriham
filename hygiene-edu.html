@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>조리실무사 위생교육 자료 만들기 · 급식"소리"함</title>
+<meta name="description" content="월별 조리실무사 위생교육 자료를 6차 개정 지침서 기준으로 만들어 바로 인쇄합니다.">
+<style>
+:root{
+  --ink:#12203a; --ink-soft:#4a5a76; --line:#dfe6f2; --line-soft:#eef2f9;
+  --blue:#1a4fd6; --blue-dark:#123a9e; --blue-tint:#eef3ff; --bg:#f6f8fc;
+  --white:#fff; --warn:#b4530a; --warn-bg:#fff6ec; --ok:#0d7a53; --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+a{color:var(--blue)}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #7ba0ff;outline-offset:2px}
+
+header{background:var(--white);border-bottom:1px solid var(--line)}
+.head-in{max-width:1180px;margin:0 auto;padding:18px 20px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.head-in h1{font-size:22px}
+.head-in .sub{color:var(--ink-soft);font-size:14px}
+.head-in .home{margin-left:auto;font-size:14px;text-decoration:none;color:var(--ink-soft)}
+.hero{max-width:1180px;margin:0 auto;padding:26px 20px 6px}
+.hero p{margin:0;max-width:64ch;color:var(--ink-soft)}
+.hero strong{color:var(--ink)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 80px;display:grid;gap:22px;
+  grid-template-columns:minmax(0,1fr) 460px;align-items:start}
+@media (max-width:1020px){.wrap{grid-template-columns:1fr}}
+
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.card > h2{font-size:17px;display:flex;align-items:center;gap:10px}
+.step-no{flex:none;width:24px;height:24px;border-radius:7px;background:var(--blue);color:#fff;
+  font-size:13px;font-weight:700;display:grid;place-items:center}
+.hint{color:var(--ink-soft);font-size:14px;margin:6px 0 16px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.label{font-size:14px;font-weight:600;margin-bottom:7px;display:block}
+input[type=text],input[type=date],textarea,select{width:100%;padding:11px 12px;border:1px solid var(--line);
+  border-radius:10px;background:var(--white)}
+textarea{min-height:80px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media (max-width:560px){.two,.three{grid-template-columns:1fr}}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--white);border-radius:999px;padding:8px 14px;font-size:14px;color:var(--ink-soft)}
+.chip[aria-pressed=true]{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+
+/* 연간 차시 목록 */
+.units{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.unit{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;
+  background:var(--white);border:0;border-top:1px solid var(--line-soft);padding:12px 14px}
+.unit:first-child{border-top:0}
+.unit .m{flex:none;width:44px;font-size:13px;font-weight:700;color:var(--ink-soft);padding-top:1px}
+.unit b{display:block;font-size:14.5px;font-weight:600}
+.unit span{display:block;font-size:13px;color:var(--ink-soft)}
+.unit[aria-pressed=true]{background:var(--blue-tint)}
+.unit[aria-pressed=true] .m,.unit[aria-pressed=true] b{color:var(--blue-dark)}
+.unit .now{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:700;color:#fff;
+  background:var(--blue);border-radius:5px;padding:1px 6px;vertical-align:2px}
+
+.opt{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-soft)}
+.opt:first-of-type{border-top:0}
+.opt input{margin-top:5px;width:17px;height:17px;accent-color:var(--blue)}
+.opt b{font-size:14.5px;font-weight:600}
+.opt span{display:block;font-size:13px;color:var(--ink-soft)}
+
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:10px;padding:11px 16px;font-size:14.5px;font-weight:600}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:var(--white);color:var(--blue)}
+.btn.quiet{background:var(--white);color:var(--ink-soft);border-color:var(--line)}
+.btn.wide{width:100%}
+
+.panel{position:sticky;top:18px}
+@media (max-width:1020px){.panel{position:static}}
+.sheet{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  padding:26px 26px 30px;min-height:340px;max-height:66vh;overflow:auto}
+.sheet.placeholder{display:grid;place-items:center;color:var(--ink-soft);text-align:center;font-size:14.5px}
+.panel-actions{display:flex;gap:8px;margin-top:12px}
+.panel-actions .btn{flex:1}
+.note{font-size:13px;color:var(--ink-soft);margin-top:12px;background:var(--white);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+
+/* 생성 문서 서식 — 원자료 느낌에 맞춤 */
+.doc h1{font-size:20px;text-align:center;margin-bottom:10px}
+.doc .meta{font-size:13px;color:var(--ink-soft);text-align:center;
+  border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);padding:8px 0;margin-bottom:18px}
+.doc h2{font-size:15.5px;margin:22px 0 8px;background:var(--line-soft);
+  border-left:5px solid var(--blue);padding:7px 10px}
+.doc h3{font-size:14.5px;margin:14px 0 4px}
+.doc p,.doc li{font-size:14.5px}
+.doc ul,.doc ol{padding-left:20px;margin:6px 0}
+.doc li{margin:3px 0}
+.doc table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.doc th,.doc td{border:1px solid #7f8ea8;padding:6px 8px;text-align:left;vertical-align:top}
+.doc th{background:var(--line-soft);font-weight:600;text-align:center}
+.doc .ref{font-size:12.5px;color:var(--ink-soft)}
+.doc .src{font-size:12.5px;color:var(--ink-soft);text-align:right;margin-top:8px}
+.doc blockquote{margin:10px 0;padding:10px 14px;background:var(--warn-bg);border-left:4px solid #e0a35a;font-size:14px}
+.doc .new{background:#e7f4ec;color:#0b5c3d;border:1px solid #b8ddc9;border-radius:5px;
+  padding:0 6px;font-size:12px;font-weight:700;margin-right:5px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;color:var(--ink-soft);font-size:13px}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-right-color:transparent;
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+@media print{
+  body{background:#fff;font-size:11pt}
+  header,.hero,main,footer,.panel-actions,.note,.toast{display:none!important}
+  .wrap{display:block;padding:0;max-width:none}
+  .panel{position:static}
+  .sheet{border:0;border-radius:0;padding:0;max-height:none;overflow:visible}
+  .doc h2{break-after:avoid}
+  .doc table{break-inside:avoid}
+  @page{size:A4;margin:16mm 15mm}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <h1>조리실무사 위생교육 자료 만들기</h1>
+    <span class="sub">월별 연간 계획대로, 6차 개정 기준으로</span>
+    <a class="home" href="/">← 급식"소리"함</a>
+  </div>
+</header>
+
+<div class="hero">
+  <p>연간 10차시 교육 계획에 맞춰 그달 자료를 만듭니다. 조리실무사가 들고 볼 <strong>본문</strong>과
+  선생님만 보는 <strong>영양(교)사용 참고자료</strong>가 함께 나오고, 마지막에 <strong>교육일지·서명부</strong>가 붙습니다.
+  내용은 현행 6차 개정 지침서를 근거로 쓰고, 인용한 곳은 장·쪽을 적습니다.</p>
+</div>
+
+<div class="wrap">
+<main>
+
+  <div id="ai"></div>
+
+  <!-- 1 -->
+  <section class="card">
+    <h2><span class="step-no">1</span>이달 교육 주제</h2>
+    <p class="hint">연간 계획의 차시입니다. 이번 달에 해당하는 것이 미리 골라져 있어요.</p>
+    <div class="units" id="units"></div>
+    <div class="field" style="margin-top:14px">
+      <label class="label" for="extra">우리 학교에서 특히 짚을 것 <span style="color:var(--ink-soft);font-weight:400">(선택)</span></label>
+      <textarea id="extra" placeholder="예: 지난주 검수에서 냉동식품이 -12℃로 들어왔어요. 검수 온도 기준과 반품 절차를 다시 짚고 싶습니다."></textarea>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="card">
+    <h2><span class="step-no">2</span>무엇을 만들까요</h2>
+    <label class="opt"><input type="checkbox" id="mBody" checked>
+      <span><b>교육주제 및 내용(조리실무사용)</b><span>현장에서 바로 지킬 수 있는 본문. 수치와 절차 중심</span></span></label>
+    <label class="opt"><input type="checkbox" id="mTeacher" checked>
+      <span><b>영양(교)사용 참고자료</b><span>교육할 때 덧붙일 운영 노하우, 점검 요령, 실습 아이디어</span></span></label>
+    <label class="opt"><input type="checkbox" id="mCase">
+      <span><b>식중독·사고 사례</b><span>실제 사례와 그때 무엇을 놓쳤는지</span></span></label>
+    <label class="opt"><input type="checkbox" id="mQuiz" checked>
+      <span><b>확인 문제</b><span>OX·단답 5문항과 정답</span></span></label>
+    <label class="opt"><input type="checkbox" id="mCheck">
+      <span><b>현장 점검표</b><span>교육 뒤 조리실에서 바로 확인할 항목</span></span></label>
+    <label class="opt"><input type="checkbox" id="mLog" checked>
+      <span><b>교육일지·수강자 명단</b><span>안전보건교육일지 서식. 결재용</span></span></label>
+    <label class="opt" style="border-top:1px solid var(--line-soft)"><input type="checkbox" id="mDiff" checked>
+      <span><b>6차 개정으로 바뀐 점 표시</b><span>예전 자료와 달라진 부분에 표시를 답니다</span></span></label>
+    <label class="opt"><input type="checkbox" id="mEasy">
+      <span><b>쉬운 말로</b><span>짧은 문장, 전문 용어 최소화. 외국인 조리원이 있을 때</span></span></label>
+  </section>
+
+  <!-- 3 -->
+  <section class="card">
+    <h2><span class="step-no">3</span>교육일지에 들어갈 정보</h2>
+    <p class="hint">서명부와 일지에 그대로 들어갑니다. 비워 두면 빈칸으로 나옵니다.</p>
+    <div class="two">
+      <div class="field"><label class="label" for="school">학교명</label>
+        <input type="text" id="school" placeholder="예: 동탄중앙고등학교"></div>
+      <div class="field"><label class="label" for="edate">교육일시</label>
+        <input type="date" id="edate"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="teacher">교육 담당</label>
+        <input type="text" id="teacher" placeholder="예: 영양교사 김소리"></div>
+      <div class="field"><label class="label" for="place">교육 방법</label>
+        <input type="text" id="place" placeholder="예: 현장교육"></div>
+    </div>
+    <div class="three">
+      <div class="field"><label class="label" for="cAll">참석 계</label>
+        <input type="text" id="cAll" inputmode="numeric" placeholder="8"></div>
+      <div class="field"><label class="label" for="cM">남</label>
+        <input type="text" id="cM" inputmode="numeric" placeholder="0"></div>
+      <div class="field"><label class="label" for="cF">여</label>
+        <input type="text" id="cF" inputmode="numeric" placeholder="8"></div>
+    </div>
+    <div class="field"><label class="label">교육 시간</label><div class="chips" id="dur"></div></div>
+    <div class="field"><label class="label" for="book">사용 교재</label>
+      <input type="text" id="book" placeholder="예: 학교급식 위생관리 지침서(6차 개정)"></div>
+  </section>
+
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn" id="make">교육자료 만들기</button>
+    <button class="btn ghost" id="copyPrompt">프롬프트 복사</button>
+    <button class="btn quiet" id="reset">처음부터</button>
+  </div>
+  <p class="hint" style="margin-top:10px">만드는 데 20초쯤 걸립니다. 지침서에서 근거를 찾아가며 쓰기 때문이에요.</p>
+
+</main>
+
+<aside class="panel">
+  <div class="sheet placeholder" id="sheet">
+    <div>차시를 고르고 <b>교육자료 만들기</b>를 누르면<br>여기에 완성된 자료가 나옵니다.</div>
+  </div>
+  <div class="panel-actions">
+    <button class="btn" id="print" disabled>인쇄 · PDF로 저장</button>
+    <button class="btn ghost" id="copy" disabled>글자만 복사</button>
+  </div>
+  <div class="panel-actions">
+    <button class="btn quiet wide" id="again" disabled>다시 만들기</button>
+  </div>
+  <p class="note">근거는 「학교급식 위생관리 지침서」에서 확인된 것만 적습니다. 법 조항과 과태료 금액처럼 지침서 밖의 내용은
+    빠지거나 확인이 필요하다고 나올 수 있어요.
+    <b>결재 전에 한 번 읽어보고 학교 상황에 맞게 고쳐 주세요.</b></p>
+</aside>
+</div>
+
+<footer>급식"소리"함 · 김소리 영양교사 · 근거 출처: 학교급식 위생관리 지침서(6차 개정)</footer>
+<div class="toast" id="toast"></div>
+
+<script src="/sori-gate.js"></script>
+<script src="/sori-ai.js"></script>
+<script>
+/* ---------- 관리자 전용 잠금 (공개 시 false) ---------- */
+const ADMIN_ONLY = true;
+const ADMINS = ['thfl4811@gmail.com'];
+window.addEventListener('sori-ready', () => {
+  if (!ADMIN_ONLY) return;
+  const email = (window.SORI && window.SORI.email || '').toLowerCase();
+  if (ADMINS.includes(email)) return;
+  document.body.innerHTML =
+    '<div style="max-width:520px;margin:18vh auto;padding:0 24px;text-align:center">' +
+    '<h1 style="font-size:20px">아직 준비 중인 도구예요</h1>' +
+    '<p style="color:#4a5a76">연수에서 공개되면 급식"소리"함 첫 화면에 카드가 열립니다.</p>' +
+    '<p><a href="/" style="color:#1a4fd6">급식"소리"함으로 돌아가기</a></p></div>';
+});
+
+const $ = id => document.getElementById(id);
+const val = id => ($(id).value || '').trim();
+const on = id => $(id).checked;
+
+/* ---------- 연간 10차시 ---------- */
+const UNITS = [
+  {m:3,  cat:'개인위생관리 Part 1.', title:'개인위생 및 손 씻기', desc:'복장, 손 씻기 방법과 시점, 올바르지 못한 개인위생'},
+  {m:4,  cat:'개인위생관리 Part 2.', title:'건강관리', desc:'건강진단, 작업 전 건강상태 확인, 상처 관리, 작업 제외 대상'},
+  {m:5,  cat:'식재료 위생관리',      title:'검수와 보관', desc:'검수 절차와 온도, 창고·냉장고 보관 방법'},
+  {m:6,  cat:'식중독 관리 Part 1.',  title:'식중독의 정의 및 종류', desc:'식중독균별 특징과 예방법, 온도와 증식'},
+  {m:8,  cat:'식중독 관리 Part 2.',  title:'식중독 사례로 본 예방관리', desc:'실제 사례 유형별 원인과 예방법'},
+  {m:9,  cat:'작업 위생관리 Part 1.',title:'교차오염·전처리·검식', desc:'구역 구분, 전처리, 완제품 관리, 검식과 보존식'},
+  {m:10, cat:'작업 위생관리 Part 2.',title:'세척 및 소독', desc:'소독액 농도와 시간, 기구·식기 세척, 채소 소독'},
+  {m:11, cat:'작업 위생관리 Part 3.',title:'쉽게 오염되는 사례', desc:'현장에서 놓치기 쉬운 오염 지점'},
+  {m:12, cat:'환경위생관리 Part 1.', title:'폐기물·음식물류 폐기물 관리', desc:'보관, 처리 동선, 용기 관리'},
+  {m:2,  cat:'환경위생관리 Part 2.', title:'청소 및 해충구제', desc:'일·주·월·연간 청소 구역, 방충·방서, 살충제 취급'}
+];
+const DURS = ['30분','1시간','2시간'];
+const state = {unit:0, dur:'1시간'};
+
+const kst = new Date(Date.now() + (new Date().getTimezoneOffset()*60000) + 9*3600000);
+const nowM = kst.getMonth()+1;
+$('edate').value = kst.toISOString().slice(0,10);
+
+const ubox = $('units');
+UNITS.forEach((u,i) => {
+  const b = document.createElement('button');
+  b.className='unit'; b.type='button'; b.setAttribute('aria-pressed','false');
+  b.innerHTML = '<span class="m"></span><span><b></b><span></span></span>';
+  b.querySelector('.m').textContent = u.m + '월';
+  b.querySelector('b').textContent = u.cat + ' — ' + u.title;
+  if (u.m === nowM) b.querySelector('b').insertAdjacentHTML('beforeend','<span class="now">이달</span>');
+  b.querySelector('span span').textContent = u.desc;
+  b.onclick = () => {
+    state.unit = i;
+    [...ubox.children].forEach((c,j)=>c.setAttribute('aria-pressed', String(j===i)));
+  };
+  ubox.appendChild(b);
+});
+/* 이달 차시 기본 선택 (없으면 가장 가까운 앞 차시) */
+let def = UNITS.findIndex(u=>u.m===nowM);
+if (def < 0){ def = UNITS.findIndex(u=>u.m>nowM); if (def<0) def = 0; }
+state.unit = def;
+ubox.children[def].setAttribute('aria-pressed','true');
+
+const dbox = $('dur');
+DURS.forEach(d => {
+  const b=document.createElement('button');
+  b.className='chip'; b.type='button'; b.textContent=d;
+  b.setAttribute('aria-pressed', String(state.dur===d));
+  b.onclick=()=>{ state.dur=d; [...dbox.children].forEach(c=>c.setAttribute('aria-pressed', String(c.textContent===d))); };
+  dbox.appendChild(b);
+});
+
+/* ---------- 요청 ---------- */
+function buildRequest(){
+  const u = UNITS[state.unit];
+  const parts = [];
+  if (on('mBody')) parts.push('교육주제 및 내용 — 조리실무사가 들고 볼 본문. 현장에서 바로 행동으로 옮길 수 있게 구체적으로. "청결히 한다"가 아니라 "세척 후 소독액에 5분 담근다"처럼.');
+  if (on('mTeacher')) parts.push('영양(교)사용 참고자료 — 선생님만 보는 부분. 교육할 때 덧붙이면 좋은 운영 노하우, 점검 시 눈여겨볼 지점, 현장에서 자주 어긋나는 부분, 실습 아이디어. 본문 내용을 되풀이하지 말 것.');
+  if (on('mCase')) parts.push('사례 — 이 주제와 관련된 실제 식중독·오염 사례 한두 건과, 그때 무엇을 놓쳤는지. 사례는 blockquote로 감쌀 것.');
+  if (on('mQuiz')) parts.push('확인 문제 — OX 또는 단답 5문항과 정답. 본문에서 다룬 수치와 절차를 묻는 문제로.');
+  if (on('mCheck')) parts.push('현장 점검표 — 교육 뒤 조리실에서 바로 확인할 항목을 표로. 열은 점검항목 / 확인 / 비고.');
+
+  const log = on('mLog') ? `
+
+[교육일지·수강자 명단]
+문서 맨 끝에 <h2>교육일지</h2>로 아래 서식을 표로 만드세요. 경기도교육청 안전보건교육일지 서식을 따릅니다.
+- 첫 표: 교육일시(${val('edate')||''}) / 교육구분(근로자 정기교육) / 교육인원(구분·계·남·여·비고 열, 참석인원 행에 계 ${val('cAll')||''} 남 ${val('cM')||''} 여 ${val('cF')||''})
+- 둘째 표: 교육내용 / 교육방법(${val('place')||'현장교육'}) / 교육시간(${state.dur}) / 사용교재(${val('book')||'학교급식 위생관리 지침서'}) 열. 교육내용 칸에는 이번 차시 내용을 세 줄 이내로 요약해 넣으세요.
+- 셋째 표: <h3>수강자 명단</h3> 순번·소속·성명·서명 네 열을 좌우 두 벌로 배치(순번 1~5 / 6~10). 성명과 서명 칸은 비워 둘 것.` : '';
+
+  return `학교급식 조리실무사 월별 위생교육 자료를 만들어 주세요. 아래 차시 하나에 대한 완성 문서입니다.
+
+[이번 차시]
+- ${u.m}월 / ${u.cat} — ${u.title}
+- 다룰 범위: ${u.desc}
+- 학교: ${val('school')||'(학교명)'} / 교육 담당: ${val('teacher')||'(담당자)'} / 교육시간: ${state.dur}
+${val('extra') ? '\n[우리 학교 상황 — 반드시 본문에 반영]\n' + val('extra') : ''}
+
+[만들 것]
+${parts.map((p,i)=>`${i+1}. ${p}`).join('\n')}${log}
+
+[작성 규칙 — 반드시 지킬 것]
+- 이 자료의 근거는 현행 6차 개정 「학교급식 위생관리 지침서」입니다. 개정 전 기준으로 쓰지 마세요.
+- 지침서에서 확인되는 내용만 쓰고, 온도·시간·농도·주기 같은 수치를 지어내지 마세요. 확인되지 않으면 그 항목을 빼거나 "학교 기준 확인 필요"라고 적으세요.
+- 법 조항 번호와 과태료 금액은 지침서에서 확인되는 것만 적고, 확인되지 않으면 적지 마세요.
+- 근거가 있는 문단 끝에 <span class="ref">(근거: ○장 p.○○)</span>로 장·쪽을 적으세요. 쪽수를 확인할 수 없으면 근거 표기를 생략하세요.
+${on('mDiff') ? '- 6차 개정에서 바뀐 내용을 다룰 때는 그 문장 앞에 <span class="new">6차 개정</span>을 붙이고, 무엇이 어떻게 바뀌었는지 한 줄로 덧붙이세요. 확인되는 변경점에만 붙입니다.' : ''}
+- ${state.dur} 교육으로 실제 소화할 분량에 맞추세요.
+${on('mEasy') ? '- 한 문장을 짧게 쓰고 전문 용어를 피하세요. 꼭 필요한 용어는 괄호로 뜻을 덧붙이세요.' : ''}
+
+[출력 형식]
+- HTML 조각만 출력하세요. <html>, <head>, <body>, 코드블록 표시, 설명 문장을 넣지 마세요.
+- 맨 위: <h1>${u.m}월 조리실무사 위생교육</h1> 다음에 <div class="meta">학교 · 교육일 · 대상 · 교육시간 · 담당</div>
+- 큰 항목은 <h2>, 하위는 <h3>, 본문은 <p>·<ul>·<ol>, 표는 <table>.
+- 본문 항목 제목은 "□ 일반위생 : ${u.cat} - ${u.title}" 형태로 시작하세요.
+- 목록 기호는 지침서 자료 관례대로 ￭, ▪, - 를 쓰고, 주의사항은 ※, 강조 흐름은 ☞ 를 쓰세요.
+- 각 큰 항목이 끝나면 <p class="src">&lt;참고 : 교육부 학교급식 위생관리 지침서&gt;</p> 형태로 출처를 오른쪽에 적으세요.
+- style 속성이나 <style> 태그를 쓰지 마세요. 서식은 이미 준비되어 있습니다.`;
+}
+
+/* ---------- 호출 ---------- */
+SoriAI.init({
+  mount:'#ai', endpoint:'/api/mmw-ask', admins:ADMINS,
+  userKey:false,                       /* 지침서 근거가 필요해 각자 키로는 못 돌린다 */
+  copyTarget:'무.물.위(mumulwi.vercel.app)',
+  onChange:()=>{ $('make').hidden = !SoriAI.canRun(); }
+});
+const ask = p => SoriAI.run(p);
+function clean(html){
+  return String(html)
+    .replace(/```html|```/g, '')
+    .replace(/<\/?(html|head|body|script|style)[^>]*>/gi, '')
+    .replace(/ style="[^"]*"/gi, '')
+    .trim();
+}
+const esc = s => String(s).replace(/[<>&]/g, m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
+
+let busy = false;
+async function generate(){
+  if (busy) return;
+  if (!['mBody','mTeacher','mCase','mQuiz','mCheck','mLog'].some(on)) return toast('만들 것을 하나 이상 골라 주세요.');
+  busy = true;
+  const btn = $('make'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span>만드는 중…';
+  $('again').disabled = true;
+  $('sheet').className = 'sheet placeholder';
+  $('sheet').innerHTML = '<div>지침서에서 근거를 찾는 중이에요.<br>20초쯤 걸립니다.</div>';
+  try{
+    const html = clean(await ask(buildRequest()));
+    $('sheet').className = 'sheet doc';
+    $('sheet').innerHTML = html;
+    $('sheet').scrollTop = 0;
+    $('print').disabled = false; $('copy').disabled = false; $('again').disabled = false;
+    toast('만들었어요. 읽어보고 학교 상황에 맞게 고쳐 쓰세요.');
+  }catch(e){
+    $('sheet').className = 'sheet placeholder';
+    $('sheet').innerHTML = '<div>' + esc(e.message) + '<br><br>잠시 뒤 다시 눌러 주세요.</div>';
+  }
+  busy = false; btn.disabled = false; btn.textContent = '교육자료 만들기';
+}
+
+$('make').hidden = true;
+$('copyPrompt').onclick = async () => {
+  if (!['mBody','mTeacher','mCase','mQuiz','mCheck','mLog'].some(on)) return toast('만들 것을 하나 이상 골라 주세요.');
+  await SoriAI.copy(buildRequest());
+  toast('복사했어요. 무.물.위 챗봇에 붙여넣으면 지침서 근거까지 붙은 답이 나옵니다.');
+};
+$('make').onclick = generate;
+$('again').onclick = generate;
+$('print').onclick = () => window.print();
+$('copy').onclick = async () => {
+  const t = $('sheet').innerText;
+  try{ await navigator.clipboard.writeText(t); toast('복사했어요. 한글이나 워드에 붙여 넣으세요.'); }
+  catch{ const ta=document.createElement('textarea'); ta.value=t; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy'); ta.remove(); toast('복사했어요.'); }
+};
+$('reset').onclick = () => {
+  if (!confirm('입력한 내용을 모두 지울까요?')) return;
+  ['school','teacher','place','cAll','cM','cF','book','extra'].forEach(id => $(id).value='');
+  $('sheet').className='sheet placeholder';
+  $('sheet').innerHTML='<div>차시를 고르고 <b>교육자료 만들기</b>를 누르면<br>여기에 완성된 자료가 나옵니다.</div>';
+  $('print').disabled=true; $('copy').disabled=true; $('again').disabled=true;
+};
+
+let toastTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'), 3200);
+}
+</script>
+</body>
+</html>

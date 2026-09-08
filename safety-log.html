@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대체인력 안전보건교육일지 · 급식"소리"함</title>
+<meta name="description" content="대체 조리인력 안전보건교육일지를 채워서 바로 인쇄합니다.">
+<style>
+:root{
+  --ink:#12203a; --ink-soft:#4a5a76; --line:#dfe6f2; --line-soft:#eef2f9;
+  --blue:#1a4fd6; --blue-dark:#123a9e; --blue-tint:#eef3ff; --bg:#f6f8fc;
+  --white:#fff; --warn-bg:#fff6ec; --radius:14px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  font-size:16px;line-height:1.65;-webkit-text-size-adjust:100%}
+a{color:var(--blue);word-break:break-all}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.02em}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid #7ba0ff;outline-offset:2px}
+
+header{background:var(--white);border-bottom:1px solid var(--line)}
+.head-in{max-width:1180px;margin:0 auto;padding:18px 20px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.head-in h1{font-size:22px}
+.head-in .sub{color:var(--ink-soft);font-size:14px}
+.head-in .home{margin-left:auto;font-size:14px;text-decoration:none;color:var(--ink-soft)}
+.hero{max-width:1180px;margin:0 auto;padding:26px 20px 6px}
+.hero p{margin:0;max-width:64ch;color:var(--ink-soft)}
+.hero strong{color:var(--ink)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:18px 20px 80px;display:grid;gap:22px;
+  grid-template-columns:minmax(0,1fr) 500px;align-items:start}
+@media (max-width:1040px){.wrap{grid-template-columns:1fr}}
+
+.card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.card > h2{font-size:17px;display:flex;align-items:center;gap:10px}
+.step-no{flex:none;width:24px;height:24px;border-radius:7px;background:var(--blue);color:#fff;
+  font-size:13px;font-weight:700;display:grid;place-items:center}
+.hint{color:var(--ink-soft);font-size:14px;margin:6px 0 16px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.label{font-size:14px;font-weight:600;margin-bottom:7px;display:block}
+input[type=text],input[type=date],input[type=time],textarea,select{width:100%;padding:11px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--white)}
+textarea{min-height:76px;resize:vertical}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.two{grid-template-columns:1fr}}
+
+.opt{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line-soft)}
+.opt:first-of-type{border-top:0}
+.opt input{margin-top:5px;width:17px;height:17px;accent-color:var(--blue)}
+.opt b{font-size:14.5px;font-weight:600}
+.opt span{display:block;font-size:13px;color:var(--ink-soft)}
+.opt a{font-size:12.5px}
+
+.btn{border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:10px;padding:11px 16px;font-size:14.5px;font-weight:600}
+.btn.ghost{background:var(--white);color:var(--blue)}
+.btn.quiet{background:var(--white);color:var(--ink-soft);border-color:var(--line)}
+.btn.wide{width:100%}
+
+.panel{position:sticky;top:18px}
+@media (max-width:1040px){.panel{position:static}}
+.sheet{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);
+  padding:24px;max-height:70vh;overflow:auto}
+.panel-actions{display:flex;gap:8px;margin-top:12px}
+.panel-actions .btn{flex:1}
+.note{font-size:13px;color:var(--ink-soft);margin-top:12px;background:var(--white);
+  border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+
+/* 일지 서식 */
+.log{font-size:13px;color:#000}
+.log .tag{font-size:12px;color:var(--ink-soft);margin-bottom:6px}
+.log h1{font-size:17px;text-align:center;margin:0 0 12px;letter-spacing:.06em}
+.log table{width:100%;border-collapse:collapse;margin-bottom:10px}
+.log th,.log td{border:1px solid #333;padding:6px 8px;vertical-align:middle}
+.log th{background:#f1f4fa;font-weight:600;text-align:center;white-space:nowrap}
+.log td.c{text-align:center}
+.log .body{line-height:1.7}
+.log .body b{font-weight:600}
+.log .body .u{font-size:12px;color:#333}
+.log h2{font-size:13.5px;margin:14px 0 6px}
+.log .sign td{height:30px}
+.log .chk{font-family:"Malgun Gothic",sans-serif}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;color:var(--ink-soft);font-size:13px}
+
+@media print{
+  body{background:#fff}
+  header,.hero,main,footer,.panel-actions,.note,.toast{display:none!important}
+  .wrap{display:block;padding:0;max-width:none}
+  .panel{position:static}
+  .sheet{border:0;border-radius:0;padding:0;max-height:none;overflow:visible}
+  .log{font-size:10.5pt}
+  .log table{break-inside:avoid}
+  @page{size:A4;margin:15mm}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="head-in">
+    <h1>대체인력 안전보건교육일지</h1>
+    <span class="sub">오시는 날 채워서 바로 인쇄</span>
+    <a class="home" href="/">← 급식"소리"함</a>
+  </div>
+</header>
+
+<div class="hero">
+  <p>대체 조리인력이 오신 날 실시하는 <strong>신규채용자 교육</strong> 일지입니다.
+  교육 영상 두 편이 이미 들어 있어서, 이름과 날짜만 채우면 됩니다.
+  <strong>AI를 쓰지 않으니 입력하는 대로 오른쪽에 바로 그려집니다.</strong></p>
+</div>
+
+<div class="wrap">
+<main>
+
+  <section class="card">
+    <h2><span class="step-no">1</span>교육 정보</h2>
+    <div class="two">
+      <div class="field"><label class="label" for="school">학교명</label>
+        <input type="text" id="school" placeholder="예: 동탄중앙고등학교"></div>
+      <div class="field"><label class="label" for="edate">교육일</label>
+        <input type="date" id="edate"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="etime">교육 시각</label>
+        <input type="time" id="etime" value="08:30"></div>
+      <div class="field"><label class="label" for="hours">교육 시간</label>
+        <input type="text" id="hours" value="1시간"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="teacher">교육 담당</label>
+        <input type="text" id="teacher" placeholder="예: 영양교사 김소리"></div>
+      <div class="field"><label class="label" for="method">교육 방법</label>
+        <input type="text" id="method" value="현장교육"></div>
+    </div>
+    <div class="field"><label class="label" for="attach">문서 위 표시 <span style="color:var(--ink-soft);font-weight:400">(비워도 됩니다)</span></label>
+      <input type="text" id="attach" value="붙임5" placeholder="예: 붙임5"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">2</span>교육 구분</h2>
+    <p class="hint">대체인력은 보통 첫 번째입니다.</p>
+    <label class="opt"><input type="radio" name="kind" value="new" checked>
+      <span><b>신규채용자 교육 — 일용근로자 1시간</b><span>하루 단위로 오시는 대체인력</span></span></label>
+    <label class="opt"><input type="radio" name="kind" value="new8">
+      <span><b>신규채용자 교육 — 일용근로자 외 8시간</b><span>기간을 두고 근무하는 경우</span></span></label>
+    <label class="opt"><input type="radio" name="kind" value="reg">
+      <span><b>근로자 정기교육</b><span>기존 조리종사원 정기교육</span></span></label>
+    <label class="opt"><input type="radio" name="kind" value="chg">
+      <span><b>작업내용 변경 시 교육</b></span></label>
+    <label class="opt"><input type="radio" name="kind" value="msds">
+      <span><b>기타(MSDS) 교육</b></span></label>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">3</span>교육 내용</h2>
+    <p class="hint">쓰신 영상이 기본으로 들어 있습니다. 필요 없으면 끄고, 다른 내용은 아래에 적으세요.</p>
+    <label class="opt"><input type="checkbox" id="v1" checked>
+      <span><b>일용근로자 채용 시 교육 (경기도교육청TV)</b>
+        <span>1부 산업안전보건법의 이해 및 산업재해보상보험법 · 2부 보호구의 종류 및 산업재해 사례</span>
+        <a href="https://www.youtube.com/watch?v=443cmandj7c" target="_blank" rel="noopener">youtube.com/watch?v=443cmandj7c</a></span></label>
+    <label class="opt"><input type="checkbox" id="v2" checked>
+      <span><b>후처리 작업 (서울특별시교육청 보건안전진흥원)</b>
+        <span>15분 38초</span>
+        <a href="https://www.youtube.com/watch?v=RhRAuPGWIdE" target="_blank" rel="noopener">youtube.com/watch?v=RhRAuPGWIdE</a></span></label>
+    <div class="field" style="margin-top:14px">
+      <label class="label" for="own">직접 실시한 교육 <span style="color:var(--ink-soft);font-weight:400">(선택)</span></label>
+      <textarea id="own" placeholder="예: 우리 학교 조리실 동선과 기기 사용법 안내, 비상구·소화기 위치 확인"></textarea>
+    </div>
+    <div class="field"><label class="label" for="book">사용 교재</label>
+      <input type="text" id="book" value="경기도교육청TV 및 서울시교육청 보건안전진흥원"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="step-no">4</span>수강자</h2>
+    <p class="hint">한 줄에 한 명씩 적으세요. 소속을 함께 적으려면 쉼표로 나눠 주세요. 예: 홍길동, 대체인력</p>
+    <div class="field">
+      <textarea id="people" style="min-height:110px" placeholder="홍길동, 대체인력"></textarea>
+    </div>
+    <div class="two">
+      <div class="field"><label class="label" for="cM">남</label>
+        <input type="text" id="cM" inputmode="numeric" value="0"></div>
+      <div class="field"><label class="label" for="cF">여</label>
+        <input type="text" id="cF" inputmode="numeric" value="1"></div>
+    </div>
+    <p class="hint" style="margin:0">계는 남·여를 더해 자동으로 들어갑니다.</p>
+  </section>
+
+  <button class="btn quiet" id="reset">처음부터</button>
+</main>
+
+<aside class="panel">
+  <div class="sheet"><div class="log" id="log"></div></div>
+  <div class="panel-actions">
+    <button class="btn" id="print">인쇄 · PDF로 저장</button>
+    <button class="btn ghost" id="save">이 학교 정보 기억</button>
+  </div>
+  <p class="note">교육 구분과 시간은 원본 서식의 표기를 그대로 씁니다. 학교나 지역 교육청에서 쓰는 서식이 다르면
+    인쇄 후 손으로 고쳐 주세요. 영상 주소가 바뀌면 링크를 눌러 확인해 보시고 알려 주세요.</p>
+</aside>
+</div>
+
+<footer>급식"소리"함 · 김소리 영양교사</footer>
+<div class="toast" id="toast"></div>
+
+<script src="/sori-gate.js"></script>
+<script>
+/* 관리자 전용 잠금 (공개 시 false) */
+const ADMIN_ONLY = true;
+const ADMINS = ['thfl4811@gmail.com'];
+window.addEventListener('sori-ready', () => {
+  if (!ADMIN_ONLY) return;
+  const email = (window.SORI && window.SORI.email || '').toLowerCase();
+  if (ADMINS.includes(email)) return;
+  document.body.innerHTML =
+    '<div style="max-width:520px;margin:18vh auto;padding:0 24px;text-align:center">' +
+    '<h1 style="font-size:20px">아직 준비 중인 도구예요</h1>' +
+    '<p style="color:#4a5a76">연수에서 공개되면 급식"소리"함 첫 화면에 카드가 열립니다.</p>' +
+    '<p><a href="/" style="color:#1a4fd6">급식"소리"함으로 돌아가기</a></p></div>';
+});
+
+const $ = id => document.getElementById(id);
+const val = id => ($(id).value || '').trim();
+const esc = s => String(s).replace(/[<>&]/g, m=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[m]));
+const kind = () => document.querySelector('input[name=kind]:checked').value;
+
+/* 오늘 날짜(한국 시간) */
+const kst = new Date(Date.now() + (new Date().getTimezoneOffset()*60000) + 9*3600000);
+$('edate').value = kst.toISOString().slice(0,10);
+
+function dateText(){
+  const v = val('edate'); if (!v) return '';
+  const [y,m,d] = v.split('-');
+  const t = val('etime');
+  return `${y}. ${Number(m)}. ${Number(d)}.` + (t ? ` ${t}` : '');
+}
+function box(is){ return is ? '☑' : '□'; }
+
+function people(){
+  return val('people').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const [name, dept] = l.split(',').map(s=>(s||'').trim());
+    return { name: name||'', dept: dept||'대체인력' };
+  });
+}
+
+function render(){
+  const k = kind();
+  const ppl = people();
+  const m = Number(val('cM')||0), f = Number(val('cF')||0);
+  const rows = Math.max(10, Math.ceil(ppl.length/2)*2);
+  const half = rows/2;
+
+  /* 교육내용 칸 */
+  const items = [];
+  if ($('v1').checked) items.push(
+    `<b>• 일용근로자 채용 시 교육 (경기도교육청TV) 영상 활용</b><br>` +
+    `<span class="u">www.youtube.com/watch?v=443cmandj7c</span><br>` +
+    `&nbsp;1부 : 산업안전보건법의 이해 및 산업재해보상보험법<br>` +
+    `&nbsp;2부 : 보호구의 종류 및 산업재해 사례`);
+  if ($('v2').checked) items.push(
+    `<b>• 서울특별시교육청 보건안전진흥원</b><br>` +
+    `<span class="u">https://www.youtube.com/watch?v=RhRAuPGWIdE</span><br>` +
+    `&nbsp;(후처리 작업) 15분 38초`);
+  if (val('own')) items.push('<b>• ' + esc(val('own')).replace(/\n/g,'<br>&nbsp;&nbsp;') + '</b>');
+
+  /* 수강자 표 (좌우 두 벌) */
+  let sign = '';
+  for (let i=0; i<half; i++){
+    const a = ppl[i], b = ppl[i+half];
+    sign += `<tr>
+      <td class="c">${i+1}</td><td>${a?esc(a.dept):''}</td><td>${a?esc(a.name):''}</td><td></td>
+      <td class="c">${i+half+1}</td><td>${b?esc(b.dept):''}</td><td>${b?esc(b.name):''}</td><td></td>
+    </tr>`;
+  }
+
+  $('log').innerHTML = `
+${val('attach') ? `<div class="tag">${esc(val('attach'))}</div>` : ''}
+<h1>안전보건교육일지</h1>
+${val('school') ? `<div style="text-align:right;font-size:12px;margin-bottom:6px">${esc(val('school'))}</div>` : ''}
+<table>
+  <tr><th style="width:78px">교육일시</th><td colspan="3">${esc(dateText())}</td></tr>
+  <tr><th>교육구분</th><td colspan="3" class="chk">
+    1. 신규채용자 교육 (${box(k==='new')} 일용근로자: 1시간, ${box(k==='new8')} 일용근로자 외: 8시간)<br>
+    2. 근로자 정기교육 (${box(k==='reg')} 비사무직: ${k==='reg'?esc(val('hours')):'&nbsp;&nbsp;&nbsp;'} )
+    &nbsp; 3. 관리감독자 정기교육 □
+    <br>4. 작업내용 변경시 교육 (${box(k==='chg')} 해당근로자: ${k==='chg'?esc(val('hours')):'&nbsp;&nbsp;&nbsp;'} )
+    &nbsp; 5. 기타(MSDS)교육 ${box(k==='msds')}
+  </td></tr>
+</table>
+
+<table>
+  <tr><th rowspan="2" style="width:78px">교육인원</th><th>구분</th><th>계</th><th>남</th><th>여</th><th>비고</th></tr>
+  <tr><th>참석인원</th><td class="c">${m+f}</td><td class="c">${m}</td><td class="c">${f}</td><td class="c">대체인력</td></tr>
+</table>
+
+<table>
+  <tr><th>교육내용</th><th style="width:66px">교육방법</th><th style="width:66px">교육시간</th><th style="width:104px">사용교재 등</th></tr>
+  <tr>
+    <td class="body">${items.join('<br><br>') || '&nbsp;'}</td>
+    <td class="c">${esc(val('method'))}</td>
+    <td class="c">${esc(val('hours'))}</td>
+    <td class="c">${esc(val('book'))}</td>
+  </tr>
+</table>
+
+<h2>■ 수강자 명단</h2>
+<table class="sign">
+  <tr><th style="width:36px">순번</th><th>소속</th><th>성명</th><th style="width:56px">서명</th>
+      <th style="width:36px">순번</th><th>소속</th><th>성명</th><th style="width:56px">서명</th></tr>
+  ${sign}
+</table>
+${val('teacher') ? `<p style="text-align:right;font-size:12px;margin-top:12px">교육 담당 : ${esc(val('teacher'))} (인)</p>` : ''}
+`;
+}
+
+['school','edate','etime','hours','teacher','method','attach','own','book','people','cM','cF']
+  .forEach(id => $(id).addEventListener('input', render));
+document.querySelectorAll('input[name=kind]').forEach(r => r.addEventListener('change', render));
+['v1','v2'].forEach(id => $(id).addEventListener('change', render));
+
+/* 학교 정보 기억 */
+const KEYS = ['school','teacher','method','book','attach'];
+try{
+  const saved = JSON.parse(localStorage.getItem('safelog_pref') || '{}');
+  KEYS.forEach(k => { if (saved[k]) $(k).value = saved[k]; });
+}catch{}
+$('save').onclick = () => {
+  const o = {}; KEYS.forEach(k => o[k] = val(k));
+  localStorage.setItem('safelog_pref', JSON.stringify(o));
+  toast('이 브라우저에 기억했어요. 다음에 열면 채워져 있습니다.');
+};
+
+$('print').onclick = () => window.print();
+$('reset').onclick = () => {
+  if (!confirm('입력한 내용을 모두 지울까요?')) return;
+  ['school','teacher','own','people'].forEach(id => $(id).value='');
+  $('cM').value='0'; $('cF').value='1';
+  render();
+};
+
+let toastTimer;
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'), 3000);
+}
+
+render();
+</script>
+</body>
+</html>
