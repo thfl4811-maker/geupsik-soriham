@@ -125,14 +125,22 @@
         s.id = 'sai-css'; s.textContent = css; document.head.appendChild(s);
       }
       render();
-      window.addEventListener('sori-ready', () => {
+      /* 게이트가 이벤트를 먼저 쏘고 지나갔을 수 있어, 이벤트와 폴링을 함께 쓴다 */
+      const check = () => {
         const P = window.SORI || {};
         const email = ((P.profile && P.profile.email) || P.email || '').toLowerCase();
+        if (!email) return false;
         S.admin = S.opts.admins.map(x=>x.toLowerCase()).includes(email);
         const a = document.getElementById('sai-adm');
         if (a) a.hidden = !(S.admin && S.opts.endpoint);
         changed();
-      });
+        return true;
+      };
+      window.addEventListener('sori-ready', check);
+      if (!check()){
+        let n = 0;
+        const t = setInterval(() => { if (check() || ++n > 40) clearInterval(t); }, 300);
+      }
     },
     canRun(){ return (S.opts.userKey && S.ok) || (S.admin && !!S.opts.endpoint); },
     isAdmin(){ return S.admin; },
