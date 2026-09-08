@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/api/mmw-ask", "destination": "https://mumulwi.vercel.app/api/ask" }
+  ]
+}
