@@ -126,7 +126,8 @@
       }
       render();
       window.addEventListener('sori-ready', () => {
-        const email = (window.SORI && window.SORI.email || '').toLowerCase();
+        const P = window.SORI || {};
+        const email = ((P.profile && P.profile.email) || P.email || '').toLowerCase();
         S.admin = S.opts.admins.map(x=>x.toLowerCase()).includes(email);
         const a = document.getElementById('sai-adm');
         if (a) a.hidden = !(S.admin && S.opts.endpoint);

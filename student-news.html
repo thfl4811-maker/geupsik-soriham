@@ -224,7 +224,8 @@ const ADMIN_ONLY = true;
 const ADMINS = ['thfl4811@gmail.com'];
 window.addEventListener('sori-ready', () => {
   if (!ADMIN_ONLY) return;
-  const email = (window.SORI && window.SORI.email || '').toLowerCase();
+  const S = window.SORI || {};
+  const email = ((S.profile && S.profile.email) || S.email || '').toLowerCase();
   if (ADMINS.includes(email)) return;
   document.body.innerHTML =
     '<div style="max-width:520px;margin:18vh auto;padding:0 24px;text-align:center">' +
