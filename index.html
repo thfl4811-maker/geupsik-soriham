@@ -1188,6 +1188,18 @@ function updateAdminStats() {
   const tEl = document.getElementById('activeUsersToday');
   if (tEl) tEl.textContent = activeToday;
 
+  // 강의 등급·연구회 집계
+  const t2 = users.filter(u => (u.tier||0) >= 2).length;
+  const t1 = users.filter(u => (u.tier||0) >= 1).length;
+  const t2El = document.getElementById('tier2Count'); if (t2El) t2El.textContent = t2;
+  const t1El = document.getElementById('tier1Count'); if (t1El) t1El.textContent = t1;
+  const gDefs = CODES.filter(c => c.group);
+  const gCounts = gDefs.map(d => ({ label: d.label, n: users.filter(u => (u.groups||[]).includes(d.group)).length }));
+  const gTotEl = document.getElementById('groupTotal');
+  if (gTotEl) gTotEl.textContent = users.filter(u => (u.groups||[]).length).length;
+  const gBrEl = document.getElementById('groupBreak');
+  if (gBrEl) gBrEl.innerHTML = gCounts.length ? gCounts.map(x => esc(x.label) + ': <strong>' + x.n + '</strong>명').join(' · ') : '등록된 연구회 없음';
+
   // 어플 요청
   const ideas = adminData.ideas || [];
   const iEl = document.getElementById('ideasCount');
@@ -1237,6 +1249,15 @@ function updateAdminStats() {
   renderAdminUserList(sorted);
 }
 
+function adminBadges(u) {
+  const t = (u.tier||0) >= 2 ? '2차' : ((u.tier||0) === 1 ? '1차' : '');
+  const tb = t ? '<span class="badge badge-locked">' + t + ' 강의</span>' : '';
+  const gb = (u.groups||[]).map(g => {
+    const d = CODES.find(c => c.group === g);
+    return '<span class="badge badge-grp">🤝 ' + esc(d ? d.label : g) + '</span>';
+  }).join('');
+  return tb + gb;
+}
 function renderAdminUserList(list) {
   const now = new Date();
   const threeDaysAgo = new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000);
@@ -1258,7 +1279,7 @@ function renderAdminUserList(list) {
     return `
       <div class="user-item">
         <div class="user-info">
-          <div class="user-name">${u.name || '이름없음'} ${isNew ? '<span class="new-badge">🆕 신규</span>' : ''}</div>
+          <div class="user-name">${u.name || '이름없음'} ${isNew ? '<span class="new-badge">🆕 신규</span>' : ''} ${adminBadges(u)}</div>
           <div class="user-school">🏫 ${u.school || '학교 미지정'}</div>
           <div class="user-email">📧 ${u.email || '-'}</div>
         </div>
@@ -1373,6 +1394,16 @@ onAuthStateChanged(auth, async user=>{
       <div class="stat-label">최근 활성</div>
       <div class="stat-value" id="activeUsers7d">-</div>
       <div class="stat-detail">오늘: <strong id="activeUsersToday">-</strong> · 어제: <strong id="activeUsersYesterday">-</strong></div>
+    </div>
+    <div class="admin-stat-card" style="border-left-color: var(--bl);">
+      <div class="stat-label">강의 수강</div>
+      <div class="stat-value" id="tier2Count">-</div>
+      <div class="stat-detail">2차 · 1차 이상: <strong id="tier1Count">-</strong>명</div>
+    </div>
+    <div class="admin-stat-card" style="border-left-color: #2B68AC;">
+      <div class="stat-label">🤝 연구회</div>
+      <div class="stat-value" id="groupTotal">-</div>
+      <div class="stat-detail" id="groupBreak">-</div>
     </div>
     <div class="admin-stat-card" style="border-left-color: var(--am); cursor: pointer;" onclick="showNewUsersOnly()" title="클릭하면 신규 가입자만 보여요">
       <div class="stat-label">최근 가입 (7일) 👆</div>
