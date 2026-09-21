@@ -110,6 +110,7 @@
     .badge-on { background: var(--gl); color: var(--g); }
     .badge-soon { background: #F1F3F1; color: #8A9890; }
     .badge-locked { background: #FDF0E3; color: #C47A2E; }
+    .badge-grp { background: #E8F0FE; color: #2B68AC; margin-left: 5px; }
     .ext { font-size: 14px; color: #C0CEC2; flex-shrink: 0; }
 
     /* 모달 */
@@ -312,7 +313,8 @@ const CODES = [
   { h:'7042e89645a07deabb1650dfb0684c2ab0a3bcb4b2370683556062adac36b424', tier:1, label:'1차 강의', expiresAt:'2099-12-31' },
   { h:'67c2d3ad3eda08f6522014b6e7009b1a6a55a3535b41cb464758332a167bb84f', tier:2, label:'2차 강의', expiresAt:'2099-12-31' },
   /* 그룹 코드: 등급을 올리지 않고 groups 배열에 해당 그룹만 추가해, groups가 지정된 카드만 열어줌 */
-  { h:'9fab831f526a61f0bee8968c77e15ab2889e09eb3164fa9a2b75f96f0533fb52', group:'policy', label:'정책실행연구회', expiresAt:'2099-12-31' }
+  { h:'9fab831f526a61f0bee8968c77e15ab2889e09eb3164fa9a2b75f96f0533fb52', group:'policy', label:'정책실행연구회', expiresAt:'2099-12-31' },
+  { h:'ef11c940ced3b6126e727a24b9272b5ee070db7d31f335581a10852c84bfa211', group:'insung', label:'인성밥상연구회', expiresAt:'2099-12-31' }
 ];
 async function sha256Hex(s){
   const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
@@ -329,8 +331,8 @@ const CATS = [
       { featured:true, featOrder:2, featName:'스마트 월간식단 뷰어', featCat:'식단 기획·급식 운영', name:'알레르기·월간식단 뷰어', desc:'월간 식단 사이니지·인쇄 출력', url:'https://smart-meal-signage.vercel.app/', tier:0 },
       { featured:true, featOrder:3, featCat:'식단 기획·급식 운영', name:'나의 식단 아카이브', desc:'과거 식단 검색·조회·관리', url:'https://smart-meal-archive.vercel.app/', tier:0 },
       { featured:true, featOrder:4, featCat:'식단 기획·급식 운영', name:'자율선택급식 메뉴 탐색기', desc:'메뉴별 알레르기·영양소 탐색', url:'https://thfl4811-maker.github.io/choice-meal-menu-finder/', tier:0 },
-      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2, groups:['policy'] },
-      { name:'⭐ 추천식단 캘린더 · 초안 식단 보드', desc:'특일·학사일정 캘린더에 스크랩 식단을 배치해 월간 식단 초안 작성', url:'https://smart-meal-archive.vercel.app/?view=recommend&beta=SORI-2ND', tier:2 },
+      { name:"젬스 활용 '식단+교육' 자료 만들기", desc:'식단표 하나로 퀴즈·게임·인포그래픽까지', url:'https://gems-meal-edu.vercel.app', tier:2, groups:['policy','insung'] },
+      { name:'⭐ 추천식단 캘린더 · 초안 식단 보드', desc:'특일·학사일정 캘린더에 스크랩 식단을 배치해 월간 식단 초안 작성', url:'https://smart-meal-archive.vercel.app/?view=recommend&beta=SORI-2ND', tier:2, groups:['policy','insung'] },
     ]
   },
   { id:'order', name:'발주·재고', icon:'📦', c:'var(--am)', cl:'var(--al)',
@@ -393,7 +395,7 @@ async function saveProfile(uid, data) {
   await setDoc(doc(db,'users',uid), data, {merge:true});
   await setDoc(doc(db,'signups',uid), {
     name:data.name, school:data.school, email:data.email,
-    tier:data.tier||0, joinedAt:data.joinedAt||new Date().toISOString(), uid
+    tier:data.tier||0, groups:data.groups||[], joinedAt:data.joinedAt||new Date().toISOString(), uid
   }, {merge:true});
 }
 async function loadProfile(uid) {
@@ -407,7 +409,7 @@ async function trackVisit(uid) {
     if (now - parseInt(localStorage.getItem(lk)||'0',10) < 30*60*1000) return;
     localStorage.setItem(lk,String(now));
     const iso=new Date(now).toISOString();
-    const patch={lastSeenAt:iso, lastSeenApp:key, visitCount:increment(1), apps:{[key]:{lastAt:iso,count:increment(1)}}};
+    const patch={groups:(userProfile&&userProfile.groups)||[], lastSeenAt:iso, lastSeenApp:key, visitCount:increment(1), apps:{[key]:{lastAt:iso,count:increment(1)}}};
     await setDoc(doc(db,'users',uid), patch, {merge:true});
     await setDoc(doc(db,'signups',uid), patch, {merge:true});
   } catch(e) { /* 기록 실패는 무시 */ }
@@ -720,6 +722,11 @@ async function renderAdmin() {
   if(!el)return;
   if(!signups.length){el.innerHTML='<p>아직 가입자가 없어요.</p>';return;}
 
+  /* ── 그룹(연구회) 정의 ── */
+  const GDEFS=CODES.filter(c=>c.group).map(c=>({g:c.group,label:c.label}));
+  const gCount=g=>signups.filter(x=>(x.groups||[]).includes(g)).length;
+  const gBadges=x=>(x.groups||[]).map(g=>{const d=GDEFS.find(y=>y.g===g);return `<span class="badge badge-grp">🤝 ${esc(d?d.label:g)}</span>`;}).join("");
+
   /* ── 접속 기록 집계 ── */
   const now=Date.now(), DAY=864e5;
   const ago=iso=>iso?Math.floor((now-new Date(iso).getTime())/DAY):null;
@@ -756,6 +763,7 @@ async function renderAdmin() {
       <div style="font-size:26px;font-weight:700;color:var(--bl);line-height:1">${signups.filter(s=>s.tier>=2).length}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:4px;">2차 강의 수강</div>
     </div>
+    ${GDEFS.map(gd=>`<div style="background:#E8F0FE;border-radius:10px;padding:14px 20px;text-align:center;"><div style="font-size:26px;font-weight:700;color:#2B68AC;line-height:1">${gCount(gd.g)}</div><div style="font-size:12px;color:var(--mu);margin-top:4px;">🤝 ${esc(gd.label)}</div></div>`).join("")}
     <div style="background:#eef7f2;border-radius:10px;padding:14px 20px;text-align:center;">
       <div style="font-size:26px;font-weight:700;color:var(--g);line-height:1">${active7}</div>
       <div style="font-size:12px;color:var(--mu);margin-top:4px;">최근 7일 접속</div>
@@ -780,7 +788,7 @@ async function renderAdmin() {
       <span style="font-weight:500">${esc(s.name)}</span>
       <span style="color:var(--mu)">${esc(s.school)}</span>
       <span style="color:var(--mu);font-size:12px">${esc(s.email)}</span>
-      <span><span class="badge ${s.tier>=2?'badge-on':s.tier>=1?'badge-locked':'badge-soon'}">${s.tier>=2?'2차':''}${s.tier===1?'1차':''}${!s.tier?'기본':''}</span></span>
+      <span><span class="badge ${s.tier>=2?'badge-on':s.tier>=1?'badge-locked':'badge-soon'}">${s.tier>=2?'2차':''}${s.tier===1?'1차':''}${!s.tier?'기본':''}</span>${gBadges(s)}</span>
       <span style="color:var(--mu);font-size:11px;white-space:nowrap">${s.joinedAt?new Date(s.joinedAt).toLocaleDateString('ko-KR'):'-'}</span>
       <span style="font-size:11.5px;white-space:nowrap" title="${s.lastSeenAt?new Date(s.lastSeenAt).toLocaleString('ko-KR')+(s.lastSeenApp?' · '+s.lastSeenApp:''):''}">${fmtSeen(s)}</span>
       <span style="color:var(--mu);font-size:11.5px;white-space:nowrap;text-align:right">${s.visitCount||0}</span>
