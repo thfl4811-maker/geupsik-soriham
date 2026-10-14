@@ -657,10 +657,11 @@ function renderCodeModal() {
   document.getElementById('cancelCode').onclick=()=>div.remove();
   div.onclick=e=>{if(e.target===div)div.remove()};
   const submit=async()=>{
-    const code=input.value.trim().toUpperCase();
+    const code=input.value.normalize('NFC').trim().toUpperCase();
     if(!code){errEl.textContent='코드를 입력해주세요.';return;}
-    const hash=await sha256Hex(code);
-    const matched=CODES.find(c=>c.h===hash);
+    /* 한글 코드: 띄어쓰기 섞여 입력돼도 인식 */
+    const hashes=[await sha256Hex(code), await sha256Hex(code.replace(/\s+/g,''))];
+    const matched=CODES.find(c=>hashes.includes(c.h));
     if(!matched){errEl.textContent='올바르지 않은 코드예요.';input.value='';return;}
     if(matched.expiresAt && new Date() > new Date(matched.expiresAt)){errEl.textContent='만료된 코드예요. 강의 담당자에게 문의해주세요.';return;}
     if(matched.group){
@@ -678,7 +679,8 @@ function renderCodeModal() {
     render();
   };
   document.getElementById('submitCode').onclick=submit;
-  input.onkeydown=e=>{if(e.key==='Enter')submit()};
+  /* 한글 조합 중 Enter는 무시 — 마지막 글자가 덜 입력된 채 제출되는 문제 방지 */
+  input.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)submit()};
 }
 
 async function renderAdmin() {
