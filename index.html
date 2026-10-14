@@ -314,7 +314,8 @@ const CODES = [
   { h:'67c2d3ad3eda08f6522014b6e7009b1a6a55a3535b41cb464758332a167bb84f', tier:2, label:'2차 강의', expiresAt:'2099-12-31' },
   /* 그룹 코드: 등급을 올리지 않고 groups 배열에 해당 그룹만 추가해, groups가 지정된 카드만 열어줌 */
   { h:'9fab831f526a61f0bee8968c77e15ab2889e09eb3164fa9a2b75f96f0533fb52', group:'policy', label:'정책실행연구회', expiresAt:'2099-12-31' },
-  { h:'ef11c940ced3b6126e727a24b9272b5ee070db7d31f335581a10852c84bfa211', group:'insung', label:'인성밥상연구회', expiresAt:'2099-12-31' }
+  { h:'ef11c940ced3b6126e727a24b9272b5ee070db7d31f335581a10852c84bfa211', group:'insung', label:'인성밥상연구회', expiresAt:'2099-12-31' },
+  { h:'346193b2e416abfa7f80e9ebed650428c765fdeb60850fc2174208ba39dbab0f', group:'hwaosan', label:'화성오산연구회', expiresAt:'2099-12-31' }
 ];
 async function sha256Hex(s){
   const d=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));
@@ -345,8 +346,8 @@ const CATS = [
   },
   { id:'inspect', name:'검수·엑셀', icon:'📊', c:'var(--bl)', cl:'var(--bll)',
     tools:[
-      { name:'시장조사 자료 변환기', desc:'업체 단가를 시장조사 자료로 변환해 나이스 단가입력에 등록', url:'https://geupsik-soriham.vercel.app/market-survey.html', tier:3 },
-      { name:'계약단가·검수단가 자동 매칭', desc:'품의로 흐트러진 계약·검수단가를 한 번에 자동 업로드', url:'https://geupsik-soriham.vercel.app/inspection-price.html', tier:3 },
+      { name:'시장조사 자료 변환기', desc:'업체 단가를 시장조사 자료로 변환해 나이스 단가입력에 등록', url:'https://geupsik-soriham.vercel.app/market-survey.html', tier:3, groups:['hwaosan'] },
+      { name:'계약단가·검수단가 자동 매칭', desc:'품의로 흐트러진 계약·검수단가를 한 번에 자동 업로드', url:'https://geupsik-soriham.vercel.app/inspection-price.html', tier:3, groups:['hwaosan'] },
       { name:'나이스 자료 표준 변환기', desc:'떠도는 표준레시피를 나이스 내 레시피로 등록되게 변환', url:null, tier:2 },
     ]
   },
