@@ -696,7 +696,11 @@ async function fillRefresh(){
       +'<p style="margin-top:22px"><a href="https://geupsik-soriham.vercel.app/" '
       +'style="color:#5c63eb;font-weight:800;font-size:14px;text-decoration:none">← 급식"소리"함으로 돌아가기</a></p></div>';
   }
-  function check(s){ if(!s||!s.user||s.user.email!==ADMIN) lock(); }
+  var GROUPS=['hwaosan']; /* 이 그룹 코드를 입력한 가입자도 열림 */
+  function check(s){
+    var ok=s&&s.user&&(s.user.email===ADMIN||((s.profile&&s.profile.groups)||[]).some(function(g){return GROUPS.indexOf(g)>=0;}));
+    if(!ok) lock();
+  }
   if(window.SORI) check(window.SORI);
   else window.addEventListener('sori-ready', function(e){ check(e.detail); });
 })();
